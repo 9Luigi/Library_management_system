@@ -29,17 +29,22 @@ namespace Library
 
         private async void bAddMember_Click(object sender, EventArgs e)
         {
-            if (tbName.Text!=null && tbSurname.Text!=null && mtbBirthday.Text!=null && tbAdress.Text!=null && mtbPhoneNumber.Text!=null &&mtbIIN.Text!=null && pbPhoto.Image!=null)
+            if (tbName.Text != null && tbSurname.Text != null && mtbBirthday.Text != null && tbAdress.Text != null && mtbPhoneNumber.Text != null && mtbIIN.Text != null && pbPhoto.Image != null)
             {
-                using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                RegexController regexController = new RegexController();
+                foreach (Control control in this.Controls)
+                {
+                    regexController.Check(control.Text, control);
+                }
+                /*using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                 {
                     Member member = new Member(tbName.Text, tbSurname.Text, DateTime.Parse(mtbBirthday.Text), tbAdress.Text, Convert.ToInt64(mtbIIN.Text), Convert.ToInt64(mtbPhoneNumber.Text), photo);
                     db.Members.Add(member);
                     int number = await db.SaveChangesAsync();
-                    if (number==1)
+                    if (number == 1)
                     {
-                        DialogResult result = MessageBox.Show("Add another one?","Member succesfully added",MessageBoxButtons.YesNo,MessageBoxIcon.Question,MessageBoxDefaultButton.Button1);
-                        if (result==DialogResult.No || result==DialogResult.Abort)
+                        DialogResult result = MessageBox.Show("Add another one?", "Member succesfully added", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                        if (result == DialogResult.No || result == DialogResult.Abort)
                         {
                             this.Close();
                         }
@@ -55,25 +60,25 @@ namespace Library
                             }
                         }
                     }
-                   
-                }
+
+                }*/
             }
             else
             {
                 MessageBox.Show("fill in the empty requiered(*) fields");
             }
-           
+
         }
         private void TextBoxBase_OnFocusEnter(object sender, EventArgs e)
         {
             if (sender is TextBox tb)
             {
                 tb.SelectionStart = 0;
-            }    
+            }
             if (sender is MaskedTextBox mtb)
             {
                 mtb.SelectionStart = 0;
-            }   
+            }
         }
         private void TextBoxBase_OnClick(object sender, EventArgs e)
         {

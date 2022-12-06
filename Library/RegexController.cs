@@ -7,17 +7,45 @@ using System.Threading.Tasks;
 
 namespace Library
 {
-    internal class RegexController
+    internal class RegexController //TODO make static
     {
-        public void check()//string str, TextBox textBox
+        const string nameAndPatronomycPattern = "^[a-z,-]+$|^[а-яё,-]+$";
+        const string birthdayPattern = "(0?[1-9]|[1-2][0-9]|3[01])/(0?[1-9]|1[0-2])/((19|20)\\d\\d)";
+        const string surnamePattern = "^[a-z,-.']+$|^[а-яё,.'-]+$";
+        const string phoneNumberPattern = "(\\+7)([0-9]{10})";
+        string? selectedPattern;
+        public void Check(string input,Control control)//string str, TextBox textBox
         {
-            string nameCheckExpression = "^[a-z,-]+$|^[а-яё,-]+$";
-            string birthdayCheckExpression = "(0?[1-9]|[1-2][0-9]|3[01])/(0?[1-9]|1[0-2])/((19|20)\\d\\d)";
-            string surnameCheckRegex = "^[a-z,-.']+$|^[а-яё,.'-]+$";
-            string phoneNumberCheck = "(\\+7)([0-9]{10})";
-            Regex regex = new Regex(phoneNumberCheck, RegexOptions.IgnoreCase);
-            MessageBox.Show(regex.Match("+77142572004").ToString()); 
-            MessageBox.Show(regex.Match("+77762475879").ToString());
+            switch (control.Name)
+            {
+                case "tbName":
+                case "tbPatronymic":
+                    selectedPattern = nameAndPatronomycPattern;
+                    break;
+                case "mtbBirthday":
+                    selectedPattern = birthdayPattern;
+                    break;
+                case "tbSurname":
+                    selectedPattern = surnamePattern;
+                    break;
+                case "mtbPhoneNumber":
+                    selectedPattern = phoneNumberPattern;
+                    break;
+                default:
+                    break;
+            }
+            if (selectedPattern != null)
+            {
+                Regex regex = new Regex(selectedPattern);
+                if (!regex.IsMatch(input))
+                {
+                    MessageBox.Show($"value of field {control.Name} is wrong");
+                }
+                else
+                {
+                    MessageBox.Show($"value of field {control.Name} is well");
+                }
+            }
         }
     }
 }

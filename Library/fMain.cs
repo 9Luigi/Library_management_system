@@ -27,8 +27,7 @@ namespace Library
 
         private void fMain_Load(object sender, EventArgs e)
         {
-            RegexController regexController = new RegexController();
-            regexController.check();
+            
         }
     }
 }
