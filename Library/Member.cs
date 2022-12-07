@@ -16,14 +16,14 @@ namespace Library
         public int Age { get; set; }
         public DateTime BirthDay { get; set; }
         public string Adress { get; set; }
-        public long PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; }
         public long IIN { get; set; }
         public DateTime RegistrationDate { get; set; }
         public byte[] Photo { get; set; }
         public List<Book> Books { get; set; } = new();
         public Member() { }
 
-        public Member(string name, string surname, DateTime birthday, string adress, long iin,long Phonenumber, byte[] photo, string patronymic="None")
+        public Member(string name, string surname, DateTime birthday, string adress, long iin,string Phonenumber, byte[] photo, string patronymic="None")
         {
             Name = name;
             Surname = surname;

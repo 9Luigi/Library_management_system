@@ -13,7 +13,7 @@ namespace Library
         public string Title { get; set; }
         public string? Description { get; set; }
         public string Genre { get; set; }
-        //TODO createIndexForEachProperty and in Subscriber too
+        //TODO createIndexForEachProperty and in Subscriber too (?)
         public string? Sort { get; set; } //new,classic,bestseller
         public DateTime PublicationDate { get; set; }
         public byte[] coverImage { get; set; }

@@ -28,7 +28,7 @@ namespace Library
             builder.Property(s => s.Photo).HasColumnName("Photo").HasDefaultValue(new byte[1]).IsRequired();
             builder.Property(s => s.RegistrationDate).HasColumnName("RegistrationDate").IsRequired();
             builder.Property(s => s.Adress).HasColumnName("Adress").IsRequired();
-            builder.Property(s => s.PhoneNumber).HasColumnType("BIGINT").HasColumnName("PhoneNumber");
+            builder.Property(s => s.PhoneNumber).HasColumnName("PhoneNumber").IsRequired().HasMaxLength(75);
         }
 
     }

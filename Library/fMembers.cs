@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,21 +18,13 @@ namespace Library
             InitializeComponent();
         }
 
-        private void viewAllToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void viewAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+            using (  LibraryContextForEFcore db = new LibraryContextForEFcore())
             {
-                var members = from member in db.Members
-                              select new
-                              {
-                                  member.IIN,
-                                  member.Name,
-                                  member.Surname,
-                                  member.Age,
+                var members = await db.Members.Select(m => new { m.IIN,m.Name,m.Surname,m.PhoneNumber}).ToListAsync();
 
-                              };
-
-                dataGridViewForMembers.DataSource = members.ToList();
+                dataGridViewForMembers.DataSource =  members;
             }
         }
         private void dataGridViewForMembers_CellDoubleClick(object sender, DataGridViewCellEventArgs e)

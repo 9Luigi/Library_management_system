@@ -29,39 +29,55 @@ namespace Library
 
         private async void bAddMember_Click(object sender, EventArgs e)
         {
-            if (tbName.Text != null && tbSurname.Text != null && mtbBirthday.Text != null && tbAdress.Text != null && mtbPhoneNumber.Text != null && mtbIIN.Text != null && pbPhoto.Image != null)
+            //TODO strict control of textbox text lenght (example Name=75 cause column has type varchar(75))
+            //check "fields" for null
+            if (tbName.Text != null && tbSurname.Text != null && mtbBirthday.Text != null && mtbAdress.Text != null 
+                && mtbPhoneNumber.Text != null && mtbIIN.Text != null && pbPhoto.Image != null) 
+            //
             {
-                RegexController regexController = new RegexController();
-                foreach (Control control in this.Controls)
+                //check corresponding to patterns 
+                if (RegexController.Check(tbName.Text, tbName) && RegexController.Check(tbSurname.Text, tbSurname)
+                    && RegexController.Check(mtbBirthday.Text, mtbBirthday) &&
+                    RegexController.Check(mtbAdress.Text, mtbAdress) && RegexController.Check(mtbPhoneNumber.Text, mtbPhoneNumber)) 
                 {
-                    regexController.Check(control.Text, control);
-                }
-                /*using (LibraryContextForEFcore db = new LibraryContextForEFcore())
-                {
-                    Member member = new Member(tbName.Text, tbSurname.Text, DateTime.Parse(mtbBirthday.Text), tbAdress.Text, Convert.ToInt64(mtbIIN.Text), Convert.ToInt64(mtbPhoneNumber.Text), photo);
-                    db.Members.Add(member);
-                    int number = await db.SaveChangesAsync();
-                    if (number == 1)
+                    if (tbPatronymic.Text != null)
                     {
-                        DialogResult result = MessageBox.Show("Add another one?", "Member succesfully added", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
-                        if (result == DialogResult.No || result == DialogResult.Abort)
+                        if (RegexController.Check(tbPatronymic.Text, tbPatronymic))
                         {
-                            this.Close();
-                        }
-                        else
-                        {
-                            pbPhoto.Image = null;
-                            foreach (Control control in this.Controls)
+                //
+                            //Add object to dataBase(Member entity)
+                            using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                             {
-                                if (control is TextBox textbox)
+                                Member member = new Member(tbName.Text, tbSurname.Text, DateTime.Parse(mtbBirthday.Text), 
+                                    mtbAdress.Text, Convert.ToInt64(mtbIIN.Text),mtbPhoneNumber.Text, photo);
+                                db.Members.Add(member);
+                                int number = await db.SaveChangesAsync();
+                                //if member were added then question user for another one
+                                if (number == 1)
                                 {
-                                    textbox.Text = "";
+                                    DialogResult result = MessageBox.Show("Add another one?", "Member succesfully added", 
+                                        MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                                    if (result == DialogResult.No || result == DialogResult.Abort)
+                                    {
+                                        this.Close();
+                                    }
+                                    else
+                                    {
+                                        pbPhoto.Image = null;
+                                        foreach (Control control in this.Controls)
+                                        {
+                                            if (control is TextBox textbox)
+                                            {
+                                                textbox.Text = "";
+                                            }
+                                        }
+                                    }
                                 }
                             }
+                            //
                         }
                     }
-
-                }*/
+                }
             }
             else
             {

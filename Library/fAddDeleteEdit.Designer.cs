@@ -31,7 +31,6 @@
             this.tbSurname = new System.Windows.Forms.TextBox();
             this.tbPatronymic = new System.Windows.Forms.TextBox();
             this.tbAge = new System.Windows.Forms.TextBox();
-            this.tbAdress = new System.Windows.Forms.TextBox();
             this.pbPhoto = new System.Windows.Forms.PictureBox();
             this.bSelectPhoto = new System.Windows.Forms.Button();
             this.bAddMember = new System.Windows.Forms.Button();
@@ -47,6 +46,7 @@
             this.mtbBirthday = new System.Windows.Forms.MaskedTextBox();
             this.mtbIIN = new System.Windows.Forms.MaskedTextBox();
             this.tbName = new System.Windows.Forms.TextBox();
+            this.mtbAdress = new System.Windows.Forms.MaskedTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pbPhoto)).BeginInit();
             this.SuspendLayout();
             // 
@@ -77,15 +77,6 @@
             this.tbAge.TabIndex = 4;
             this.tbAge.Click += new System.EventHandler(this.TextBoxBase_OnClick);
             this.tbAge.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
-            // 
-            // tbAdress
-            // 
-            this.tbAdress.Location = new System.Drawing.Point(12, 240);
-            this.tbAdress.Name = "tbAdress";
-            this.tbAdress.Size = new System.Drawing.Size(100, 23);
-            this.tbAdress.TabIndex = 6;
-            this.tbAdress.Click += new System.EventHandler(this.TextBoxBase_OnClick);
-            this.tbAdress.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
             // 
             // pbPhoto
             // 
@@ -229,11 +220,19 @@
             this.tbName.Click += new System.EventHandler(this.TextBoxBase_OnClick);
             this.tbName.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
             // 
+            // mtbAdress
+            // 
+            this.mtbAdress.Location = new System.Drawing.Point(12, 240);
+            this.mtbAdress.Name = "mtbAdress";
+            this.mtbAdress.Size = new System.Drawing.Size(100, 23);
+            this.mtbAdress.TabIndex = 23;
+            // 
             // fAddDeleteEdit
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(515, 394);
+            this.Controls.Add(this.mtbAdress);
             this.Controls.Add(this.mtbIIN);
             this.Controls.Add(this.mtbBirthday);
             this.Controls.Add(this.mtbPhoneNumber);
@@ -248,7 +247,6 @@
             this.Controls.Add(this.bAddMember);
             this.Controls.Add(this.bSelectPhoto);
             this.Controls.Add(this.pbPhoto);
-            this.Controls.Add(this.tbAdress);
             this.Controls.Add(this.tbAge);
             this.Controls.Add(this.tbPatronymic);
             this.Controls.Add(this.tbSurname);
@@ -264,7 +262,6 @@
         private TextBox tbSurname;
         private TextBox tbPatronymic;
         private TextBox tbAge;
-        private TextBox tbAdress;
         private PictureBox pbPhoto;
         private Button bSelectPhoto;
         private Button bAddMember;
@@ -280,5 +277,6 @@
         private MaskedTextBox mtbBirthday;
         private MaskedTextBox mtbIIN;
         private TextBox tbName;
+        private MaskedTextBox mtbAdress;
     }
 }

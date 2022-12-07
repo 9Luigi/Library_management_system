@@ -168,8 +168,10 @@ namespace Library.Migrations
                         .HasColumnType("nvarchar(75)")
                         .HasColumnName("Patronymic");
 
-                    b.Property<long>("PhoneNumber")
-                        .HasColumnType("BIGINT")
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(75)
+                        .HasColumnType("nvarchar(75)")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<byte[]>("Photo")

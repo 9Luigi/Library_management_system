@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Migrations
 {
     [DbContext(typeof(LibraryContextForEFcore))]
-    [Migration("20221204163005_phoneNumberFromIntToLong")]
-    partial class phoneNumberFromIntToLong
+    [Migration("20221207094520_phoneNumberFromLongToString")]
+    partial class phoneNumberFromLongToString
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -171,8 +171,10 @@ namespace Library.Migrations
                         .HasColumnType("nvarchar(75)")
                         .HasColumnName("Patronymic");
 
-                    b.Property<long>("PhoneNumber")
-                        .HasColumnType("BIGINT")
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(75)
+                        .HasColumnType("nvarchar(75)")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<byte[]>("Photo")
