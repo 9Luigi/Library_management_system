@@ -121,7 +121,7 @@
             this.dataGridViewForMembers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.dataGridViewForMembers.Size = new System.Drawing.Size(572, 354);
             this.dataGridViewForMembers.TabIndex = 2;
-            this.dataGridViewForMembers.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewForMembers_CellDoubleClick);
+            this.dataGridViewForMembers.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewForMembers_CellClick);
             // 
             // pictureBox1
             // 

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static Library.fMembers;
 
 namespace Library
 {
@@ -112,6 +113,15 @@ namespace Library
                     mtb.SelectionStart = 0;
                 }
             }  */ //TODO think about it
+        }
+
+        private void fAddDeleteEdit_Load(object sender, EventArgs e)
+        {
+
+        }
+        private void editRequested(MemberEventArgs e)
+        {
+            
         }
     }
 }

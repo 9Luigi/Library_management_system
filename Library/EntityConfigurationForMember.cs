@@ -17,7 +17,6 @@ namespace Library
             builder.HasIndex(m => m.Id).IsUnique();
             builder.HasIndex(m => m.IIN).IsUnique();
             builder.HasMany(m => m.Books).WithMany(b => b.Members);
-            builder.HasCheckConstraint("Age", "AGE>0 AND AGE<120");
 
             builder.Property(s => s.Name).HasColumnName("Name").IsRequired().HasMaxLength(75);
             builder.Property(s => s.Surname).HasColumnName("Surname").IsRequired().HasMaxLength(75);

@@ -16,7 +16,7 @@ namespace Library
         internal DbSet<Book> Books { get; set; } = null!;
         internal DbSet<Author> Authors { get; set; } = null!;
         string ConnectionString = @"Server=" + Environment.MachineName + ";DataBase=LibraryDB;User Id=RomanKudrik;Password=98585R;MultipleActiveResultSets=true;Encrypt=False";
-        protected override void OnConfiguring(DbContextOptionsBuilder dbOptions)
+        protected  override void OnConfiguring(DbContextOptionsBuilder dbOptions)
         {
             dbOptions.UseSqlServer(ConnectionString);
         }

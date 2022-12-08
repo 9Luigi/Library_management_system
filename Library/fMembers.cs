@@ -17,14 +17,23 @@ namespace Library
         {
             InitializeComponent();
         }
-
+        internal class MemberEventArgs : EventArgs
+        {
+            internal long IIN { get; set; }
+            public MemberEventArgs(long IIN)
+            {
+                this.IIN = IIN;
+            }
+        }
+        internal delegate void OnfAddDeleteEditCreatedDelegate(MemberEventArgs e);
+        internal event OnfAddDeleteEditCreatedDelegate OnfAddDeleteEditCreatedEvent;
         private async void viewAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (  LibraryContextForEFcore db = new LibraryContextForEFcore())
+            using (LibraryContextForEFcore db = new LibraryContextForEFcore())
             {
-                var members = await db.Members.Select(m => new { m.IIN,m.Name,m.Surname,m.PhoneNumber}).ToListAsync();
+                var members = await db.Members.Select(m => new { m.IIN, m.Name, m.Surname, m.PhoneNumber }).ToListAsync();
 
-                dataGridViewForMembers.DataSource =  members;
+                dataGridViewForMembers.DataSource = members;
             }
         }
         private void dataGridViewForMembers_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -42,7 +51,7 @@ namespace Library
 
         private void TbIINSearch_Leave(object sender, EventArgs e)
         {
-            
+
         }
 
         private void bIINSearch_Click(object sender, EventArgs e)
@@ -62,13 +71,28 @@ namespace Library
         }
         private void editOneToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void addMemberToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            fAddDeleteEdit fadddeleteedit = new fAddDeleteEdit();
-            fadddeleteedit.ShowDialog();
+            fAddDeleteEdit dade = new fAddDeleteEdit();
+            dade.ShowDialog();
+        }
+
+        private async void dataGridViewForMembers_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (dataGridViewForMembers.CurrentCell.Value != null)
+            {
+                long IIN = Convert.ToInt64(dataGridViewForMembers.CurrentCell.Value);
+                using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                {
+                    var members = await db.Members.Where(m => m.IIN == IIN).ToListAsync();
+                    OnfAddDeleteEditCreatedEvent.Invoke(new MemberEventArgs(IIN));
+                    fAddDeleteEdit dade = new fAddDeleteEdit();
+                    dade.ShowDialog();
+                }
+            }
         }
     }
 }

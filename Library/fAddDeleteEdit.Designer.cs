@@ -252,6 +252,7 @@
             this.Controls.Add(this.tbSurname);
             this.Controls.Add(this.tbName);
             this.Name = "fAddDeleteEdit";
+            this.Load += new System.EventHandler(this.fAddDeleteEdit_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pbPhoto)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
