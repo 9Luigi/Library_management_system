@@ -20,10 +20,12 @@ namespace Library
         }
         internal class MemberEventArgs : EventArgs
         {
-            internal long IIN { get; set; }
-            public MemberEventArgs(long IIN)
+            internal long IIN { get; private set; }
+            internal string Action { get; private set; }
+            public MemberEventArgs(long IIN, string action)
             {
                 this.IIN = IIN;
+                Action = action;
             }
         }
         internal delegate void OnfAddDeleteEditCreatedDelegate(MemberEventArgs e);
@@ -61,13 +63,24 @@ namespace Library
 
         private void addMemberToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            fAddDeleteEdit dade = new fAddDeleteEdit();
-            dade.ShowDialog();
+            long IIN;
+            if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
+                && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN)) //TODO create a method?
+            {
+                using (LibraryContextForEFcore db = new LibraryContextForEFcore()) //TODO create a method!
+                {
+                    var members = db.Members.Where(m => m.IIN == IIN).ToList();
+                    fAddDeleteEdit dade = new fAddDeleteEdit();
+                    OnfAddDeleteEditCreatedEvent.Invoke(new MemberEventArgs(IIN, "CREATE"));
+                    dade.ShowDialog();
+                    dataGridViewForMembers.Update();
+                }
+            }
         }
 
         private async void dataGridViewForMembers_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0)
+            /*if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0)
             {
                 long IIN = Convert.ToInt64(dataGridViewForMembers.CurrentCell.Value);
                 using (LibraryContextForEFcore db = new LibraryContextForEFcore())
@@ -77,7 +90,7 @@ namespace Library
                     OnfAddDeleteEditCreatedEvent.Invoke(new MemberEventArgs(IIN));
                     dade.ShowDialog();
                 }
-            }
+            }*/
         }
 
         private void fMembers_Load(object sender, EventArgs e)
@@ -140,7 +153,7 @@ namespace Library
                 {
                     var members = await db.Members.Where(m => m.IIN == IIN).ToListAsync();
                     fAddDeleteEdit dade = new fAddDeleteEdit();
-                    OnfAddDeleteEditCreatedEvent.Invoke(new MemberEventArgs(IIN));
+                    OnfAddDeleteEditCreatedEvent.Invoke(new MemberEventArgs(IIN,"EDIT"));
                     dade.ShowDialog();
                     dataGridViewForMembers.Update();
                 }

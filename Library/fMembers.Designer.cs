@@ -130,7 +130,7 @@
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(590, 24);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(210, 414);
+            this.pictureBox1.Size = new System.Drawing.Size(198, 315);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 3;
             this.pictureBox1.TabStop = false;
@@ -139,7 +139,7 @@
             // 
             this.TbIINSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.TbIINSearch.Location = new System.Drawing.Point(224, 374);
+            this.TbIINSearch.Location = new System.Drawing.Point(326, 374);
             this.TbIINSearch.Name = "TbIINSearch";
             this.TbIINSearch.Size = new System.Drawing.Size(148, 23);
             this.TbIINSearch.TabIndex = 4;
@@ -150,7 +150,7 @@
             // 
             this.bIINSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.bIINSearch.Location = new System.Drawing.Point(224, 403);
+            this.bIINSearch.Location = new System.Drawing.Point(326, 403);
             this.bIINSearch.Name = "bIINSearch";
             this.bIINSearch.Size = new System.Drawing.Size(148, 23);
             this.bIINSearch.TabIndex = 5;
@@ -160,9 +160,11 @@
             // 
             // pbMembers
             // 
+            this.pbMembers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.pbMembers.Location = new System.Drawing.Point(12, 345);
             this.pbMembers.Name = "pbMembers";
-            this.pbMembers.Size = new System.Drawing.Size(572, 23);
+            this.pbMembers.Size = new System.Drawing.Size(776, 23);
             this.pbMembers.Step = 1;
             this.pbMembers.TabIndex = 6;
             // 

@@ -48,7 +48,6 @@
             this.tbName = new System.Windows.Forms.TextBox();
             this.mtbAdress = new System.Windows.Forms.MaskedTextBox();
             this.bUpdateMember = new System.Windows.Forms.Button();
-            this.bDeleteMember = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbPhoto)).BeginInit();
             this.SuspendLayout();
             // 
@@ -103,7 +102,7 @@
             // 
             this.bAddMember.Location = new System.Drawing.Point(12, 336);
             this.bAddMember.Name = "bAddMember";
-            this.bAddMember.Size = new System.Drawing.Size(94, 46);
+            this.bAddMember.Size = new System.Drawing.Size(119, 46);
             this.bAddMember.TabIndex = 11;
             this.bAddMember.Text = "Add member";
             this.bAddMember.UseVisualStyleBackColor = true;
@@ -231,29 +230,19 @@
             // 
             // bUpdateMember
             // 
-            this.bUpdateMember.Location = new System.Drawing.Point(209, 336);
+            this.bUpdateMember.Location = new System.Drawing.Point(212, 336);
             this.bUpdateMember.Name = "bUpdateMember";
-            this.bUpdateMember.Size = new System.Drawing.Size(94, 46);
+            this.bUpdateMember.Size = new System.Drawing.Size(119, 46);
             this.bUpdateMember.TabIndex = 24;
             this.bUpdateMember.Text = "Update member";
             this.bUpdateMember.UseVisualStyleBackColor = true;
-            // 
-            // bDeleteMember
-            // 
-            this.bDeleteMember.Location = new System.Drawing.Point(406, 336);
-            this.bDeleteMember.Name = "bDeleteMember";
-            this.bDeleteMember.Size = new System.Drawing.Size(94, 46);
-            this.bDeleteMember.TabIndex = 25;
-            this.bDeleteMember.Text = "Delete member";
-            this.bDeleteMember.UseVisualStyleBackColor = true;
-            this.bDeleteMember.Click += new System.EventHandler(this.bDeleteMember_Click);
+            this.bUpdateMember.Click += new System.EventHandler(this.bUpdateMember_Click);
             // 
             // fAddDeleteEdit
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(515, 394);
-            this.Controls.Add(this.bDeleteMember);
             this.Controls.Add(this.bUpdateMember);
             this.Controls.Add(this.mtbAdress);
             this.Controls.Add(this.mtbIIN);
@@ -303,6 +292,5 @@
         private TextBox tbName;
         private MaskedTextBox mtbAdress;
         private Button bUpdateMember;
-        private Button bDeleteMember;
     }
 }
