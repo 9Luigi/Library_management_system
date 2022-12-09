@@ -73,28 +73,28 @@
             // addMemberToolStripMenuItem
             // 
             this.addMemberToolStripMenuItem.Name = "addMemberToolStripMenuItem";
-            this.addMemberToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addMemberToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
             this.addMemberToolStripMenuItem.Text = "Add member";
             this.addMemberToolStripMenuItem.Click += new System.EventHandler(this.addMemberToolStripMenuItem_Click);
             // 
             // viewAllToolStripMenuItem
             // 
             this.viewAllToolStripMenuItem.Name = "viewAllToolStripMenuItem";
-            this.viewAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.viewAllToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
             this.viewAllToolStripMenuItem.Text = "View all";
             this.viewAllToolStripMenuItem.Click += new System.EventHandler(this.viewAllToolStripMenuItem_Click);
             // 
             // editOneToolStripMenuItem
             // 
             this.editOneToolStripMenuItem.Name = "editOneToolStripMenuItem";
-            this.editOneToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.editOneToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
             this.editOneToolStripMenuItem.Text = "Edit member";
             this.editOneToolStripMenuItem.Click += new System.EventHandler(this.editOneToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem
             // 
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
             this.deleteToolStripMenuItem.Text = "Delete member";
             // 
             // exitToolStripMenuItem
@@ -173,6 +173,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "fMembers";
             this.Text = "Members";
+            this.Load += new System.EventHandler(this.fMembers_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.startBindingSource)).EndInit();

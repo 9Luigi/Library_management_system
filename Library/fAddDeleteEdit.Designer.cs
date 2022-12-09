@@ -99,7 +99,7 @@
             // 
             // bAddMember
             // 
-            this.bAddMember.Location = new System.Drawing.Point(212, 359);
+            this.bAddMember.Location = new System.Drawing.Point(22, 359);
             this.bAddMember.Name = "bAddMember";
             this.bAddMember.Size = new System.Drawing.Size(90, 23);
             this.bAddMember.TabIndex = 11;

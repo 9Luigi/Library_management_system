@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,6 +17,7 @@ namespace Library
         byte[] photo { get; set; }
         public fAddDeleteEdit()
         {
+            fMembers.OnfAddDeleteEditCreatedEvent += editRequested;
             InitializeComponent();
         }
 
@@ -69,7 +71,11 @@ namespace Library
                                         {
                                             if (control is TextBox textbox)
                                             {
-                                                textbox.Text = "";
+                                                textbox.Text="";
+                                            }
+                                            if (control is MaskedTextBox mtb)
+                                            {
+                                                mtb.Text = "";
                                             }
                                         }
                                     }
@@ -117,11 +123,30 @@ namespace Library
 
         private void fAddDeleteEdit_Load(object sender, EventArgs e)
         {
-
-        }
-        private void editRequested(MemberEventArgs e)
-        {
             
+        }
+        internal void editRequested(MemberEventArgs e)
+        {
+            bAddMember.Enabled = false;
+            mtbIIN.Text = e.IIN.ToString();
+            using(LibraryContextForEFcore db = new LibraryContextForEFcore())
+            {
+                var memberToEdit = db.Members.FirstOrDefault(m => m.IIN == e.IIN);
+                    mtbIIN.Text = memberToEdit.IIN.ToString();
+                    tbName.Text = memberToEdit.Name;
+                    tbSurname.Text = memberToEdit.Surname;
+                tbPatronymic.Text = memberToEdit.Patronymic;
+                tbAge.Text = memberToEdit.Age.ToString();
+                mtbBirthday.Text = memberToEdit.BirthDay.ToString();
+                mtbAdress.Text = memberToEdit.Adress;
+                mtbPhoneNumber.Text = memberToEdit.PhoneNumber;
+                
+                byte[] imageByte = memberToEdit.Photo;
+                using (MemoryStream ms = new MemoryStream(imageByte))
+                {
+                    pbPhoto.Image = Image.FromStream(ms);
+                }
+            }
         }
     }
 }

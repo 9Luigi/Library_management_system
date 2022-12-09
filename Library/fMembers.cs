@@ -26,7 +26,7 @@ namespace Library
             }
         }
         internal delegate void OnfAddDeleteEditCreatedDelegate(MemberEventArgs e);
-        internal event OnfAddDeleteEditCreatedDelegate OnfAddDeleteEditCreatedEvent;
+        static internal event OnfAddDeleteEditCreatedDelegate OnfAddDeleteEditCreatedEvent;
         private async void viewAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (LibraryContextForEFcore db = new LibraryContextForEFcore())
@@ -88,11 +88,18 @@ namespace Library
                 using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                 {
                     var members = await db.Members.Where(m => m.IIN == IIN).ToListAsync();
-                    OnfAddDeleteEditCreatedEvent.Invoke(new MemberEventArgs(IIN));
                     fAddDeleteEdit dade = new fAddDeleteEdit();
+                    OnfAddDeleteEditCreatedEvent.Invoke(new MemberEventArgs(IIN));
+                    MessageBox.Show(IIN.ToString());
                     dade.ShowDialog();
                 }
             }
         }
+
+        private void fMembers_Load(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }
