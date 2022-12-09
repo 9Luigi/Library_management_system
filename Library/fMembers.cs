@@ -116,7 +116,7 @@ namespace Library
                 }
                 Thread.Sleep(500);
                 this.Invoke(pbProgressReset, pbMembers);
-            }));
+            })); //TODO all controls should be disabled before table is load
 
         }
         public void pbProgressCgange(ProgressBar pb, int startValue, int finalValue)
