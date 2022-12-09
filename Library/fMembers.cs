@@ -15,6 +15,7 @@ namespace Library
     {
         public fMembers()
         {
+
             InitializeComponent();
         }
         internal class MemberEventArgs : EventArgs
@@ -27,51 +28,35 @@ namespace Library
         }
         internal delegate void OnfAddDeleteEditCreatedDelegate(MemberEventArgs e);
         static internal event OnfAddDeleteEditCreatedDelegate OnfAddDeleteEditCreatedEvent;
-        private async void viewAllToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            using (LibraryContextForEFcore db = new LibraryContextForEFcore())
-            {
-                var members = await db.Members.Select(m => new { m.IIN, m.Name, m.Surname, m.PhoneNumber }).ToListAsync();
-
-                dataGridViewForMembers.DataSource = members;
-            }
-        }
-        private void dataGridViewForMembers_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (dataGridViewForMembers.CurrentCell.ColumnIndex.Equals(0))
-            {
-                if (dataGridViewForMembers.CurrentCell != null && dataGridViewForMembers.CurrentCell.Value != null)
-                    MessageBox.Show(dataGridViewForMembers.CurrentCell.Value.ToString());
-            }
-        }
-        private void TbIINSearch_MouseDown(object sender, MouseEventArgs e)
-        {
-            TbIINSearch.Text = "";
-        }
-
-        private void TbIINSearch_Leave(object sender, EventArgs e)
-        {
-
-        }
-
         private void bIINSearch_Click(object sender, EventArgs e)
         {
-            using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+            Task fillGridWithSelectedMember = new TaskFactory().StartNew(new Action(() =>
             {
-                long IIN = Convert.ToInt64(TbIINSearch.Text);
-                var selectedUser = db.Members.Where(m => m.IIN == IIN).Select(m => new
+                using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                 {
-                    m.IIN,
-                    m.Name,
-                    m.Surname,
-                    m.Age
-                }).ToList();
-                dataGridViewForMembers.DataSource = selectedUser;
-            }
-        }
-        private void editOneToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
+                    long number;
+                    if (long.TryParse(TbIINSearch.Text, out number))
+                    {
+                        long IIN = number;
+                        this.Invoke(pbProgressCgange, pbMembers, 0, 25);
+                        var selectedUser = db.Members.Where(m => m.IIN == IIN).Select(m => new //change where to firstOrDefault
+                        {
+                            m.IIN,
+                            m.Name,
+                            m.Surname,
+                            m.Age
+                        }).ToList();
+                        this.Invoke(pbProgressCgange, pbMembers, 25, 50);
+                        this.Invoke(new Action(() =>
+                        {
+                            dataGridViewForMembers.DataSource = selectedUser; //TODO error catch or logic to avoid
+                        }));
+                        this.Invoke(pbProgressCgange, pbMembers, 50, 100);
+                    }
+                }
+                Thread.Sleep(500);
+                this.Invoke(pbProgressReset, pbMembers);
+            }));
         }
 
         private void addMemberToolStripMenuItem_Click(object sender, EventArgs e)
@@ -80,9 +65,9 @@ namespace Library
             dade.ShowDialog();
         }
 
-        private async void dataGridViewForMembers_CellClick(object sender, DataGridViewCellEventArgs e)
+        private async void dataGridViewForMembers_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (dataGridViewForMembers.CurrentCell.Value != null)
+            if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0)
             {
                 long IIN = Convert.ToInt64(dataGridViewForMembers.CurrentCell.Value);
                 using (LibraryContextForEFcore db = new LibraryContextForEFcore())
@@ -90,7 +75,6 @@ namespace Library
                     var members = await db.Members.Where(m => m.IIN == IIN).ToListAsync();
                     fAddDeleteEdit dade = new fAddDeleteEdit();
                     OnfAddDeleteEditCreatedEvent.Invoke(new MemberEventArgs(IIN));
-                    MessageBox.Show(IIN.ToString());
                     dade.ShowDialog();
                 }
             }
@@ -98,8 +82,112 @@ namespace Library
 
         private void fMembers_Load(object sender, EventArgs e)
         {
+            Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(() =>
+            {
+                using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                {
+                    this.Invoke(pbProgressCgange, pbMembers, 0, 25);
+                    var users = db.Members.Select(m => new
+                    {
+                        m.IIN,
+                        m.Name,
+                        m.Surname,
+                        m.Age
+                    }).ToList();
+                    this.Invoke(pbProgressCgange, pbMembers, 25, 85);
+                    this.Invoke(new Action(() =>
+                    {
+                        dataGridViewForMembers.DataSource = users; //TODO error catch or logic to avoid
+                    }));
+                    this.Invoke(pbProgressCgange, pbMembers, 50, 100);
+                }
+                Thread.Sleep(500);
+                this.Invoke(pbProgressReset, pbMembers);
+            }));
 
         }
+        public void pbProgressCgange(ProgressBar pb, int startValue, int finalValue)
+        {
+            pb.Visible = true;
+            this.Invoke(new Action(() =>
+            {
+                for (int i = startValue; i < finalValue; i++)
+                {
+                    pb.PerformStep();
+                    Task.Delay(100);
+                }
+            }));
+        }
+        public void pbProgressReset(ProgressBar pb)
+        {
+            pb.Invoke(new Action(() =>
+            {
+                if (pb.Value == 100)
+                {
+                    pb.Value = 0;
+                    pb.Visible = false;
+                }
+            }));
+        }
 
+        private async void editToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            long IIN;
+            if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
+                && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN)) //TODO create a method?
+            { 
+                using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                {
+                    var members = await db.Members.Where(m => m.IIN == IIN).ToListAsync();
+                    fAddDeleteEdit dade = new fAddDeleteEdit();
+                    OnfAddDeleteEditCreatedEvent.Invoke(new MemberEventArgs(IIN));
+                    dade.ShowDialog();
+                    dataGridViewForMembers.Update();
+                }
+            }
+        }
+
+        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            long IIN;
+            if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
+                && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN))
+            {
+                Task deleteMember = new TaskFactory().StartNew(new Action(() =>
+                {
+                    using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                    {
+                        Member memberToDelete = db.Members.FirstOrDefault(m => m.IIN == Convert.ToInt64(IIN));
+                        db.Members.Attach(memberToDelete);
+                        db.Members.Remove(memberToDelete);
+                        DialogResult result = MessageBox.Show("Are you sure to remove?", "Removing member", MessageBoxButtons.YesNo);
+                        if (result == DialogResult.Yes)
+                        {
+                            if (db.SaveChanges() > 0)
+                            {
+                                MessageBox.Show("Member succesfully removed");
+                            }
+                        }
+                    }
+                    this.Invoke(new Action(() =>
+                    {
+                        dataGridViewForMembers.Update();
+                    }));
+                }));
+            }
+            else
+            {
+                MessageBox.Show("Cannot delete this member, try later or communicate your system admin");
+            }
+        }
+
+        private void dataGridViewForMembers_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                this.dataGridViewForMembers.CurrentCell = this.dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                this.cmMember.Show(this.dataGridViewForMembers, new Point(e.RowIndex, e.ColumnIndex));
+            }
+        }
     }
 }

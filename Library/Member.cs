@@ -19,7 +19,7 @@ namespace Library
         public string PhoneNumber { get; set; }
         public long IIN { get; set; }
         public DateTime RegistrationDate { get; set; }
-        public byte[] Photo { get; set; }
+        public byte[]? Photo { get; set; }
         public List<Book> Books { get; set; } = new();
         public Member() { }
 
