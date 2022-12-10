@@ -124,78 +124,80 @@ namespace Library
                     && RegexController.Check(mtbBirthday.Text, mtbBirthday) &&
                     RegexController.Check(mtbAdress.Text, mtbAdress) && RegexController.Check(mtbPhoneNumber.Text, mtbPhoneNumber))
                 {
-                    if (tbPatronymic.Text != null) //TODO here
+                    if (RegexController.Check(tbPatronymic.Text, tbPatronymic))
                     {
-                        if (RegexController.Check(tbPatronymic.Text, tbPatronymic))
+                        using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                         {
-                            using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                            if (operation == "CREATE")
                             {
-                                if (operation == "CREATE")
+                                Member member = new Member
+                                (
+                                    tbName.Text,
+                                    tbSurname.Text,
+                                    DateTime.Parse(mtbBirthday.Text),
+                                    mtbAdress.Text,
+                                    Convert.ToInt64(mtbIIN.Text), //TODO check long?
+                                    mtbPhoneNumber.Text,
+                                    photo,
+                                    checkIfHasPatronymic(tbPatronymic.Text)
+                                );
+                                db.Members.Add(member);
+                                int number = db.SaveChanges();
+                                if (number == 1)
                                 {
-                                    Member member = new Member
-                                        (
-                                            tbName.Text,
-                                            tbSurname.Text,
-                                            DateTime.Parse(mtbBirthday.Text),
-                                            mtbAdress.Text,
-                                            Convert.ToInt64(mtbIIN.Text),
-                                            mtbPhoneNumber.Text,
-                                            photo
-                                        );
-                                    db.Members.Add(member);
-                                    int number = db.SaveChanges();
-                                    if (number == 1)
+                                    DialogResult result = MessageBox.Show("Add another one?", "Member succesfully added",
+                                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                                    if (result == DialogResult.No || result == DialogResult.Abort)
                                     {
-                                        DialogResult result = MessageBox.Show("Add another one?", "Member succesfully added",
-                                     MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
-                                        if (result == DialogResult.No || result == DialogResult.Abort)
-                                        {
-                                            this.Close();
-                                        }
-                                        else
-                                        {
-                                            pbPhoto.Image = null;
-                                            foreach (Control control in this.Controls)
-                                            {
-                                                if (control is TextBox textbox)
-                                                {
-                                                    textbox.Text = "";
-                                                }
-                                                if (control is MaskedTextBox mtb)
-                                                {
-                                                    mtb.Text = "";
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                }
-                                else if (operation == "UPDATE")
-                                {
-                                    bAddMember.Enabled = false;
-                                    Member member = new Member()
-                                    {
-                                        Name = tbName.Text,
-                                        Surname = tbSurname.Text,
-                                        BirthDay = DateTime.Parse(mtbBirthday.Text),
-                                        Adress = mtbAdress.Text,
-                                        PhoneNumber = mtbPhoneNumber.Text,
-                                        Photo = photo,
-                                        Patronymic = tbPatronymic.Text
-                                    };
-                                    db.Members.Attach(member);
-                                    db.Members.Add(member);
-                                    int number = db.SaveChanges();
-                                    if (number == 1)
-                                    {
-                                        MessageBox.Show("Member updated successful");
-                                        Close();
+                                        this.Close();
                                     }
                                     else
                                     {
-                                        MessageBox.Show($"Cannot execute {operation}");
-                                        Close();
+                                        pbPhoto.Image = null;
+                                        foreach (Control control in this.Controls)
+                                        {
+                                            if (control is TextBox textbox)
+                                            {
+                                                textbox.Text = "";
+                                            }
+                                            if (control is MaskedTextBox mtb)
+                                            {
+                                                mtb.Text = "";
+                                            }
+                                        }
                                     }
+                                }
+
+                            }
+                            else if (operation == "UPDATE")
+                            {
+                                long IIN;
+                                long.TryParse(mtbIIN.Text, out IIN); //TODO what if cannot parse?, can it be?
+                                using (MemoryStream ms = new MemoryStream())
+                                {
+                                    pbPhoto.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                                    photo = ms.GetBuffer();
+                                }
+                                bAddMember.Enabled = false;
+                                Member member = db.Members.SingleOrDefault(m => m.IIN == IIN);
+                                member.IIN = IIN;
+                                member.Name = tbName.Text;
+                                member.Surname = tbSurname.Text;
+                                member.BirthDay = DateTime.Parse(mtbBirthday.Text);
+                                member.Adress = mtbAdress.Text;
+                                member.PhoneNumber = mtbPhoneNumber.Text;
+                                member.Photo = photo;
+                                member.Patronymic = checkIfHasPatronymic(tbPatronymic.Text);
+                                int number = db.SaveChanges();
+                                if (number == 1)
+                                {
+                                    MessageBox.Show("Member updated successful");
+                                    Close();
+                                }
+                                else
+                                {
+                                    MessageBox.Show($"Cannot execute {operation}");
+                                    Close();
                                 }
                             }
                         }
@@ -205,6 +207,17 @@ namespace Library
             else
             {
                 MessageBox.Show("fill in the empty requiered(*) fields");
+            }
+        }
+        string checkIfHasPatronymic(string patronymic)
+        {
+            if (patronymic != null)
+            {
+                return patronymic;
+            }
+            else
+            {
+                return "None";
             }
         }
     }

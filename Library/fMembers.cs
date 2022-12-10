@@ -28,31 +28,6 @@ namespace Library
                 Action = action;
             }
         }
-        class Motocycle
-        {
-            public int driverNumber;
-            public string driverName;
-
-            public Motocycle()
-            {
-                Console.WriteLine("In default ctor");
-            }
-            public Motocycle(int number) : this(number, "")
-            {
-                Console.WriteLine("In ctor taking an int");
-            }
-            public Motocycle(string name) : this(0, name)
-            {
-                Console.WriteLine("In ctor taking a string");
-            }
-            public Motocycle(int number, string name)
-            {
-                Console.WriteLine("In master ctor");
-                if (number > 10) number = 5;
-                driverNumber = number;
-                driverName = name;
-            }
-        }
         internal delegate void OnfAddDeleteEditCreatedDelegate(MemberEventArgs e);
         static internal event OnfAddDeleteEditCreatedDelegate OnfAddDeleteEditCreatedEvent;
         private void bIINSearch_Click(object sender, EventArgs e)
@@ -93,9 +68,8 @@ namespace Library
                     fAddDeleteEdit dade = new fAddDeleteEdit();
                     OnfAddDeleteEditCreatedEvent.Invoke(new MemberEventArgs("CREATE"));
                     dade.ShowDialog();
-                    dataGridViewForMembers.Update();
-                    dataGridViewForMembers.Refresh();
                 }
+            dataGridViewForMembers.Update();
         }
         private async void dataGridViewForMembers_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -174,8 +148,9 @@ namespace Library
                     fAddDeleteEdit dade = new fAddDeleteEdit();
                     OnfAddDeleteEditCreatedEvent.Invoke(new MemberEventArgs("EDIT", IIN));
                     dade.ShowDialog();
-                    dataGridViewForMembers.Update();
+                    
                 }
+                dataGridViewForMembers.Update();
             }
         }
 
