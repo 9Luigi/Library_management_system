@@ -124,7 +124,7 @@ namespace Library
                     && RegexController.Check(mtbBirthday.Text, mtbBirthday) &&
                     RegexController.Check(mtbAdress.Text, mtbAdress) && RegexController.Check(mtbPhoneNumber.Text, mtbPhoneNumber))
                 {
-                    if (tbPatronymic.Text != null)
+                    if (tbPatronymic.Text != null) //TODO here
                     {
                         if (RegexController.Check(tbPatronymic.Text, tbPatronymic))
                         {
@@ -180,7 +180,8 @@ namespace Library
                                         BirthDay = DateTime.Parse(mtbBirthday.Text),
                                         Adress = mtbAdress.Text,
                                         PhoneNumber = mtbPhoneNumber.Text,
-                                        Photo = photo
+                                        Photo = photo,
+                                        Patronymic = tbPatronymic.Text
                                     };
                                     db.Members.Attach(member);
                                     db.Members.Add(member);
