@@ -145,6 +145,7 @@
             this.TbIINSearch.TabIndex = 4;
             this.TbIINSearch.Text = "Enter IIN";
             this.TbIINSearch.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.TbIINSearch.TextChanged += new System.EventHandler(this.TbIINSearch_TextChanged);
             // 
             // bIINSearch
             // 

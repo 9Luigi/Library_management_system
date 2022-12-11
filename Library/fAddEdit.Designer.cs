@@ -1,6 +1,6 @@
 ﻿namespace Library
 {
-    partial class fAddDeleteEdit
+    partial class fAddEdit
     {
         /// <summary>
         /// Required designer variable.
@@ -93,7 +93,7 @@
             this.bSelectPhoto.Location = new System.Drawing.Point(314, 307);
             this.bSelectPhoto.Name = "bSelectPhoto";
             this.bSelectPhoto.Size = new System.Drawing.Size(101, 23);
-            this.bSelectPhoto.TabIndex = 10;
+            this.bSelectPhoto.TabIndex = 8;
             this.bSelectPhoto.Text = "Select photo*";
             this.bSelectPhoto.UseVisualStyleBackColor = true;
             this.bSelectPhoto.Click += new System.EventHandler(this.bSelectPhoto_Click);
@@ -103,7 +103,7 @@
             this.bAddMember.Location = new System.Drawing.Point(12, 336);
             this.bAddMember.Name = "bAddMember";
             this.bAddMember.Size = new System.Drawing.Size(119, 46);
-            this.bAddMember.TabIndex = 11;
+            this.bAddMember.TabIndex = 9;
             this.bAddMember.Text = "Add member";
             this.bAddMember.UseVisualStyleBackColor = true;
             this.bAddMember.Click += new System.EventHandler(this.bAddMember_Click);
@@ -186,7 +186,7 @@
             this.mtbPhoneNumber.Mask = "+7(999) 000-0000";
             this.mtbPhoneNumber.Name = "mtbPhoneNumber";
             this.mtbPhoneNumber.Size = new System.Drawing.Size(100, 23);
-            this.mtbPhoneNumber.TabIndex = 20;
+            this.mtbPhoneNumber.TabIndex = 7;
             this.mtbPhoneNumber.Click += new System.EventHandler(this.TextBoxBase_OnClick);
             this.mtbPhoneNumber.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
             // 
@@ -196,7 +196,7 @@
             this.mtbBirthday.Mask = "00/00/0000";
             this.mtbBirthday.Name = "mtbBirthday";
             this.mtbBirthday.Size = new System.Drawing.Size(100, 23);
-            this.mtbBirthday.TabIndex = 21;
+            this.mtbBirthday.TabIndex = 5;
             this.mtbBirthday.ValidatingType = typeof(System.DateTime);
             this.mtbBirthday.Click += new System.EventHandler(this.TextBoxBase_OnClick);
             this.mtbBirthday.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
@@ -207,7 +207,7 @@
             this.mtbIIN.Mask = "000000000000";
             this.mtbIIN.Name = "mtbIIN";
             this.mtbIIN.Size = new System.Drawing.Size(100, 23);
-            this.mtbIIN.TabIndex = 22;
+            this.mtbIIN.TabIndex = 3;
             this.mtbIIN.ValidatingType = typeof(int);
             this.mtbIIN.Click += new System.EventHandler(this.TextBoxBase_OnClick);
             this.mtbIIN.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
@@ -226,14 +226,14 @@
             this.mtbAdress.Location = new System.Drawing.Point(12, 240);
             this.mtbAdress.Name = "mtbAdress";
             this.mtbAdress.Size = new System.Drawing.Size(100, 23);
-            this.mtbAdress.TabIndex = 23;
+            this.mtbAdress.TabIndex = 6;
             // 
             // bUpdateMember
             // 
             this.bUpdateMember.Location = new System.Drawing.Point(212, 336);
             this.bUpdateMember.Name = "bUpdateMember";
             this.bUpdateMember.Size = new System.Drawing.Size(119, 46);
-            this.bUpdateMember.TabIndex = 24;
+            this.bUpdateMember.TabIndex = 10;
             this.bUpdateMember.Text = "Update member";
             this.bUpdateMember.UseVisualStyleBackColor = true;
             this.bUpdateMember.Click += new System.EventHandler(this.bUpdateMember_Click);

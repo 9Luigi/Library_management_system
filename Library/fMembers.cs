@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -28,11 +29,11 @@ namespace Library
                 Action = action;
             }
         }
-        internal delegate void OnfAddDeleteEditCreatedDelegate(MemberEventArgs e);
-        static internal event OnfAddDeleteEditCreatedDelegate OnfAddDeleteEditCreatedEvent;
+        internal delegate void OnfAddEditCreatedDelegate(MemberEventArgs e);
+        static internal event OnfAddEditCreatedDelegate OnfAddEditCreatedEvent;
         private void bIINSearch_Click(object sender, EventArgs e)
         {
-            Task fillGridWithSelectedMember = new TaskFactory().StartNew(new Action(() =>
+            /*Task fillGridWithSelectedMemberOrAll = new TaskFactory().StartNew(new Action(() =>
             {
                 using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                 {
@@ -41,7 +42,7 @@ namespace Library
                     {
                         long IIN = number;
                         this.Invoke(pbProgressCgange, pbMembers, 0, 25);
-                        var selectedUser = db.Members.Where(m => m.IIN == IIN).Select(m => new //change where to firstOrDefault
+                        var selectedUser = db.Members.Where(m => m.IIN == IIN).Select(m => new
                         {
                             m.IIN,
                             m.Name,
@@ -58,18 +59,18 @@ namespace Library
                 }
                 Thread.Sleep(500);
                 this.Invoke(pbProgressReset, pbMembers);
-            }));
+            }));*/
         }
 
         private void addMemberToolStripMenuItem_Click(object sender, EventArgs e)
         {
                 using (LibraryContextForEFcore db = new LibraryContextForEFcore()) //TODO create a method!
                 {
-                    fAddDeleteEdit dade = new fAddDeleteEdit();
-                    OnfAddDeleteEditCreatedEvent.Invoke(new MemberEventArgs("CREATE"));
+                    fAddEdit dade = new fAddEdit();
+                    OnfAddEditCreatedEvent.Invoke(new MemberEventArgs("CREATE"));
                     dade.ShowDialog();
-                }
-            dataGridViewForMembers.Update();
+                    RefreshDataGridForMembers();
+            }
         }
         private async void dataGridViewForMembers_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -88,29 +89,7 @@ namespace Library
 
         private void fMembers_Load(object sender, EventArgs e)
         {
-            Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(() =>
-            {
-                using (LibraryContextForEFcore db = new LibraryContextForEFcore())
-                {
-                    this.Invoke(pbProgressCgange, pbMembers, 0, 25);
-                    var users = db.Members.Select(m => new
-                    {
-                        m.IIN,
-                        m.Name,
-                        m.Surname,
-                        m.Age
-                    }).ToList();
-                    this.Invoke(pbProgressCgange, pbMembers, 25, 85);
-                    this.Invoke(new Action(() =>
-                    {
-                        dataGridViewForMembers.DataSource = users; //TODO error catch or logic to avoid
-                    }));
-                    this.Invoke(pbProgressCgange, pbMembers, 50, 100);
-                }
-                Thread.Sleep(500);
-                this.Invoke(pbProgressReset, pbMembers);
-            })); //TODO all controls should be disabled before table is load
-
+            RefreshDataGridForMembers();
         }
         public void pbProgressCgange(ProgressBar pb, int startValue, int finalValue)
         {
@@ -145,12 +124,11 @@ namespace Library
                 using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                 {
                     var members = await db.Members.Where(m => m.IIN == IIN).ToListAsync();
-                    fAddDeleteEdit dade = new fAddDeleteEdit();
-                    OnfAddDeleteEditCreatedEvent.Invoke(new MemberEventArgs("EDIT", IIN));
+                    fAddEdit dade = new fAddEdit();
+                    OnfAddEditCreatedEvent.Invoke(new MemberEventArgs("EDIT", IIN));
                     dade.ShowDialog();
-                    
+                    RefreshDataGridForMembers();
                 }
-                dataGridViewForMembers.Update();
             }
         }
 
@@ -172,14 +150,11 @@ namespace Library
                         {
                             if (db.SaveChanges() > 0)
                             {
+                                RefreshDataGridForMembers();
                                 MessageBox.Show("Member succesfully removed");
                             }
                         }
                     }
-                    this.Invoke(new Action(() =>
-                    {
-                        dataGridViewForMembers.Update();
-                    }));
                 }));
             }
             else
@@ -195,6 +170,52 @@ namespace Library
                 this.dataGridViewForMembers.CurrentCell = this.dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
                 this.cmMember.Show(this.dataGridViewForMembers, new Point(e.RowIndex, e.ColumnIndex));
             }
+        }
+
+        private void TbIINSearch_TextChanged(object sender, EventArgs e)
+        {
+            if (TbIINSearch.Text.Length>3)
+            {
+                long IIN;
+                long.TryParse(TbIINSearch.Text,out IIN);
+                if (IIN!=0)
+                {
+                    using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                    {
+                        var MatchedMembers = db.Members.Where(m => EF.Functions.Like(m.IIN.ToString(),$"%{IIN.ToString()}%")).ToList();
+                        dataGridViewForMembers.DataSource = MatchedMembers; //TODO something
+                    }
+                }
+            }
+            else
+            {
+                RefreshDataGridForMembers();
+            }
+        }
+        private void RefreshDataGridForMembers() //TODO maybe better don't close connection after each operation?
+        {
+            Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(() =>
+            {
+                using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                {
+                    this.Invoke(pbProgressCgange, pbMembers, 0, 25); //TODO check if searched by IIN
+                    var users = db.Members.Select(m => new
+                    {
+                        m.IIN,
+                        m.Name,
+                        m.Surname,
+                        m.Age
+                    }).ToList();
+                    this.Invoke(pbProgressCgange, pbMembers, 25, 85);
+                    this.Invoke(new Action(() =>
+                    {
+                        dataGridViewForMembers.DataSource = users; //TODO error catch or logic to avoid
+                    }));
+                    this.Invoke(pbProgressCgange, pbMembers, 50, 100);
+                }
+                Thread.Sleep(500);
+                this.Invoke(pbProgressReset, pbMembers);
+            })); //TODO all controls should be disabled before table is load
         }
     }
 }
