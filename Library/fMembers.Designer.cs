@@ -41,6 +41,7 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.TbIINSearch = new System.Windows.Forms.TextBox();
             this.pbMembers = new System.Windows.Forms.ProgressBar();
+            this.leToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewForMembers)).BeginInit();
             this.cmMember.SuspendLayout();
@@ -69,7 +70,7 @@
             // addMemberToolStripMenuItem
             // 
             this.addMemberToolStripMenuItem.Name = "addMemberToolStripMenuItem";
-            this.addMemberToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.addMemberToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.addMemberToolStripMenuItem.Text = "Add member";
             this.addMemberToolStripMenuItem.Click += new System.EventHandler(this.addMemberToolStripMenuItem_Click);
             // 
@@ -104,21 +105,22 @@
             // 
             this.cmMember.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.editToolStripMenuItem,
-            this.deleteToolStripMenuItem});
+            this.deleteToolStripMenuItem,
+            this.leToolStripMenuItem});
             this.cmMember.Name = "cmMember";
-            this.cmMember.Size = new System.Drawing.Size(108, 48);
+            this.cmMember.Size = new System.Drawing.Size(140, 70);
             // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.editToolStripMenuItem.Text = "Edit";
             this.editToolStripMenuItem.Click += new System.EventHandler(this.editToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem
             // 
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.deleteToolStripMenuItem.Text = "Delete";
             this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
             // 
@@ -157,6 +159,12 @@
             this.pbMembers.Step = 1;
             this.pbMembers.TabIndex = 6;
             // 
+            // leToolStripMenuItem
+            // 
+            this.leToolStripMenuItem.Name = "leToolStripMenuItem";
+            this.leToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.leToolStripMenuItem.Text = "Lend a book";
+            // 
             // fMembers
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -194,5 +202,6 @@
         private ContextMenuStrip cmMember;
         private ToolStripMenuItem editToolStripMenuItem;
         private ToolStripMenuItem deleteToolStripMenuItem;
+        private ToolStripMenuItem leToolStripMenuItem;
     }
 }

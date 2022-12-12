@@ -169,12 +169,13 @@ namespace Library
                     {
                         if (cancellationToken.IsCancellationRequested) { return; }
                         this.Invoke(pbProgressCgange, pbMembers, 0, 25); //TODO check if searched by IIN
-                        var users = db.Members.Select(m => new
+                        var users = db.Members.Include(m=>m.Books).Select(m => new
                         {
                             m.IIN,
                             m.Name,
                             m.Surname,
-                            m.Age
+                            m.Age,
+                            m.Books
                         }).ToList();
                         if (cancellationToken.IsCancellationRequested) { return; }
                         this.Invoke(pbProgressCgange, pbMembers, 25, 85);
