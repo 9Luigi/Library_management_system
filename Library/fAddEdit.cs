@@ -19,7 +19,7 @@ namespace Library
         byte[] photo { get; set; }
         public fAddEdit()
         {
-            fMembers.OnfAddEditCreatedEvent += ActionRequested; //TODO Remember how it works
+            fMembers.OnfAddEditCreatedEvent += ActionRequested;
             InitializeComponent();
         }
 
@@ -67,12 +67,7 @@ namespace Library
                 }
             }   //TODO think about it
         }
-
-        private void fAddDeleteEdit_Load(object sender, EventArgs e)
-        {
-
-        }
-        internal void ActionRequested(MemberEventArgs e) //TODO this method should also handle remove
+        internal void ActionRequested(MemberEventArgs e)
         {
             switch (e.Action)
             {
@@ -95,7 +90,6 @@ namespace Library
                         byte[] imageByte = memberToEdit.Photo;
                         using (MemoryStream ms = new MemoryStream(imageByte))
                         {
-
                             try
                             {
                                 pbPhoto.Image = Image.FromStream(ms);
@@ -123,34 +117,26 @@ namespace Library
         }
         private bool checkFieldsBeforeAction()
         {
-            //TODO strict 75 char for field cause varchar(75) (etc) in columns
             if (tbName.Text != null && tbSurname.Text != null && mtbBirthday.Text != null && mtbAdress.Text != null
                 && mtbPhoneNumber.Text != null && mtbIIN.Text != null && pbPhoto.Image != null)
             {
+                foreach (Control control in this.Controls)
+                {
+                    if (control is TextBox textBox && textBox.Text.Length > 75)
+                    {
+                        MessageBox.Show($"{control.Name} cannot be more than 75 symbols");
+                        return false;
+                    }
+                }
                 if (RegexController.Check(tbName.Text, tbName) && RegexController.Check(tbSurname.Text, tbSurname)
-                    && RegexController.Check(mtbBirthday.Text, mtbBirthday) &&
-                    RegexController.Check(mtbAdress.Text, mtbAdress) && RegexController.Check(mtbPhoneNumber.Text, mtbPhoneNumber))
+                && RegexController.Check(mtbBirthday.Text, mtbBirthday) &&
+                RegexController.Check(mtbAdress.Text, mtbAdress) && RegexController.Check(mtbPhoneNumber.Text, mtbPhoneNumber))
                 {
-                    if (tbPatronymic.Text == "" || tbPatronymic.Text == "None")
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        if (RegexController.Check(tbPatronymic.Text, tbPatronymic))
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                    }
+                    if (tbPatronymic.Text == "" || tbPatronymic.Text == "None") return true;
+                    else if (RegexController.Check(tbPatronymic.Text, tbPatronymic)) return true;
+                    else return false;
                 }
-                else
-                {
-                    return false;
-                }
+                else return false;
             }
             else
             {

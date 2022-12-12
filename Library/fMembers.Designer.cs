@@ -40,7 +40,6 @@
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.TbIINSearch = new System.Windows.Forms.TextBox();
-            this.bIINSearch = new System.Windows.Forms.Button();
             this.pbMembers = new System.Windows.Forms.ProgressBar();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewForMembers)).BeginInit();
@@ -79,6 +78,7 @@
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(38, 20);
             this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // dataGridViewForMembers
             // 
@@ -96,9 +96,8 @@
             this.dataGridViewForMembers.ReadOnly = true;
             this.dataGridViewForMembers.RowTemplate.Height = 25;
             this.dataGridViewForMembers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.dataGridViewForMembers.Size = new System.Drawing.Size(572, 315);
+            this.dataGridViewForMembers.Size = new System.Drawing.Size(572, 316);
             this.dataGridViewForMembers.TabIndex = 2;
-            this.dataGridViewForMembers.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewForMembers_CellDoubleClick);
             this.dataGridViewForMembers.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewForMembers_CellMouseClick);
             // 
             // cmMember
@@ -130,7 +129,7 @@
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(590, 24);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(198, 315);
+            this.pictureBox1.Size = new System.Drawing.Size(198, 316);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 3;
             this.pictureBox1.TabStop = false;
@@ -139,31 +138,20 @@
             // 
             this.TbIINSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.TbIINSearch.Location = new System.Drawing.Point(326, 374);
+            this.TbIINSearch.Location = new System.Drawing.Point(326, 375);
             this.TbIINSearch.Name = "TbIINSearch";
             this.TbIINSearch.Size = new System.Drawing.Size(148, 23);
             this.TbIINSearch.TabIndex = 4;
             this.TbIINSearch.Text = "Enter IIN";
             this.TbIINSearch.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.TbIINSearch.Click += new System.EventHandler(this.TbIINSearch_Click);
             this.TbIINSearch.TextChanged += new System.EventHandler(this.TbIINSearch_TextChanged);
-            // 
-            // bIINSearch
-            // 
-            this.bIINSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.bIINSearch.Location = new System.Drawing.Point(326, 403);
-            this.bIINSearch.Name = "bIINSearch";
-            this.bIINSearch.Size = new System.Drawing.Size(148, 23);
-            this.bIINSearch.TabIndex = 5;
-            this.bIINSearch.Text = "Search";
-            this.bIINSearch.UseVisualStyleBackColor = true;
-            this.bIINSearch.Click += new System.EventHandler(this.bIINSearch_Click);
             // 
             // pbMembers
             // 
             this.pbMembers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbMembers.Location = new System.Drawing.Point(12, 345);
+            this.pbMembers.Location = new System.Drawing.Point(12, 346);
             this.pbMembers.Name = "pbMembers";
             this.pbMembers.Size = new System.Drawing.Size(776, 23);
             this.pbMembers.Step = 1;
@@ -173,9 +161,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 438);
+            this.ClientSize = new System.Drawing.Size(800, 439);
             this.Controls.Add(this.pbMembers);
-            this.Controls.Add(this.bIINSearch);
             this.Controls.Add(this.TbIINSearch);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.dataGridViewForMembers);
@@ -183,6 +170,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "fMembers";
             this.Text = "Members";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.fMembers_FormClosing);
             this.Load += new System.EventHandler(this.fMembers_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -202,7 +190,6 @@
         private PictureBox pictureBox1;
         private ToolStripMenuItem addMemberToolStripMenuItem;
         private TextBox TbIINSearch;
-        private Button bIINSearch;
         private ProgressBar pbMembers;
         private ContextMenuStrip cmMember;
         private ToolStripMenuItem editToolStripMenuItem;

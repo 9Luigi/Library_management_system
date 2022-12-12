@@ -238,7 +238,7 @@
             this.bUpdateMember.UseVisualStyleBackColor = true;
             this.bUpdateMember.Click += new System.EventHandler(this.bUpdateMember_Click);
             // 
-            // fAddDeleteEdit
+            // fAddEdit
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -263,8 +263,7 @@
             this.Controls.Add(this.tbPatronymic);
             this.Controls.Add(this.tbSurname);
             this.Controls.Add(this.tbName);
-            this.Name = "fAddDeleteEdit";
-            this.Load += new System.EventHandler(this.fAddDeleteEdit_Load);
+            this.Name = "fAddEdit";
             ((System.ComponentModel.ISupportInitialize)(this.pbPhoto)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

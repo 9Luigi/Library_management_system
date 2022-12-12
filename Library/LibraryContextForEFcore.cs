@@ -19,6 +19,7 @@ namespace Library
         protected  override void OnConfiguring(DbContextOptionsBuilder dbOptions)
         {
             dbOptions.UseSqlServer(ConnectionString);
+            //dbOptions.LogTo(message => System.Diagnostics.Debug.WriteLine(message));
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

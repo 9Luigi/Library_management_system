@@ -35,7 +35,7 @@ namespace Library
             IIN = iin;
             Photo = photo;
             Age = RegistrationDate.Year - BirthDay.Year;
-            if (BirthDay > RegistrationDate.AddYears(-Age)) Age--; //TODO to learn, don't understand yet
+            if (BirthDay > RegistrationDate.AddYears(-Age)) Age--;
             if (Patronymic==null)
             {
                 Patronymic = "None";
