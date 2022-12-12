@@ -38,10 +38,10 @@
             this.cmMember = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.leToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.TbIINSearch = new System.Windows.Forms.TextBox();
             this.pbMembers = new System.Windows.Forms.ProgressBar();
-            this.leToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewForMembers)).BeginInit();
             this.cmMember.SuspendLayout();
@@ -70,7 +70,7 @@
             // addMemberToolStripMenuItem
             // 
             this.addMemberToolStripMenuItem.Name = "addMemberToolStripMenuItem";
-            this.addMemberToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addMemberToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.addMemberToolStripMenuItem.Text = "Add member";
             this.addMemberToolStripMenuItem.Click += new System.EventHandler(this.addMemberToolStripMenuItem_Click);
             // 
@@ -108,21 +108,28 @@
             this.deleteToolStripMenuItem,
             this.leToolStripMenuItem});
             this.cmMember.Name = "cmMember";
-            this.cmMember.Size = new System.Drawing.Size(140, 70);
+            this.cmMember.Size = new System.Drawing.Size(181, 92);
             // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.editToolStripMenuItem.Text = "Edit";
             this.editToolStripMenuItem.Click += new System.EventHandler(this.editToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem
             // 
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.deleteToolStripMenuItem.Text = "Delete";
             this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
+            // 
+            // leToolStripMenuItem
+            // 
+            this.leToolStripMenuItem.Name = "leToolStripMenuItem";
+            this.leToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.leToolStripMenuItem.Text = "Lend a book";
+            this.leToolStripMenuItem.Click += new System.EventHandler(this.leToolStripMenuItem_Click);
             // 
             // pictureBox1
             // 
@@ -158,12 +165,6 @@
             this.pbMembers.Size = new System.Drawing.Size(776, 23);
             this.pbMembers.Step = 1;
             this.pbMembers.TabIndex = 6;
-            // 
-            // leToolStripMenuItem
-            // 
-            this.leToolStripMenuItem.Name = "leToolStripMenuItem";
-            this.leToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
-            this.leToolStripMenuItem.Text = "Lend a book";
             // 
             // fMembers
             // 

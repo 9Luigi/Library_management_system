@@ -220,5 +220,10 @@ namespace Library
         {
             TbIINSearch.Text = "";
         }
+
+        private void leToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            
+        }
     }
 }
