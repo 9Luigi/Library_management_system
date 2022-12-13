@@ -31,13 +31,13 @@ namespace Library
         internal CancellationTokenSource cancellationTokenSource { get; set; }
         internal CancellationToken cancellationToken { get; set; }
         internal delegate void need_IIN_EventDelegate(MemberEventArgs e);
-        static internal event need_IIN_EventDelegate need_IIN_Event;
+        static internal event need_IIN_EventDelegate? Need_IIN_Event;
         private void addMemberToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (LibraryContextForEFcore db = new LibraryContextForEFcore()) //TODO create a method!
             {
                 fAddEdit dade = new fAddEdit();
-                need_IIN_Event.Invoke(new MemberEventArgs("CREATE"));
+                Need_IIN_Event.Invoke(new MemberEventArgs("CREATE"));
                 dade.ShowDialog();
                 RefreshDataGridForMembers();
             }
@@ -80,7 +80,7 @@ namespace Library
                 {
                     var members = await db.Members.Where(m => m.IIN == IIN).ToListAsync();
                     fAddEdit dade = new fAddEdit();
-                    need_IIN_Event.Invoke(new MemberEventArgs("EDIT", IIN));
+                    Need_IIN_Event.Invoke(new MemberEventArgs("EDIT", IIN));
                     dade.ShowDialog();
                     RefreshDataGridForMembers();
                 }
@@ -169,7 +169,7 @@ namespace Library
                     using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                     {
                         if (cancellationToken.IsCancellationRequested) { return; }
-                        this.Invoke(pbProgressCgange, pbMembers, 0, 25); //TODO check if searched by IIN
+                        this.Invoke(ProgressBarController.pbProgressCgange,this, pbMembers, 0, 25); //TODO check if searched by IIN
                         var users = db.Members.Select(m => new
                         {
                             m.IIN,
@@ -178,18 +178,18 @@ namespace Library
                             m.Age,
                         }).ToList();
                         if (cancellationToken.IsCancellationRequested) { return; }
-                        this.Invoke(pbProgressCgange, pbMembers, 25, 85);
+                        this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 25, 85);
                         if (cancellationToken.IsCancellationRequested) { return; }
                         this.Invoke(new Action(() =>
                         {
                             dataGridViewForMembers.DataSource = users; //TODO error catch or logic to avoid
                         }));
                         if (cancellationToken.IsCancellationRequested) { return; }
-                        this.Invoke(pbProgressCgange, pbMembers, 50, 100);
+                        this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 50, 100);
                     }
                     Thread.Sleep(500);
                     if (cancellationToken.IsCancellationRequested) { return; }
-                    this.Invoke(pbProgressReset, pbMembers);
+                    this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
                     if (cancellationToken.IsCancellationRequested) { return; }
                     this.Invoke(controlsEnableFlag, true);
                 }), cancellationToken); //TODO all invoke call exception if form isdisposed earlier than invokable method
@@ -224,7 +224,7 @@ namespace Library
                 {
                     var members = db.Members.Where(m => m.IIN == IIN).ToListAsync();
                     fLendOrRecieveBook LORB = new fLendOrRecieveBook();
-                    need_IIN_Event.Invoke(new MemberEventArgs("BORROW", IIN));
+                    Need_IIN_Event.Invoke(new MemberEventArgs("BORROW", IIN));
                     LORB.ShowDialog();
                     RefreshDataGridForMembers();
                 }
@@ -241,7 +241,7 @@ namespace Library
                 {
                     var members = db.Members.Where(m => m.IIN == IIN).ToListAsync();
                     fLendOrRecieveBook LORB = new fLendOrRecieveBook();
-                    need_IIN_Event.Invoke(new MemberEventArgs("RETURN", IIN));
+                    Need_IIN_Event.Invoke(new MemberEventArgs("RETURN", IIN));
                     LORB.ShowDialog();
                     RefreshDataGridForMembers();
                 }

@@ -17,7 +17,7 @@ namespace Library
     {
         public fLendOrRecieveBook()
         {
-            need_IIN_Event += selectBooksByIIN;
+            Need_IIN_Event += selectBooksByIIN;
             InitializeComponent();
         }
         internal long IIN { get; private set; }
@@ -37,7 +37,7 @@ namespace Library
                 }
                 else
                 {
-                    var selectedMember = db.Members.Include(m=>m.Books).FirstOrDefault(m => m.IIN == Convert.ToInt64(criterion));
+                    var selectedMember = db.Members.Include(m=>m.Books).FirstOrDefault(m => m.IIN == Convert.ToInt64(criterion));//TODO select not all columns
                     dataGridViewForLendBook.DataSource = selectedMember.Books;
                 }
             }
@@ -87,20 +87,19 @@ namespace Library
                         {
                             if (db.SaveChanges() > 0)
                             {
-                                MessageBox.Show("Book succesfully lended");
+                                MessageBox.Show("Book succesfully borrowed");
                             }
                         }
                         catch (DbUpdateException)
                         {
-                            MessageBox.Show("Same book were already lended to this member");
+                            MessageBox.Show("Same book were already borrowed to this member");
                             //Close();
                         }
                     }
-                    else MessageBox.Show("Cannot lend the book when it's amount is 0");
+                    else MessageBox.Show("Cannot borrowed the book when it's amount is 0");
                 }
             }
         }
-
         private void unlendABookToolStripMenuItem_Click(object sender, EventArgs e)
         {
             long ID;
@@ -115,7 +114,7 @@ namespace Library
                     selectedBook.Amount += 1;
                     if (db.SaveChanges()>0)
                     {
-                        MessageBox.Show($"{selectedBook.Title} succesfully unlended from {selectedMember.Name} {selectedMember.Surname}");
+                        MessageBox.Show($"{selectedBook.Title} succesfully return by {selectedMember.Name} {selectedMember.Surname}");
                     }
                 }
             }
