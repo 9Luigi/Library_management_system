@@ -19,7 +19,7 @@ namespace Library
         byte[] photo { get; set; }
         public fAddEdit()
         {
-            fMembers.OnfAddEditCreatedEvent += ActionRequested;
+            need_IIN_Event += ActionRequested;
             InitializeComponent();
         }
 

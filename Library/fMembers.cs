@@ -30,14 +30,14 @@ namespace Library
         }
         internal CancellationTokenSource cancellationTokenSource { get; set; }
         internal CancellationToken cancellationToken { get; set; }
-        internal delegate void OnfAddEditCreatedDelegate(MemberEventArgs e);
-        static internal event OnfAddEditCreatedDelegate OnfAddEditCreatedEvent;
+        internal delegate void need_IIN_EventDelegate(MemberEventArgs e);
+        static internal event need_IIN_EventDelegate need_IIN_Event;
         private void addMemberToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (LibraryContextForEFcore db = new LibraryContextForEFcore()) //TODO create a method!
             {
                 fAddEdit dade = new fAddEdit();
-                OnfAddEditCreatedEvent.Invoke(new MemberEventArgs("CREATE"));
+                need_IIN_Event.Invoke(new MemberEventArgs("CREATE"));
                 dade.ShowDialog();
                 RefreshDataGridForMembers();
             }
@@ -46,7 +46,7 @@ namespace Library
         {
             RefreshDataGridForMembers();
         }
-        public void pbProgressCgange(ProgressBar pb, int startValue, int finalValue)
+        internal void pbProgressCgange(ProgressBar pb, int startValue, int finalValue)
         {
             pb.Visible = true;
             this.Invoke(new Action(() =>
@@ -58,7 +58,7 @@ namespace Library
                 }
             }));
         }
-        public void pbProgressReset(ProgressBar pb)
+        internal void pbProgressReset(ProgressBar pb)
         {
             pb.Invoke(new Action(() =>
             {
@@ -80,7 +80,7 @@ namespace Library
                 {
                     var members = await db.Members.Where(m => m.IIN == IIN).ToListAsync();
                     fAddEdit dade = new fAddEdit();
-                    OnfAddEditCreatedEvent.Invoke(new MemberEventArgs("EDIT", IIN));
+                    need_IIN_Event.Invoke(new MemberEventArgs("EDIT", IIN));
                     dade.ShowDialog();
                     RefreshDataGridForMembers();
                 }
@@ -122,8 +122,9 @@ namespace Library
         {
             if (e.Button == MouseButtons.Right)
             {
-                this.dataGridViewForMembers.CurrentCell = this.dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
-                this.cmMember.Show(this.dataGridViewForMembers, new Point(e.RowIndex, e.ColumnIndex));
+                dataGridViewForMembers.CurrentCell = dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                Point relativeCursorPosition = dataGridViewForMembers.PointToClient(Cursor.Position);
+                cmMember.Show(dataGridViewForMembers, relativeCursorPosition);
             }
         }
 
@@ -169,13 +170,12 @@ namespace Library
                     {
                         if (cancellationToken.IsCancellationRequested) { return; }
                         this.Invoke(pbProgressCgange, pbMembers, 0, 25); //TODO check if searched by IIN
-                        var users = db.Members.Include(m=>m.Books).Select(m => new
+                        var users = db.Members.Select(m => new
                         {
                             m.IIN,
                             m.Name,
                             m.Surname,
                             m.Age,
-                            m.Books
                         }).ToList();
                         if (cancellationToken.IsCancellationRequested) { return; }
                         this.Invoke(pbProgressCgange, pbMembers, 25, 85);
@@ -205,13 +205,6 @@ namespace Library
         {
             this.Close();
         }
-        void ifFormDisposedThanTaskKill(Form form, Task task)
-        {
-            if (form.IsDisposed)
-            {
-
-            }
-        }
         private void fMembers_FormClosing(object sender, FormClosingEventArgs e)
         {
             cancellationTokenSource.Cancel();
@@ -223,7 +216,36 @@ namespace Library
 
         private void leToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
+            long IIN;
+            if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
+                && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN)) //TODO create a method?
+            {
+                using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                {
+                    var members = db.Members.Where(m => m.IIN == IIN).ToListAsync();
+                    fLendOrRecieveBook LORB = new fLendOrRecieveBook();
+                    need_IIN_Event.Invoke(new MemberEventArgs("BORROW", IIN));
+                    LORB.ShowDialog();
+                    RefreshDataGridForMembers();
+                }
+            }
+        }
+
+        private void seeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            long IIN;
+            if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
+                && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN)) //TODO create a method!
+            {
+                using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                {
+                    var members = db.Members.Where(m => m.IIN == IIN).ToListAsync();
+                    fLendOrRecieveBook LORB = new fLendOrRecieveBook();
+                    need_IIN_Event.Invoke(new MemberEventArgs("RETURN", IIN));
+                    LORB.ShowDialog();
+                    RefreshDataGridForMembers();
+                }
+            }
         }
     }
 }
