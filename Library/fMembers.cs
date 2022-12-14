@@ -76,7 +76,6 @@ namespace Library
             (bool b, long i) = isIIN_Clicked(IIN);
             if (b)
             {
-                fAddEdit faddEdit = new fAddEdit();
                 Need_IIN_Event.Invoke(new MemberEventArgs("EDIT", i));
                 faddEdit.ShowDialog();
                 RefreshDataGridForMembers();

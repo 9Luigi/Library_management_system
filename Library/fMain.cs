@@ -8,8 +8,9 @@ namespace Library
         public fMain()
         {
             InitializeComponent();
+            
         }
-
+        internal fMembers fm { get; private set; }
         private void bCatalog_Click(object sender, EventArgs e)
         {
 
@@ -19,7 +20,6 @@ namespace Library
         {
             this.Visible = false;
             this.Enabled = false;
-            fMembers fm = new fMembers();
             fm.ShowDialog();
             this.Visible = true;
             this.Enabled = true;
@@ -27,7 +27,7 @@ namespace Library
 
         private void fMain_Load(object sender, EventArgs e)
         {
-            
+            fm = new fMembers();
         }
     }
 }
