@@ -112,7 +112,7 @@ namespace Library
         {
             long ID;
             if (dataGridViewForLendBook.CurrentCell.Value != null && dataGridViewForLendBook.CurrentCell.ColumnIndex == 0
-                && long.TryParse(dataGridViewForLendBook.CurrentCell.Value.ToString(), out ID)) //TODO null or ""?
+                && long.TryParse(dataGridViewForLendBook.CurrentCell.Value.ToString(), out ID))
             {
                 using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                 {

@@ -96,7 +96,7 @@ namespace Library
                             }
                             catch
                             {
-                                pbPhoto.Image = null;
+                                pbPhoto.Image = Properties.Resources.NoImage;
                             }
                         }
                     }
@@ -170,18 +170,19 @@ namespace Library
         }
         void actionWithMember(string operation)
         {
+            Member member;
             using (LibraryContextForEFcore db = new LibraryContextForEFcore())
             {
                 switch (operation)
                 {
                     case "CREATE":
-                        Member member = new Member
+                         member = new Member
                                     (
                                         tbName.Text,
                                         tbSurname.Text,
                                         DateTime.Parse(mtbBirthday.Text),
                                         mtbAdress.Text,
-                                        Convert.ToInt64(mtbIIN.Text), //TODO check long?
+                                        Convert.ToInt64(mtbIIN.Text),
                                         mtbPhoneNumber.Text,
                                         photo,
                                         checkIfHasPatronymic(tbPatronymic.Text)
@@ -205,14 +206,14 @@ namespace Library
                     case "UPDATE":
                         bAddMember.Enabled = false;
                         long IIN;
-                        long.TryParse(mtbIIN.Text, out IIN); //TODO what if cannot parse?, can it be?
+                        long.TryParse(mtbIIN.Text, out IIN);
                         member = db.Members.SingleOrDefault(m => m.IIN == IIN);
                         member.Name = tbName.Text;
                         member.Surname = tbSurname.Text;
                         member.BirthDay = DateTime.Parse(mtbBirthday.Text);
                         member.Adress = mtbAdress.Text;
                         member.PhoneNumber = mtbPhoneNumber.Text;
-                        member.Photo = ImageToByte(pbPhoto.Image);//TODO Check null
+                        //member.Photo = ImageToByte(pbPhoto.Image);
                         member.Patronymic = checkIfHasPatronymic(tbPatronymic.Text);
                         int number = db.SaveChanges();
                         if (number == 1)
