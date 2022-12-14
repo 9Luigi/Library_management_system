@@ -37,8 +37,17 @@ namespace Library
                 }
                 else
                 {
-                    var selectedMember = db.Members.Include(m=>m.Books).FirstOrDefault(m => m.IIN == Convert.ToInt64(criterion));//TODO select not all columns
-                    dataGridViewForLendBook.DataSource = selectedMember.Books;
+                    var selectedBooks = db.Members.Where(m => m.IIN == IIN)
+                        .Include(m => m.Books).SelectMany(m => m.Books.Select(b => new
+                        {
+                            b.Id,
+                            b.Title,
+                            b.Genre
+                        })).ToList();
+                    if (selectedBooks.Count > 0)
+                    {
+                        dataGridViewForLendBook.DataSource = selectedBooks;
+                    }
                 }
             }
         }
@@ -93,7 +102,6 @@ namespace Library
                         catch (DbUpdateException)
                         {
                             MessageBox.Show("Same book were already borrowed to this member");
-                            //Close();
                         }
                     }
                     else MessageBox.Show("Cannot borrowed the book when it's amount is 0");
@@ -103,16 +111,16 @@ namespace Library
         private void unlendABookToolStripMenuItem_Click(object sender, EventArgs e)
         {
             long ID;
-            if (dataGridViewForLendBook.CurrentCell.Value!=null && dataGridViewForLendBook.CurrentCell.ColumnIndex==0 
-                && long.TryParse(dataGridViewForLendBook.CurrentCell.Value.ToString(),out ID)) //TODO null or ""?
+            if (dataGridViewForLendBook.CurrentCell.Value != null && dataGridViewForLendBook.CurrentCell.ColumnIndex == 0
+                && long.TryParse(dataGridViewForLendBook.CurrentCell.Value.ToString(), out ID)) //TODO null or ""?
             {
                 using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                 {
-                    var selectedMember = db.Members.Include(m=>m.Books).FirstOrDefault(m => m.IIN == IIN);
+                    var selectedMember = db.Members.Include(m => m.Books).FirstOrDefault(m => m.IIN == IIN);
                     var selectedBook = db.Books.FirstOrDefault(b => b.Id == ID);
-                    selectedMember.Books.Remove(selectedBook);
+                    selectedMember!.Books.Remove(selectedBook);
                     selectedBook.Amount += 1;
-                    if (db.SaveChanges()>0)
+                    if (db.SaveChanges() > 0)
                     {
                         MessageBox.Show($"{selectedBook.Title} succesfully return by {selectedMember.Name} {selectedMember.Surname}");
                     }

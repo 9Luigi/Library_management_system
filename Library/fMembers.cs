@@ -17,6 +17,8 @@ namespace Library
         public fMembers()
         {
             InitializeComponent();
+            flendOrRecieveBook = new fLendOrRecieveBook();
+            faddEdit = new fAddEdit();
         }
         internal class MemberEventArgs : EventArgs
         {
@@ -28,19 +30,17 @@ namespace Library
                 Action = action;
             }
         }
+        internal fLendOrRecieveBook flendOrRecieveBook { get; private set; }
+        internal fAddEdit faddEdit { get; private set; }
         internal CancellationTokenSource cancellationTokenSource { get; set; }
         internal CancellationToken cancellationToken { get; set; }
         internal delegate void need_IIN_EventDelegate(MemberEventArgs e);
         static internal event need_IIN_EventDelegate? Need_IIN_Event;
         private void addMemberToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (LibraryContextForEFcore db = new LibraryContextForEFcore()) //TODO create a method!
-            {
-                fAddEdit dade = new fAddEdit();
-                Need_IIN_Event.Invoke(new MemberEventArgs("CREATE"));
-                dade.ShowDialog();
-                RefreshDataGridForMembers();
-            }
+            Need_IIN_Event.Invoke(new MemberEventArgs("CREATE"));
+            faddEdit.ShowDialog();
+            RefreshDataGridForMembers();
         }
         private void fMembers_Load(object sender, EventArgs e)
         {
@@ -70,20 +70,16 @@ namespace Library
             }));
         }
 
-        private async void editToolStripMenuItem_Click(object sender, EventArgs e)
+        private void editToolStripMenuItem_Click(object sender, EventArgs e)
         {
             long IIN;
             if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
                 && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN)) //TODO create a method?
             {
-                using (LibraryContextForEFcore db = new LibraryContextForEFcore())
-                {
-                    var members = await db.Members.Where(m => m.IIN == IIN).ToListAsync();
-                    fAddEdit dade = new fAddEdit();
-                    Need_IIN_Event.Invoke(new MemberEventArgs("EDIT", IIN));
-                    dade.ShowDialog();
-                    RefreshDataGridForMembers();
-                }
+                fAddEdit faddEdit = new fAddEdit();
+                Need_IIN_Event.Invoke(new MemberEventArgs("EDIT", IIN));
+                faddEdit.ShowDialog();
+                RefreshDataGridForMembers();
             }
         }
 
@@ -123,6 +119,7 @@ namespace Library
             if (e.Button == MouseButtons.Right)
             {
                 dataGridViewForMembers.CurrentCell = dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                //TODO click to column name == Exception
                 Point relativeCursorPosition = dataGridViewForMembers.PointToClient(Cursor.Position);
                 cmMember.Show(dataGridViewForMembers, relativeCursorPosition);
             }
@@ -139,11 +136,9 @@ namespace Library
                     long.TryParse(TbIINSearch.Text, out IIN);
                     if (IIN != 0)
                     {
-
                         var MatchedMembers = db.Members.Where(m => EF.Functions.Like(m.IIN.ToString(), $"%{IIN.ToString()}%")).
                             Select(m => new { m.IIN, m.Name, m.Surname, m.Age }).ToList();
                         dataGridViewForMembers.DataSource = MatchedMembers; //TODO something
-
                     }
                 }
                 else
@@ -169,7 +164,7 @@ namespace Library
                     using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                     {
                         if (cancellationToken.IsCancellationRequested) { return; }
-                        this.Invoke(ProgressBarController.pbProgressCgange,this, pbMembers, 0, 25); //TODO check if searched by IIN
+                        this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 0, 25); //TODO check if searched by IIN
                         var users = db.Members.Select(m => new
                         {
                             m.IIN,
@@ -220,14 +215,9 @@ namespace Library
             if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
                 && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN)) //TODO create a method?
             {
-                using (LibraryContextForEFcore db = new LibraryContextForEFcore())
-                {
-                    var members = db.Members.Where(m => m.IIN == IIN).ToListAsync();
-                    fLendOrRecieveBook LORB = new fLendOrRecieveBook();
-                    Need_IIN_Event.Invoke(new MemberEventArgs("BORROW", IIN));
-                    LORB.ShowDialog();
-                    RefreshDataGridForMembers();
-                }
+                Need_IIN_Event!.Invoke(new MemberEventArgs("BORROW", IIN));
+                flendOrRecieveBook.ShowDialog();
+                RefreshDataGridForMembers();
             }
         }
 
@@ -239,11 +229,28 @@ namespace Library
             {
                 using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                 {
-                    var members = db.Members.Where(m => m.IIN == IIN).ToListAsync();
-                    fLendOrRecieveBook LORB = new fLendOrRecieveBook();
-                    Need_IIN_Event.Invoke(new MemberEventArgs("RETURN", IIN));
-                    LORB.ShowDialog();
-                    RefreshDataGridForMembers();
+                    Member? selectedMemberName = db.Members.Where(m => m.IIN == IIN).Select(m => new Member()
+                    {
+                        Name = m.Name,
+                        Surname = m.Surname
+                    }).FirstOrDefault();
+                    var selectedBooks = db.Members.Where(m => m.IIN == IIN)
+                        .Include(m => m.Books).SelectMany(m => m.Books.Select(b => new
+                        {
+                            b.Id,
+                            b.Title,
+                            b.Genre
+                        })).ToList();
+                    if (selectedBooks.Count > 0)
+                    {
+                        Need_IIN_Event!.Invoke(new MemberEventArgs("RETURN", IIN));
+                        flendOrRecieveBook.ShowDialog();
+                        RefreshDataGridForMembers();
+                    }
+                    else
+                    {
+                        MessageBox.Show($"{selectedMemberName!.Name} {selectedMemberName!.Surname} don't borrowed yet"); //TODO don't open form
+                    }
                 }
             }
         }
