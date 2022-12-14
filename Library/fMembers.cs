@@ -32,7 +32,6 @@ namespace Library
         }
         internal fLendOrRecieveBook flendOrRecieveBook { get; private set; }
         internal fAddEdit faddEdit { get; private set; }
-        internal long IIN { get; set; }
         internal CancellationTokenSource cancellationTokenSource { get; set; }
         internal CancellationToken cancellationToken { get; set; }
         internal delegate void need_IIN_EventDelegate(MemberEventArgs e);
@@ -73,11 +72,12 @@ namespace Library
 
         private void editToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (bool b, long i) = isIIN_Clicked(IIN);
-            if (b)
+            long IIN;
+            if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
+                && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN)) //TODO create a method?
             {
                 fAddEdit faddEdit = new fAddEdit();
-                Need_IIN_Event.Invoke(new MemberEventArgs("EDIT", i));
+                Need_IIN_Event.Invoke(new MemberEventArgs("EDIT", IIN));
                 faddEdit.ShowDialog();
                 RefreshDataGridForMembers();
             }
@@ -85,14 +85,15 @@ namespace Library
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (bool b, long i) = isIIN_Clicked(IIN);
-            if (b)
+            long IIN;
+            if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
+                && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN))
             {
                 Task deleteMember = new TaskFactory().StartNew(new Action(() =>
                 {
                     using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                     {
-                        Member? memberToDelete = db.Members.FirstOrDefault(m => m.IIN == i);
+                        Member memberToDelete = db.Members.FirstOrDefault(m => m.IIN == Convert.ToInt64(IIN));
                         db.Members.Attach(memberToDelete);
                         db.Members.Remove(memberToDelete);
                         DialogResult result = MessageBox.Show("Are you sure to remove?", "Removing member", MessageBoxButtons.YesNo);
@@ -115,15 +116,16 @@ namespace Library
 
         private void dataGridViewForMembers_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Right && e.RowIndex>-1 && e.ColumnIndex==0)
+            if (e.Button == MouseButtons.Right)
             {
                 dataGridViewForMembers.CurrentCell = dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                //TODO click to column name == Exception
                 Point relativeCursorPosition = dataGridViewForMembers.PointToClient(Cursor.Position);
                 cmMember.Show(dataGridViewForMembers, relativeCursorPosition);
             }
         }
 
-        private void TbIINSearch_TextChanged(object sender, EventArgs e)
+        private void TbIINSearch_TextChanged(object sender, EventArgs e) //TODO logic when lenght <3
         {
             using (LibraryContextForEFcore db = new LibraryContextForEFcore())
             {
@@ -136,7 +138,7 @@ namespace Library
                     {
                         var MatchedMembers = db.Members.Where(m => EF.Functions.Like(m.IIN.ToString(), $"%{IIN.ToString()}%")).
                             Select(m => new { m.IIN, m.Name, m.Surname, m.Age }).ToList();
-                        dataGridViewForMembers.DataSource = MatchedMembers;
+                        dataGridViewForMembers.DataSource = MatchedMembers; //TODO something
                     }
                 }
                 else
@@ -148,15 +150,11 @@ namespace Library
                         m.Surname,
                         m.Age
                     }).ToList();
-                    if (dataGridViewForMembers.DataSource != users)
-                    {
-                        dataGridViewForMembers.DataSource = users; //workaround for not update datagrid many times
-                    }
-                  
+                    dataGridViewForMembers.DataSource = users;
                 }
             }
         }
-        private void RefreshDataGridForMembers()
+        private void RefreshDataGridForMembers() //TODO maybe better don't close connection after each operation?
         {
             controlsEnableFlag(false);
             cancellationTokenSource = new CancellationTokenSource();
@@ -195,9 +193,7 @@ namespace Library
         {
             foreach (Control item in this.Controls)
             {
-                this.Invoke(new Action(()=>{
-                    item.Enabled = flag;
-                })); 
+                item.Enabled = flag;
             }
         }
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -215,10 +211,11 @@ namespace Library
 
         private void leToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (bool b, long i) = isIIN_Clicked(IIN);
-            if (b)
+            long IIN;
+            if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
+                && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN)) //TODO create a method?
             {
-                Need_IIN_Event!.Invoke(new MemberEventArgs("BORROW", i));
+                Need_IIN_Event!.Invoke(new MemberEventArgs("BORROW", IIN));
                 flendOrRecieveBook.ShowDialog();
                 RefreshDataGridForMembers();
             }
@@ -226,17 +223,18 @@ namespace Library
 
         private void seeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)
         {
-           (bool b, long i) = isIIN_Clicked(IIN);
-            if (b)
+            long IIN;
+            if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
+                && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN)) //TODO create a method!
             {
                 using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                 {
-                    Member? selectedMemberName = db.Members.Where(m => m.IIN == i).Select(m => new Member()
+                    Member? selectedMemberName = db.Members.Where(m => m.IIN == IIN).Select(m => new Member()
                     {
                         Name = m.Name,
                         Surname = m.Surname
                     }).FirstOrDefault();
-                    var selectedBooks = db.Members.Where(m => m.IIN == i)
+                    var selectedBooks = db.Members.Where(m => m.IIN == IIN)
                         .Include(m => m.Books).SelectMany(m => m.Books.Select(b => new
                         {
                             b.Id,
@@ -245,26 +243,16 @@ namespace Library
                         })).ToList();
                     if (selectedBooks.Count > 0)
                     {
-                        Need_IIN_Event!.Invoke(new MemberEventArgs("RETURN", i));
+                        Need_IIN_Event!.Invoke(new MemberEventArgs("RETURN", IIN));
                         flendOrRecieveBook.ShowDialog();
                         RefreshDataGridForMembers();
                     }
                     else
                     {
-                        MessageBox.Show($"{selectedMemberName!.Name} {selectedMemberName!.Surname} don't borrowed yet");
+                        MessageBox.Show($"{selectedMemberName!.Name} {selectedMemberName!.Surname} don't borrowed yet"); //TODO don't open form
                     }
                 }
             }
-        }
-        (bool,long) isIIN_Clicked(long IIN)
-        {
-            if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
-                && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN))
-            {
-                return (true,IIN);
-            }
-            else return (false,0);
-            
         }
     }
 }

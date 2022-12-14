@@ -18,8 +18,7 @@ namespace Library
         static string? correctSymbols;
         static string correctNameAndPatronymicSymbols = "latin, cyrillic characters and sign -";
         static string correctSurnameSymbols = "latin, cyrillic characters and signs -.'";
-        static DateTime minimumAge = DateTime.Now.AddYears(-14); //
-        static string correctBirdthday = $"from 01.01.1900 to {minimumAge.ToString()}";
+        static string correctBirdthday = "from 01.01.1900 to 31.12.2099"; //TODO change second date
         static string correctAdress = "Example 168-32";
         static public bool Check(string input,Control control)
         {
