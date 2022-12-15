@@ -20,7 +20,7 @@ namespace Library
             flendOrRecieveBook = new fLendOrRecieveBook();
             faddEdit = new fAddEdit();
         }
-        internal class MemberEventArgs : EventArgs
+        internal class MemberEventArgs : EventArgs //for transfer IIN and Action to other forms via event
         {
             internal long IIN { get; private set; }
             internal string Action { get; private set; }
@@ -39,7 +39,7 @@ namespace Library
         static internal event need_IIN_EventDelegate? Need_IIN_Event;
         private void addMemberToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Need_IIN_Event.Invoke(new MemberEventArgs("CREATE"));
+            Need_IIN_Event!.Invoke(new MemberEventArgs("CREATE"));
             faddEdit.ShowDialog();
             RefreshDataGridForMembers();
         }
@@ -154,7 +154,8 @@ namespace Library
         }
         private void RefreshDataGridForMembers() //TODO maybe better don't close connection after each operation?
         {
-            controlsEnableFlag(false);
+            //TODO maybe better use AsNotTracking
+            controlsEnableFlag(false); //while data from db is loading all controls enabled set to false
             cancellationTokenSource = new CancellationTokenSource();
             cancellationToken = cancellationTokenSource.Token;
             Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(() =>
@@ -184,10 +185,11 @@ namespace Library
                     if (cancellationToken.IsCancellationRequested) { return; }
                     this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
                     if (cancellationToken.IsCancellationRequested) { return; }
-                    this.Invoke(controlsEnableFlag, true);
+                    this.Invoke(controlsEnableFlag, true); // after data load from db set all controls enabled true
                 }), cancellationToken); //TODO all invoke call exception if form isdisposed earlier than invokable method
         }
         void controlsEnableFlag(bool flag)
+        //Set all controls enabled property according to flag
         {
             foreach (Control item in this.Controls)
             {
@@ -202,7 +204,7 @@ namespace Library
         }
         private void fMembers_FormClosing(object sender, FormClosingEventArgs e)
         {
-            cancellationTokenSource.Cancel();
+            cancellationTokenSource.Cancel(); //most likely bad arhitecture but allow to avoid error(this.invoke after this closed)
         }
         private void TbIINSearch_Click(object sender, EventArgs e)
         {
@@ -220,8 +222,9 @@ namespace Library
             }
         }
 
-        private void seeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)
+        private void seeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)//borrowed books*
         {
+            //this method checked selected member for borrowed books and if true sends data to another form
            (bool b, long i) = isIIN_Clicked(IIN);
             if (b)
             {
@@ -251,8 +254,8 @@ namespace Library
                     }
                 }
             }
-        }
-        (bool,long) isIIN_Clicked(long IIN)
+        }//borrowed books
+        (bool,long) isIIN_Clicked(long IIN) //check data grid first column for IIN value and if true return tuple
         {
             if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
                 && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN))
