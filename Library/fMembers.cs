@@ -92,7 +92,7 @@ namespace Library
                     using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                     {
                         Member? memberToDelete = db.Members.FirstOrDefault(m => m.IIN == i);
-                        db.Members.Attach(memberToDelete);
+                        db.Members.Attach(memberToDelete);//TODO parallel handle or check if already delete
                         db.Members.Remove(memberToDelete);
                         DialogResult result = MessageBox.Show("Are you sure to remove?", "Removing member", MessageBoxButtons.YesNo);
                         if (result == DialogResult.Yes)
@@ -119,7 +119,8 @@ namespace Library
                 dataGridViewForMembers.CurrentCell = dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
                 //TODO click to column name == Exception
                 Point relativeCursorPosition = dataGridViewForMembers.PointToClient(Cursor.Position);
-                cmMember.Show(dataGridViewForMembers, relativeCursorPosition);
+                cmMember.Show(dataGridViewForMembers, relativeCursorPosition); 
+                //if clicked by right button cell is IIN then popup menu executes
             }
         }
 
