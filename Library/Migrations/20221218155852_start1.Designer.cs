@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Migrations
 {
     [DbContext(typeof(LibraryContextForEFcore))]
-    [Migration("20221218123102_addConcurencyTokenToALLEntities_ApplicationNotDataBaseControl_IsRowVersion1")]
-    partial class addConcurencyTokenToALLEntitiesApplicationNotDataBaseControlIsRowVersion1
+    [Migration("20221218155852_start1")]
+    partial class start1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,9 +63,11 @@ namespace Library.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("AuthorVersion")
+                    b.Property<byte[]>("AuthorVersion")
                         .IsConcurrencyToken()
-                        .HasColumnType("uniqueidentifier")
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion")
                         .HasColumnName("Version");
 
                     b.Property<string>("Biography")
@@ -106,9 +108,11 @@ namespace Library.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("BookVersion")
+                    b.Property<byte[]>("BookVersion")
                         .IsConcurrencyToken()
-                        .HasColumnType("uniqueidentifier")
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion")
                         .HasColumnName("Version");
 
                     b.Property<string>("Description")
@@ -172,9 +176,11 @@ namespace Library.Migrations
                         .HasColumnType("BIGINT")
                         .HasColumnName("IIN");
 
-                    b.Property<Guid>("MemberVersion")
+                    b.Property<byte[]>("MemberVersion")
                         .IsConcurrencyToken()
-                        .HasColumnType("uniqueidentifier")
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion")
                         .HasColumnName("Version");
 
                     b.Property<string>("Name")

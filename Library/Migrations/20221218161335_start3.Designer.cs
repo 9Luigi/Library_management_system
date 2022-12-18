@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Migrations
 {
     [DbContext(typeof(LibraryContextForEFcore))]
-    [Migration("20221210110211_cancelAgeCheck")]
-    partial class cancelAgeCheck
+    [Migration("20221218161335_start3")]
+    partial class start3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,6 +63,13 @@ namespace Library.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<byte[]>("AuthorVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion")
+                        .HasColumnName("Version");
+
                     b.Property<string>("Biography")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)")
@@ -98,6 +105,16 @@ namespace Library.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("BookVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion")
+                        .HasColumnName("Version");
+
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)")
@@ -127,7 +144,7 @@ namespace Library.Migrations
                     b.Property<byte[]>("coverImage")
                         .IsRequired()
                         .HasColumnType("varbinary(max)")
-                        .HasColumnName("coverImage");
+                        .HasColumnName("CoverImage");
 
                     b.HasKey("Id");
 
@@ -158,6 +175,12 @@ namespace Library.Migrations
                     b.Property<long>("IIN")
                         .HasColumnType("BIGINT")
                         .HasColumnName("IIN");
+
+                    b.Property<byte[]>("MemberVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)")
+                        .HasColumnName("Version");
 
                     b.Property<string>("Name")
                         .IsRequired()

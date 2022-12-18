@@ -5,16 +5,11 @@
 namespace Library.Migrations
 {
     /// <inheritdoc />
-    public partial class addConcurencyTokenToALLEntitiesApplicationNotDataBaseControlIsRowVersion1 : Migration
+    public partial class start1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "coverImage",
-                table: "Books",
-                newName: "CoverImage");
-
             migrationBuilder.AlterColumn<byte[]>(
                 name: "Photo",
                 table: "Members",
@@ -29,11 +24,6 @@ namespace Library.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "CoverImage",
-                table: "Books",
-                newName: "coverImage");
-
             migrationBuilder.AlterColumn<byte[]>(
                 name: "Photo",
                 table: "Members",

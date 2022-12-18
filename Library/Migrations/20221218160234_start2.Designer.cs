@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Migrations
 {
     [DbContext(typeof(LibraryContextForEFcore))]
-    [Migration("20221218103208_addConcurencyTokenToALLEntities_ApplicationNotDataBaseControl_IsRowVersion")]
-    partial class addConcurencyTokenToALLEntitiesApplicationNotDataBaseControlIsRowVersion
+    [Migration("20221218160234_start2")]
+    partial class start2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,10 +63,11 @@ namespace Library.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("AuthorVersion")
+                    b.Property<byte[]>("AuthorVersion")
                         .IsConcurrencyToken()
+                        .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("rowversion")
                         .HasColumnName("Version");
 
                     b.Property<string>("Biography")
@@ -107,10 +108,11 @@ namespace Library.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("BookVersion")
+                    b.Property<byte[]>("BookVersion")
                         .IsConcurrencyToken()
+                        .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("rowversion")
                         .HasColumnName("Version");
 
                     b.Property<string>("Description")
@@ -142,7 +144,7 @@ namespace Library.Migrations
                     b.Property<byte[]>("coverImage")
                         .IsRequired()
                         .HasColumnType("varbinary(max)")
-                        .HasColumnName("coverImage");
+                        .HasColumnName("CoverImage");
 
                     b.HasKey("Id");
 
@@ -174,10 +176,11 @@ namespace Library.Migrations
                         .HasColumnType("BIGINT")
                         .HasColumnName("IIN");
 
-                    b.Property<Guid>("MemberVersion")
+                    b.Property<byte[]>("MemberVersion")
                         .IsConcurrencyToken()
+                        .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("rowversion")
                         .HasColumnName("Version");
 
                     b.Property<string>("Name")

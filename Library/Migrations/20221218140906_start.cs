@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Library.Migrations
 {
     /// <inheritdoc />
-    public partial class phoneNumberFromLongToString : Migration
+    public partial class start : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,7 +20,8 @@ namespace Library.Migrations
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Surname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Biography = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Photo = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                    Photo = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    Version = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -38,7 +39,9 @@ namespace Library.Migrations
                     Genre = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: false),
                     Sort = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: true),
                     publicationYear = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    coverImage = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                    CoverImage = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    Amount = table.Column<int>(type: "int", nullable: false),
+                    Version = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -60,12 +63,12 @@ namespace Library.Migrations
                     PhoneNumber = table.Column<string>(type: "nvarchar(75)", maxLength: 75, nullable: false),
                     IIN = table.Column<long>(type: "BIGINT", nullable: false),
                     RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Photo = table.Column<byte[]>(type: "varbinary(max)", nullable: false, defaultValue: new byte[] { 0 })
+                    Photo = table.Column<byte[]>(type: "varbinary(max)", nullable: false, defaultValue: new byte[] { 0 }),
+                    Version = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Members", x => x.Id);
-                    table.CheckConstraint("Age", "AGE>0 AND AGE<120");
                 });
 
             migrationBuilder.CreateTable(

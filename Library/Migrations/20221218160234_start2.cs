@@ -5,7 +5,7 @@
 namespace Library.Migrations
 {
     /// <inheritdoc />
-    public partial class addAmountColumnForBooks : Migration
+    public partial class start2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,22 +19,11 @@ namespace Library.Migrations
                 oldClrType: typeof(byte[]),
                 oldType: "varbinary(max)",
                 oldDefaultValue: new byte[] { 0 });
-
-            migrationBuilder.AddColumn<int>(
-                name: "Amount",
-                table: "Books",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Amount",
-                table: "Books");
-
             migrationBuilder.AlterColumn<byte[]>(
                 name: "Photo",
                 table: "Members",

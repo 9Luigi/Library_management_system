@@ -5,14 +5,19 @@
 namespace Library.Migrations
 {
     /// <inheritdoc />
-    public partial class cancelAgeCheck : Migration
+    public partial class start3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropCheckConstraint(
-                name: "Age",
-                table: "Members");
+            migrationBuilder.AlterColumn<byte[]>(
+                name: "Version",
+                table: "Members",
+                type: "varbinary(max)",
+                nullable: false,
+                oldClrType: typeof(byte[]),
+                oldType: "rowversion",
+                oldRowVersion: true);
 
             migrationBuilder.AlterColumn<byte[]>(
                 name: "Photo",
@@ -29,6 +34,15 @@ namespace Library.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<byte[]>(
+                name: "Version",
+                table: "Members",
+                type: "rowversion",
+                rowVersion: true,
+                nullable: false,
+                oldClrType: typeof(byte[]),
+                oldType: "varbinary(max)");
+
+            migrationBuilder.AlterColumn<byte[]>(
                 name: "Photo",
                 table: "Members",
                 type: "varbinary(max)",
@@ -37,11 +51,6 @@ namespace Library.Migrations
                 oldClrType: typeof(byte[]),
                 oldType: "varbinary(max)",
                 oldDefaultValue: new byte[] { 0 });
-
-            migrationBuilder.AddCheckConstraint(
-                name: "Age",
-                table: "Members",
-                sql: "AGE>0 AND AGE<120");
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace Library
         public long IIN { get; set; }
         public DateTime RegistrationDate { get; set; }
         public byte[]? Photo { get; set; }
-        public Guid MemberVersion { get; set; }
+        public byte[] MemberVersion { get; set; }
         public List<Book> Books { get; set; } = new();
         public Member() { }
 

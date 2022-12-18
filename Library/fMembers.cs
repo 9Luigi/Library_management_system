@@ -92,7 +92,6 @@ namespace Library
                     using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                     {
                         Member? memberToDelete = db.Members.FirstOrDefault(m => m.IIN == i);
-                        db.Members.Attach(memberToDelete);//TODO parallel handle or check if already delete
                         db.Members.Remove(memberToDelete);
                         DialogResult result = MessageBox.Show("Are you sure to remove?", "Removing member", MessageBoxButtons.YesNo);
                         if (result == DialogResult.Yes)

@@ -34,7 +34,7 @@ namespace Library.Migrations
 
                     b.HasIndex("BooksId");
 
-                    b.ToTable("AuthorBook");
+                    b.ToTable("AuthorBook", (string)null);
                 });
 
             modelBuilder.Entity("BookMember", b =>
@@ -49,7 +49,7 @@ namespace Library.Migrations
 
                     b.HasIndex("MembersId");
 
-                    b.ToTable("BookMember");
+                    b.ToTable("BookMember", (string)null);
                 });
 
             modelBuilder.Entity("Library.Author", b =>
@@ -60,9 +60,11 @@ namespace Library.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("AuthorVersion")
+                    b.Property<byte[]>("AuthorVersion")
                         .IsConcurrencyToken()
-                        .HasColumnType("uniqueidentifier")
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion")
                         .HasColumnName("Version");
 
                     b.Property<string>("Biography")
@@ -89,7 +91,7 @@ namespace Library.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Authors");
+                    b.ToTable("Authors", (string)null);
                 });
 
             modelBuilder.Entity("Library.Book", b =>
@@ -103,9 +105,11 @@ namespace Library.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("BookVersion")
+                    b.Property<byte[]>("BookVersion")
                         .IsConcurrencyToken()
-                        .HasColumnType("uniqueidentifier")
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion")
                         .HasColumnName("Version");
 
                     b.Property<string>("Description")
@@ -141,7 +145,7 @@ namespace Library.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Books");
+                    b.ToTable("Books", (string)null);
                 });
 
             modelBuilder.Entity("Library.Member", b =>
@@ -169,9 +173,10 @@ namespace Library.Migrations
                         .HasColumnType("BIGINT")
                         .HasColumnName("IIN");
 
-                    b.Property<Guid>("MemberVersion")
+                    b.Property<byte[]>("MemberVersion")
                         .IsConcurrencyToken()
-                        .HasColumnType("uniqueidentifier")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)")
                         .HasColumnName("Version");
 
                     b.Property<string>("Name")
@@ -217,7 +222,7 @@ namespace Library.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("Members");
+                    b.ToTable("Members", (string)null);
                 });
 
             modelBuilder.Entity("AuthorBook", b =>

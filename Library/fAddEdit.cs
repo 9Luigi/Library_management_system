@@ -87,7 +87,7 @@ namespace Library
                         mtbBirthday.Text = memberToEdit.BirthDay.ToString();
                         mtbAdress.Text = memberToEdit.Adress;
                         mtbPhoneNumber.Text = memberToEdit.PhoneNumber;
-
+                        MessageBox.Show(memberToEdit.MemberVersion[memberToEdit.MemberVersion.Length-1].ToString());
                         byte[] imageByte = memberToEdit.Photo;
                         using (MemoryStream ms = new MemoryStream(imageByte))
                         {
