@@ -4,6 +4,7 @@ using Library;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Migrations
 {
     [DbContext(typeof(LibraryContextForEFcore))]
-    partial class LibraryContextForEFcoreModelSnapshot : ModelSnapshot
+    [Migration("20221218183606_start16")]
+    partial class start16
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +37,7 @@ namespace Library.Migrations
 
                     b.HasIndex("BooksId");
 
-                    b.ToTable("AuthorBook", (string)null);
+                    b.ToTable("AuthorBook");
                 });
 
             modelBuilder.Entity("BookMember", b =>
@@ -49,7 +52,7 @@ namespace Library.Migrations
 
                     b.HasIndex("MembersId");
 
-                    b.ToTable("BookMember", (string)null);
+                    b.ToTable("BookMember");
                 });
 
             modelBuilder.Entity("Library.Author", b =>
@@ -91,7 +94,7 @@ namespace Library.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Authors", (string)null);
+                    b.ToTable("Authors");
                 });
 
             modelBuilder.Entity("Library.Book", b =>
@@ -145,7 +148,7 @@ namespace Library.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Books", (string)null);
+                    b.ToTable("Books");
                 });
 
             modelBuilder.Entity("Library.Member", b =>
@@ -181,9 +184,7 @@ namespace Library.Migrations
                         .HasColumnName("Version");
 
                     b.Property<string>("Name")
-                        .IsConcurrencyToken()
                         .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasMaxLength(75)
                         .HasColumnType("nvarchar(75)")
                         .HasColumnName("Name");
@@ -225,7 +226,7 @@ namespace Library.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("Members", (string)null);
+                    b.ToTable("Members");
                 });
 
             modelBuilder.Entity("AuthorBook", b =>

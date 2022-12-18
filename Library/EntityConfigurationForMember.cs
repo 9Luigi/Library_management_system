@@ -28,7 +28,7 @@ namespace Library
             builder.Property(m => m.RegistrationDate).HasColumnName("RegistrationDate").IsRequired();
             builder.Property(m => m.Adress).HasColumnName("Adress").IsRequired();
             builder.Property(m => m.PhoneNumber).HasColumnName("PhoneNumber").IsRequired().HasMaxLength(75);
-            builder.Property(m => m.MemberVersion).HasColumnName("Version").IsRowVersion().IsRequired();
+            builder.Property(m => m.MemberVersion).HasColumnName("Version").IsRowVersion();
         }
 
     }

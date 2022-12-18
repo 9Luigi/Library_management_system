@@ -22,7 +22,7 @@ namespace Library
             Need_IIN_Event += ActionRequested;
             InitializeComponent();
         }
-
+        internal Member memberToEdit { get; set; }
         private void bSelectPhoto_Click(object sender, EventArgs e)
         {
             OpenFileDialog fd = new OpenFileDialog();
@@ -78,7 +78,7 @@ namespace Library
                     mtbIIN.Text = e.IIN.ToString();
                     using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                     {
-                        var memberToEdit = db.Members.FirstOrDefault(m => m.IIN == e.IIN);
+                        memberToEdit = db.Members.FirstOrDefault(m => m.IIN == e.IIN);
                         mtbIIN.Text = memberToEdit.IIN.ToString();
                         tbName.Text = memberToEdit.Name;
                         tbSurname.Text = memberToEdit.Surname;
@@ -87,7 +87,7 @@ namespace Library
                         mtbBirthday.Text = memberToEdit.BirthDay.ToString();
                         mtbAdress.Text = memberToEdit.Adress;
                         mtbPhoneNumber.Text = memberToEdit.PhoneNumber;
-                        MessageBox.Show(memberToEdit.MemberVersion[memberToEdit.MemberVersion.Length-1].ToString());
+                        //MessageBox.Show(memberToEdit.MemberVersion[memberToEdit.MemberVersion.Length-1].ToString());
                         byte[] imageByte = memberToEdit.Photo;
                         using (MemoryStream ms = new MemoryStream(imageByte))
                         {
@@ -213,19 +213,19 @@ namespace Library
                         bAddMember.Enabled = false;
                         long IIN;
                         long.TryParse(mtbIIN.Text, out IIN); //TODO what if cannot parse?, can it be?
-                        member = db.Members.SingleOrDefault(m => m.IIN == IIN); //TODO parallel or check if already deleted
-                        member.Name = tbName.Text;
-                        member.Surname = tbSurname.Text;
-                        member.BirthDay = DateTime.Parse(mtbBirthday.Text);
-                        member.Adress = mtbAdress.Text;
-                        member.PhoneNumber = mtbPhoneNumber.Text;
-                        member.Photo = ImageToByte(pbPhoto.Image);//TODO Check null
-                        member.Patronymic = checkIfHasPatronymic(tbPatronymic.Text);
+                        db.Members.Attach(memberToEdit); //TODO parallel or check if already deleted
+                        memberToEdit.Name = tbName.Text;
+                        memberToEdit.Surname = tbSurname.Text;
+                        memberToEdit.BirthDay = DateTime.Parse(mtbBirthday.Text);
+                        memberToEdit.Adress = mtbAdress.Text;
+                        memberToEdit.PhoneNumber = mtbPhoneNumber.Text;
+                        memberToEdit.Photo = ImageToByte(pbPhoto.Image);//TODO Check null
+                        memberToEdit.Patronymic = checkIfHasPatronymic(tbPatronymic.Text);
                         int number = db.SaveChanges();
                         //TODO check fields, if their values did't change then don't call SaveChages
                         if (number == 1)
                         {
-                            MessageBox.Show($"{member.Name} {member.Surname} updated successful");
+                            MessageBox.Show($"{memberToEdit.Name} {memberToEdit.Surname} updated successful");
                             Close();
                         }
                         else
