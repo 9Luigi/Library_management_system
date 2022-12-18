@@ -4,6 +4,7 @@ using Library;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Migrations
 {
     [DbContext(typeof(LibraryContextForEFcore))]
-    partial class LibraryContextForEFcoreModelSnapshot : ModelSnapshot
+    [Migration("20221218123102_addConcurencyTokenToALLEntities_ApplicationNotDataBaseControl_IsRowVersion1")]
+    partial class addConcurencyTokenToALLEntitiesApplicationNotDataBaseControlIsRowVersion1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
