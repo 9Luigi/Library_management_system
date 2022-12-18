@@ -213,7 +213,7 @@ namespace Library
                         bAddMember.Enabled = false;
                         long IIN;
                         long.TryParse(mtbIIN.Text, out IIN); //TODO what if cannot parse?, can it be?
-                        member = db.Members.SingleOrDefault(m => m.IIN == IIN);
+                        member = db.Members.SingleOrDefault(m => m.IIN == IIN); //TODO parallel or check if already deleted
                         member.Name = tbName.Text;
                         member.Surname = tbSurname.Text;
                         member.BirthDay = DateTime.Parse(mtbBirthday.Text);
@@ -222,6 +222,7 @@ namespace Library
                         member.Photo = ImageToByte(pbPhoto.Image);//TODO Check null
                         member.Patronymic = checkIfHasPatronymic(tbPatronymic.Text);
                         int number = db.SaveChanges();
+                        //TODO check fields, if their values did't change then don't call SaveChages
                         if (number == 1)
                         {
                             MessageBox.Show($"{member.Name} {member.Surname} updated successful");
