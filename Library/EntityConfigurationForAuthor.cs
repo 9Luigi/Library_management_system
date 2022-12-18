@@ -18,6 +18,7 @@ namespace Library
             builder.Property(a => a.Surname).HasColumnName("Surname").IsRequired().HasMaxLength(50);
             builder.Property(a => a.Biography).HasColumnName("Biography").HasMaxLength(500);
             builder.Property(a => a.Photo).HasColumnName("Photo");
+            builder.Property(a => a.AuthorVersion).HasColumnName("Version").IsConcurrencyToken().IsRequired();
         }
     }
 }

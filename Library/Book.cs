@@ -19,6 +19,7 @@ namespace Library
         public int Amount { get; set; }
         public List<Member> Members { get; set; } = new();
         public List<Author> Authors { get; set; } = new();
+        public Guid BookVersion { get; set; }
         public Book() { }
         public Book(string title, string genre, DateTime publicationDate, int amount, string? description = "None",string? sort="None")
         {

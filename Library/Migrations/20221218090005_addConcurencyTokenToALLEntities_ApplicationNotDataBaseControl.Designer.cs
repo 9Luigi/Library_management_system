@@ -4,6 +4,7 @@ using Library;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Migrations
 {
     [DbContext(typeof(LibraryContextForEFcore))]
-    partial class LibraryContextForEFcoreModelSnapshot : ModelSnapshot
+    [Migration("20221218090005_addConcurencyTokenToALLEntities_ApplicationNotDataBaseControl")]
+    partial class addConcurencyTokenToALLEntitiesApplicationNotDataBaseControl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,7 +65,6 @@ namespace Library.Migrations
 
                     b.Property<Guid>("AuthorVersion")
                         .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("Version");
 
@@ -106,7 +108,6 @@ namespace Library.Migrations
 
                     b.Property<Guid>("BookVersion")
                         .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("Version");
 
@@ -173,7 +174,6 @@ namespace Library.Migrations
 
                     b.Property<Guid>("MemberVersion")
                         .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("Version");
 
