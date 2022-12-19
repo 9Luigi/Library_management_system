@@ -1,15 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using static Library.fMembers;
 
 namespace Library
@@ -19,7 +8,7 @@ namespace Library
         byte[] photo { get; set; }
         public fAddEdit()
         {
-            Need_IIN_Event += ActionRequested;
+            MemberCreateOrUpdateEvent += ActionRequested; //subscribe to event, event is invoked on update/create calls
             InitializeComponent();
         }
         internal Member memberToEdit { get; set; }
@@ -68,7 +57,7 @@ namespace Library
             }   //TODO think about it
         }
         internal void ActionRequested(MemberEventArgs e)
-        {
+        {//handle create/update event
             switch (e.Action)
             {
                 case "EDIT":
@@ -87,7 +76,6 @@ namespace Library
                         mtbBirthday.Text = memberToEdit.BirthDay.ToString();
                         mtbAdress.Text = memberToEdit.Adress;
                         mtbPhoneNumber.Text = memberToEdit.PhoneNumber;
-                        //MessageBox.Show(memberToEdit.MemberVersion[memberToEdit.MemberVersion.Length-1].ToString());
                         byte[] imageByte = memberToEdit.Photo;
                         using (MemoryStream ms = new MemoryStream(imageByte))
                         {
@@ -123,7 +111,7 @@ namespace Library
             }
         }
         private bool checkFieldsBeforeAction()
-        {
+        {//check properties for null and by RegexController
             if (tbName.Text != null && tbSurname.Text != null && mtbBirthday.Text != null && mtbAdress.Text != null
                 && mtbPhoneNumber.Text != null && mtbIIN.Text != null && pbPhoto.Image != null)
             {
@@ -163,7 +151,7 @@ namespace Library
             }
         }
         byte[] ImageToByte(Image img)
-        {
+        {//without this method if image don't changes via filedialog while editing exceptions trows
             byte[] byteArray = new byte[0];
             using (MemoryStream stream = new MemoryStream())
             {
@@ -194,19 +182,27 @@ namespace Library
                                         checkIfHasPatronymic(tbPatronymic.Text)
                                     );
                         db.Members.Add(member);
-                        int isSuccess = db.SaveChanges();
-                        if (isSuccess == 1)
+                        try
                         {
-                            DialogResult result = MessageBox.Show("Do you want to add another one?", $"{member.Name} {member.Surname} added succesfully", MessageBoxButtons.YesNo);
-                            if (result == DialogResult.Yes)
+                            int isSuccess = db.SaveChanges();
+                            if (isSuccess == 1)
                             {
-                                TextBoxBaseClear();
-                                pictureBoxImageClear(pbPhoto);
+                                DialogResult result = MessageBox.Show("Do you want to add another one?", $"{member.Name} {member.Surname} added succesfully", MessageBoxButtons.YesNo);
+                                if (result == DialogResult.Yes)
+                                {
+                                    TextBoxBaseClear();
+                                    pictureBoxImageClear(pbPhoto);
+                                }
+                                else
+                                {
+                                    this.Close();
+                                }
                             }
-                            else
-                            {
-                                this.Close();
-                            }
+                        }
+                        catch (DbUpdateException)
+                        {
+                            MessageBox.Show("Cannot save data, check internet connection and try later please");
+                            Close();
                         }
                         break;
                     case "UPDATE":
@@ -221,16 +217,28 @@ namespace Library
                         memberToEdit.PhoneNumber = mtbPhoneNumber.Text;
                         memberToEdit.Photo = ImageToByte(pbPhoto.Image);//TODO Check null
                         memberToEdit.Patronymic = checkIfHasPatronymic(tbPatronymic.Text);
-                        int number = db.SaveChanges();
-                        //TODO check fields, if their values did't change then don't call SaveChages
-                        if (number == 1)
+                        try
                         {
-                            MessageBox.Show($"{memberToEdit.Name} {memberToEdit.Surname} updated successful");
-                            Close();
+                            int number = db.SaveChanges();//TODO check values on change before call savechanges
+                            //TODO check fields, if their values did't change then don't call SaveChages
+                            if (number == 1)
+                            {
+                                MessageBox.Show($"{memberToEdit.Name} {memberToEdit.Surname} updated successful");
+                                Close();
+                            }
+                            else
+                            {
+                                MessageBox.Show("You don't change any data, change or cancel please");
+                            }
                         }
-                        else
+                        /*catch (DBConcurrencyException)
                         {
-                            MessageBox.Show($"Cannot execute {operation}");
+                            MessageBox.Show("While you were editing this member, his data was updated, try again please");
+                            Close();
+                        }*/
+                        catch (DbUpdateException)
+                        {
+                            MessageBox.Show("While you were editing this member, his data was updated, try again please");
                             Close();
                         }
                         break;
@@ -253,3 +261,5 @@ namespace Library
         }
     }
 }
+
+

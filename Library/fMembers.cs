@@ -1,14 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Library
 {
@@ -35,11 +26,11 @@ namespace Library
         internal long IIN { get; set; }
         internal CancellationTokenSource cancellationTokenSource { get; set; }
         internal CancellationToken cancellationToken { get; set; }
-        internal delegate void need_IIN_EventDelegate(MemberEventArgs e);
-        static internal event need_IIN_EventDelegate? Need_IIN_Event;
+        internal delegate void MemberCreateOrUpdateDelegate(MemberEventArgs e);
+        static internal event MemberCreateOrUpdateDelegate? MemberCreateOrUpdateEvent;
         private void addMemberToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Need_IIN_Event!.Invoke(new MemberEventArgs("CREATE"));
+            MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("CREATE"));
             faddEdit.ShowDialog();
             RefreshDataGridForMembers();
         }
@@ -76,7 +67,7 @@ namespace Library
             (bool b, long i) = isIIN_Clicked(IIN);
             if (b)
             {
-                Need_IIN_Event.Invoke(new MemberEventArgs("EDIT", i));
+                MemberCreateOrUpdateEvent.Invoke(new MemberEventArgs("EDIT", i));
                 faddEdit.ShowDialog();
                 RefreshDataGridForMembers();
             }
@@ -216,7 +207,7 @@ namespace Library
             (bool b, long i) = isIIN_Clicked(IIN);
             if (b)
             {
-                Need_IIN_Event!.Invoke(new MemberEventArgs("BORROW", i));
+                MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("BORROW", i));
                 flendOrRecieveBook.ShowDialog();
                 RefreshDataGridForMembers();
             }
@@ -244,7 +235,7 @@ namespace Library
                         })).ToList();
                     if (selectedBooks.Count > 0)
                     {
-                        Need_IIN_Event!.Invoke(new MemberEventArgs("RETURN", i));
+                        MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("RETURN", i));
                         flendOrRecieveBook.ShowDialog();
                         RefreshDataGridForMembers();
                     }

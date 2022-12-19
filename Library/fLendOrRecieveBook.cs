@@ -17,7 +17,7 @@ namespace Library
     {
         public fLendOrRecieveBook()
         {
-            Need_IIN_Event += selectBooksByIIN;
+            MemberCreateOrUpdateEvent += selectBooksByIIN;
             InitializeComponent();
         }
         internal long IIN { get; private set; }
