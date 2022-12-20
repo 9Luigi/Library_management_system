@@ -11,6 +11,7 @@ namespace Library
         static internal void pbProgressCgange(Form invokeBy, ProgressBar pb, int startValue, int finalValue)
         {
             pb.Visible = true;
+            //Use invoke cause most likely Form and Progress bar will be in different threads
             invokeBy.Invoke(new Action(() =>
             {
                 for (int i = startValue; i < finalValue; i++)

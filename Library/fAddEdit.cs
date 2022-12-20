@@ -10,6 +10,7 @@ namespace Library
         {
             MemberCreateOrUpdateEvent += ActionRequested; //subscribe to event, event is invoked on update/create calls
             InitializeComponent();
+            pbPhoto.Image = Properties.Resources.NoImage;
         }
         internal Member memberToEdit { get; set; }
         private void bSelectPhoto_Click(object sender, EventArgs e)
@@ -30,31 +31,11 @@ namespace Library
         }
         private void TextBoxBase_OnFocusEnter(object sender, EventArgs e)
         {
-            if (sender is TextBox tb)
-            {
-                tb.SelectionStart = 0;
-            }
-            if (sender is MaskedTextBox mtb)
-            {
-                mtb.SelectionStart = 0;
-            }
+
         }
         private void TextBoxBase_OnClick(object sender, EventArgs e)
         {
-            if (sender is TextBoxBase tb)
-            {
-                if (tb.SelectionStart == tb.TextLength)
-                {
-                    tb.SelectionStart = 0;
-                }
-            }
-            if (sender is MaskedTextBox mtb)
-            {
-                if (mtb.SelectionStart == mtb.TextLength)
-                {
-                    mtb.SelectionStart = 0;
-                }
-            }   //TODO think about it
+            //TODO think about it
         }
         internal void ActionRequested(MemberEventArgs e)
         {//handle create/update event
@@ -93,11 +74,8 @@ namespace Library
                 case "CREATE":
                     bUpdateMember.Enabled = false;
                     bAddMember.Enabled = true;
-                    foreach (Control control in this.Controls)
-                    {
-                        if (control is TextBoxBase textBoxBase) textBoxBase.Text = "";
-                        if (control is PictureBox pictureBox) pictureBox.Image = Properties.Resources.NoImage;
-                    }
+                    TextBoxBaseController.AllTextBoxBaseOnFormClear(this);
+                    pictureBoxController.pictureBoxImageSetDefault(pbPhoto);
                     break;
                 default:
                     break;
@@ -112,32 +90,26 @@ namespace Library
         }
         private bool checkFieldsBeforeAction()
         {//check properties for null and by RegexController
-            if (tbName.Text != null && tbSurname.Text != null && mtbBirthday.Text != null && mtbAdress.Text != null
-                && mtbPhoneNumber.Text != null && mtbIIN.Text != null && pbPhoto.Image != null)
+            foreach (Control control in this.Controls)
             {
-                foreach (Control control in this.Controls)
+                if (control is TextBoxBase textBoxBase)
                 {
-                    if (control is TextBox textBox && textBox.Text.Length > 75)
+                    if (TextBoxBaseController.checkTextBoxBaseTextOnNull(textBoxBase))
                     {
-                        MessageBox.Show($"{control.Name} cannot be more than 75 symbols");
                         return false;
                     }
-                }
-                if (RegexController.Check(tbName.Text, tbName) && RegexController.Check(tbSurname.Text, tbSurname)
-                && RegexController.Check(mtbBirthday.Text, mtbBirthday) &&
-                RegexController.Check(mtbAdress.Text, mtbAdress) && RegexController.Check(mtbPhoneNumber.Text, mtbPhoneNumber))
-                {
-                    if (tbPatronymic.Text == "" || tbPatronymic.Text == "None") return true;
-                    else if (RegexController.Check(tbPatronymic.Text, tbPatronymic)) return true;
-                    else return false;
-                }
+                } 
+                else return true;
+            }
+            if (RegexController.Check(tbName.Text, tbName) && RegexController.Check(tbSurname.Text, tbSurname)
+            && RegexController.Check(mtbBirthday.Text, mtbBirthday) &&
+            RegexController.Check(mtbAdress.Text, mtbAdress) && RegexController.Check(mtbPhoneNumber.Text, mtbPhoneNumber))
+            {
+                if (tbPatronymic.Text == "" || tbPatronymic.Text == "None") return true;
+                else if (RegexController.Check(tbPatronymic.Text, tbPatronymic)) return true;
                 else return false;
             }
-            else
-            {
-                MessageBox.Show("fill in the empty requiered(*) fields");
-                return false;
-            }
+            else return false;
         }
         string checkIfHasPatronymic(string patronymic)
         {
@@ -150,19 +122,6 @@ namespace Library
                 return "None";
             }
         }
-        byte[] ImageToByte(Image img)
-        {//without this method if image don't changes via filedialog while editing exceptions trows
-            byte[] byteArray = new byte[0];
-            using (MemoryStream stream = new MemoryStream())
-            {
-                Bitmap bitmap = new Bitmap(img);
-                bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                stream.Close();
-
-                byteArray = stream.ToArray();
-            }
-            return byteArray;
-        }
         void actionWithMember(string operation)
         {
             using (LibraryContextForEFcore db = new LibraryContextForEFcore())
@@ -170,28 +129,31 @@ namespace Library
                 switch (operation)
                 {
                     case "CREATE":
-                        Member member = new Member
-                                    (
-                                        tbName.Text,
+                        Member createdMember = MemberRepository.CreateMember
+                            (
+                            tbName.Text,
                                         tbSurname.Text,
                                         DateTime.Parse(mtbBirthday.Text),
                                         mtbAdress.Text,
-                                        Convert.ToInt64(mtbIIN.Text), //TODO check long?
+                                        Convert.ToInt64(mtbIIN.Text), //TODO better parse long?
                                         mtbPhoneNumber.Text,
                                         photo,
                                         checkIfHasPatronymic(tbPatronymic.Text)
-                                    );
-                        db.Members.Add(member);
+                            );
                         try
                         {
-                            int isSuccess = db.SaveChanges();
-                            if (isSuccess == 1)
+                            if (MemberRepository.AddMemberToDataBase(db, createdMember))
                             {
-                                DialogResult result = MessageBox.Show("Do you want to add another one?", $"{member.Name} {member.Surname} added succesfully", MessageBoxButtons.YesNo);
+                                DialogResult result = MessageBox.Show
+                                    (
+                                        "Do you want to add another one?",
+                                        $"{createdMember.Name} {createdMember.Surname} added succesfully",
+                                        MessageBoxButtons.YesNo
+                                    );
                                 if (result == DialogResult.Yes)
                                 {
-                                    TextBoxBaseClear();
-                                    pictureBoxImageClear(pbPhoto);
+                                    TextBoxBaseController.AllTextBoxBaseOnFormClear(this);
+                                    pictureBoxController.pictureBoxImageSetDefault(pbPhoto);
                                 }
                                 else
                                 {
@@ -202,7 +164,6 @@ namespace Library
                         catch (DbUpdateException)
                         {
                             MessageBox.Show("Cannot save data, check internet connection and try later please");
-                            Close();
                         }
                         break;
                     case "UPDATE":
@@ -215,7 +176,7 @@ namespace Library
                         memberToEdit.BirthDay = DateTime.Parse(mtbBirthday.Text);
                         memberToEdit.Adress = mtbAdress.Text;
                         memberToEdit.PhoneNumber = mtbPhoneNumber.Text;
-                        memberToEdit.Photo = ImageToByte(pbPhoto.Image);//TODO Check null
+                        memberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);//TODO Check null
                         memberToEdit.Patronymic = checkIfHasPatronymic(tbPatronymic.Text);
                         try
                         {
@@ -244,20 +205,6 @@ namespace Library
                         break;
                 }
             }
-        }
-        void TextBoxBaseClear()
-        {
-            foreach (var control in this.Controls)
-            {
-                if (control is TextBoxBase tbb)
-                {
-                    tbb.Text = "";
-                }
-            }
-        }
-        void pictureBoxImageClear(PictureBox pictureBox)
-        {
-            pictureBox.Image = null;
         }
     }
 }
