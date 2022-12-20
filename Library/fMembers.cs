@@ -38,30 +38,6 @@ namespace Library
         {
             RefreshDataGridForMembers();
         }
-        internal void pbProgressCgange(ProgressBar pb, int startValue, int finalValue)
-        {
-            pb.Visible = true;
-            this.Invoke(new Action(() =>
-            {
-                for (int i = startValue; i < finalValue; i++)
-                {
-                    pb.PerformStep();
-                    Task.Delay(100);
-                }
-            }));
-        }
-        internal void pbProgressReset(ProgressBar pb)
-        {
-            pb.Invoke(new Action(() =>
-            {
-                if (pb.Value == 100)
-                {
-                    pb.Value = 0;
-                    pb.Visible = false;
-                }
-            }));
-        }
-
         private void editToolStripMenuItem_Click(object sender, EventArgs e)
         {
             (bool b, long i) = isIIN_Clicked(IIN);
@@ -254,7 +230,6 @@ namespace Library
                 return (true,IIN);
             }
             else return (false,0);
-            
         }
     }
 }

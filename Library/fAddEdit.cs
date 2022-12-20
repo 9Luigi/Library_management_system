@@ -12,7 +12,7 @@ namespace Library
             InitializeComponent();
             pbPhoto.Image = Properties.Resources.NoImage;
         }
-        internal Member memberToEdit { get; set; }
+        internal Member? memberToEdit { get; set; }
         private void bSelectPhoto_Click(object sender, EventArgs e)
         {
             OpenFileDialog fd = new OpenFileDialog();
@@ -46,10 +46,18 @@ namespace Library
                     bAddMember.Enabled = false;
                     mtbIIN.Enabled = false;
                     mtbIIN.Text = e.IIN.ToString();
+
                     using (LibraryContextForEFcore db = new LibraryContextForEFcore())
                     {
-                        memberToEdit = db.Members.FirstOrDefault(m => m.IIN == e.IIN);
-                        mtbIIN.Text = memberToEdit.IIN.ToString();
+                        try
+                        {
+                            memberToEdit = db.Members.FirstOrDefault(m => m.IIN == e.IIN);
+                        }
+                        catch (Exception)
+                        {
+                            MessageBox.Show("Cannot load data, probably member was deleted by another employee while you edit, try again please");
+                        }
+                        mtbIIN.Text = memberToEdit!.IIN.ToString();
                         tbName.Text = memberToEdit.Name;
                         tbSurname.Text = memberToEdit.Surname;
                         tbPatronymic.Text = memberToEdit.Patronymic;
@@ -57,8 +65,8 @@ namespace Library
                         mtbBirthday.Text = memberToEdit.BirthDay.ToString();
                         mtbAdress.Text = memberToEdit.Adress;
                         mtbPhoneNumber.Text = memberToEdit.PhoneNumber;
-                        byte[] imageByte = memberToEdit.Photo;
-                        using (MemoryStream ms = new MemoryStream(imageByte))
+                        byte[]? imageByte = memberToEdit.Photo;
+                        using (MemoryStream ms = new MemoryStream(imageByte!))
                         {
                             try
                             {
@@ -92,14 +100,10 @@ namespace Library
         {//check properties for null and by RegexController
             foreach (Control control in this.Controls)
             {
-                if (control is TextBoxBase textBoxBase)
+                if (control is TextBoxBase textBoxBase && !TextBoxBaseController.checkTextBoxBaseTextOnNull(textBoxBase))
                 {
-                    if (TextBoxBaseController.checkTextBoxBaseTextOnNull(textBoxBase))
-                    {
-                        return false;
-                    }
-                } 
-                else return true;
+                    return false;
+                }
             }
             if (RegexController.Check(tbName.Text, tbName) && RegexController.Check(tbSurname.Text, tbSurname)
             && RegexController.Check(mtbBirthday.Text, mtbBirthday) &&
@@ -129,20 +133,22 @@ namespace Library
                 switch (operation)
                 {
                     case "CREATE":
-                        Member createdMember = MemberRepository.CreateMember
+                        Member createdMember = new Member
                             (
-                            tbName.Text,
-                                        tbSurname.Text,
-                                        DateTime.Parse(mtbBirthday.Text),
-                                        mtbAdress.Text,
-                                        Convert.ToInt64(mtbIIN.Text), //TODO better parse long?
-                                        mtbPhoneNumber.Text,
-                                        photo,
-                                        checkIfHasPatronymic(tbPatronymic.Text)
+                                tbName.Text,
+                                tbSurname.Text,
+                                DateTime.Parse(mtbBirthday.Text),
+                                mtbAdress.Text,
+                                Convert.ToInt64(mtbIIN.Text), //TODO better parse long?
+                                mtbPhoneNumber.Text,
+                                photo,
+                                checkIfHasPatronymic(tbPatronymic.Text)
                             );
+                        db.Add(createdMember);
+                        int answer = db.SaveChanges();
                         try
                         {
-                            if (MemberRepository.AddMemberToDataBase(db, createdMember))
+                            if (answer == 1)
                             {
                                 DialogResult result = MessageBox.Show
                                     (
@@ -160,18 +166,17 @@ namespace Library
                                     this.Close();
                                 }
                             }
+                            else MessageBox.Show($"Cannot add {createdMember.Name} {createdMember.Surname}");
                         }
                         catch (DbUpdateException)
                         {
-                            MessageBox.Show("Cannot save data, check internet connection and try later please");
+                            MessageBox.Show("While you were editing this member, his data was updated or delete, try again please");
                         }
                         break;
                     case "UPDATE":
                         bAddMember.Enabled = false;
-                        long IIN;
-                        long.TryParse(mtbIIN.Text, out IIN); //TODO what if cannot parse?, can it be?
-                        db.Members.Attach(memberToEdit); //TODO parallel or check if already deleted
-                        memberToEdit.Name = tbName.Text;
+                        db.Attach(memberToEdit!);
+                        memberToEdit!.Name = tbName.Text;
                         memberToEdit.Surname = tbSurname.Text;
                         memberToEdit.BirthDay = DateTime.Parse(mtbBirthday.Text);
                         memberToEdit.Adress = mtbAdress.Text;
@@ -192,15 +197,10 @@ namespace Library
                                 MessageBox.Show("You don't change any data, change or cancel please");
                             }
                         }
-                        /*catch (DBConcurrencyException)
-                        {
-                            MessageBox.Show("While you were editing this member, his data was updated, try again please");
-                            Close();
-                        }*/
                         catch (DbUpdateException)
                         {
-                            MessageBox.Show("While you were editing this member, his data was updated, try again please");
-                            Close();
+                            MessageBox.Show("While you were editing this member, his data was updated or delete, try again with new data or close please");
+                            memberToEdit = db.Members.FirstOrDefault(m => m.IIN == Convert.ToInt64(mtbIIN.Text));
                         }
                         break;
                 }
