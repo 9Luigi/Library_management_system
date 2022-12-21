@@ -1,6 +1,6 @@
 ﻿namespace Library
 {
-    partial class fMain
+    partial class FMain
     {
         /// <summary>
         ///  Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(fMain));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FMain));
             this.bCatalog = new System.Windows.Forms.Button();
             this.bMembers = new System.Windows.Forms.Button();
             this.pbCatalog = new System.Windows.Forms.PictureBox();
@@ -83,7 +83,7 @@
             this.pbMembers.TabIndex = 6;
             this.pbMembers.TabStop = false;
             // 
-            // fMain
+            // FMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -94,9 +94,8 @@
             this.Controls.Add(this.bCatalog);
             this.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.Margin = new System.Windows.Forms.Padding(4);
-            this.Name = "fMain";
+            this.Name = "FMain";
             this.Text = "Library";
-            this.Load += new System.EventHandler(this.fMain_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pbCatalog)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbMembers)).EndInit();
             this.ResumeLayout(false);
