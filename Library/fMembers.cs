@@ -3,13 +3,13 @@ using System.Data;
 
 namespace Library
 {
-    public partial class fMembers : Form
+    public partial class FMembers : Form
     {
-        public fMembers()
+        public FMembers()
         {
             InitializeComponent();
-            flendOrRecieveBook = new fLendOrRecieveBook();
-            faddEdit = new fAddEdit();
+            FlendOrRecieveBook = new FBorrowOrRecieveBook();
+            FaddEdit_prop = new FaddEdit_prop();
         }
         internal class MemberEventArgs : EventArgs //for transfer IIN and Action to other forms via event
         {
@@ -21,53 +21,52 @@ namespace Library
                 Action = action;
             }
         }
-        internal fLendOrRecieveBook flendOrRecieveBook { get; private set; }
-        internal fAddEdit faddEdit { get; private set; }
+        internal FBorrowOrRecieveBook FlendOrRecieveBook { get; private set; }
+        internal FaddEdit_prop FaddEdit_prop { get; private set; }
         internal long IIN { get; set; }
-        internal CancellationTokenSource cancellationTokenSource { get; set; }
-        internal CancellationToken cancellationToken { get; set; }
+        internal CancellationTokenSource? CancellationTokenSource { get; set; }
+        internal CancellationToken CancellationToken { get; set; }
         internal delegate void MemberCreateOrUpdateDelegate(MemberEventArgs e);
         static internal event MemberCreateOrUpdateDelegate? MemberCreateOrUpdateEvent;
-        private void addMemberToolStripMenuItem_Click(object sender, EventArgs e)
+        private void AddMemberToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Transfer data to FaddEdit_prop form, subscribed to MemberCreateOrUpdateEvent on FaddEdit_prop constructor
             MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("CREATE"));
-            faddEdit.ShowDialog();
+            FaddEdit_prop.ShowDialog();
             RefreshDataGridForMembers();
         }
-        private void fMembers_Load(object sender, EventArgs e)
+        private void FMembers_Load(object sender, EventArgs e)
         {
             RefreshDataGridForMembers();
         }
-        private void editToolStripMenuItem_Click(object sender, EventArgs e)
+        private void EditToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (bool b, long i) = isIIN_Clicked(IIN);
+            (bool b, long i) = IsIIN_Clicked(IIN);
             if (b)
             {
-                MemberCreateOrUpdateEvent.Invoke(new MemberEventArgs("EDIT", i));
-                faddEdit.ShowDialog();
+                MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("EDIT", i));
+                FaddEdit_prop.ShowDialog();
                 RefreshDataGridForMembers();
             }
         }
 
-        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (bool b, long i) = isIIN_Clicked(IIN);
+            (bool b, long i) = IsIIN_Clicked(IIN);
             if (b)
             {
                 Task deleteMember = new TaskFactory().StartNew(new Action(() =>
                 {
-                    using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                    using LibraryContextForEFcore db = new();
+                    Member? memberToDelete = db.Members.FirstOrDefault(m => m.IIN == i);
+                    db.Members.Remove(memberToDelete!);
+                    DialogResult result = MessageBox.Show("Are you sure to remove?", "Removing member", MessageBoxButtons.YesNo);
+                    if (result == DialogResult.Yes)
                     {
-                        Member? memberToDelete = db.Members.FirstOrDefault(m => m.IIN == i);
-                        db.Members.Remove(memberToDelete);
-                        DialogResult result = MessageBox.Show("Are you sure to remove?", "Removing member", MessageBoxButtons.YesNo);
-                        if (result == DialogResult.Yes)
+                        if (db.SaveChanges() > 0)
                         {
-                            if (db.SaveChanges() > 0)
-                            {
-                                RefreshDataGridForMembers();
-                                MessageBox.Show("Member succesfully removed");
-                            }
+                            RefreshDataGridForMembers();
+                            MessageBox.Show("Member succesfully removed");
                         }
                     }
                 }));
@@ -78,7 +77,7 @@ namespace Library
             }
         }
 
-        private void dataGridViewForMembers_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        private void DataGridViewForMembers_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right && e.RowIndex>-1 && e.ColumnIndex==0)
             {
@@ -92,44 +91,40 @@ namespace Library
 
         private void TbIINSearch_TextChanged(object sender, EventArgs e) //TODO logic when lenght <3
         {
-            using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+            using LibraryContextForEFcore db = new();
+            if (TbIINSearch.Text.Length > 3)
             {
-                if (TbIINSearch.Text.Length > 3)
+                _ = long.TryParse(TbIINSearch.Text, out long IIN);
+                if (IIN != 0)
                 {
-
-                    long IIN;
-                    long.TryParse(TbIINSearch.Text, out IIN);
-                    if (IIN != 0)
-                    {
-                        var MatchedMembers = db.Members.Where(m => EF.Functions.Like(m.IIN.ToString(), $"%{IIN.ToString()}%")).
-                            Select(m => new { m.IIN, m.Name, m.Surname, m.Age }).ToList();
-                        dataGridViewForMembers.DataSource = MatchedMembers; //TODO something
-                    }
+                    var MatchedMembers = db.Members.Where(m => EF.Functions.Like(m.IIN.ToString(), $"%{IIN}%")).
+                        Select(m => new { m.IIN, m.Name, m.Surname, m.Age }).ToList();
+                    dataGridViewForMembers.DataSource = MatchedMembers; //TODO something
                 }
-                else
+            }
+            else
+            {
+                var users = db.Members.Select(m => new
                 {
-                    var users = db.Members.Select(m => new
-                    {
-                        m.IIN,
-                        m.Name,
-                        m.Surname,
-                        m.Age
-                    }).ToList();
-                    dataGridViewForMembers.DataSource = users;
-                }
+                    m.IIN,
+                    m.Name,
+                    m.Surname,
+                    m.Age
+                }).ToList();
+                dataGridViewForMembers.DataSource = users;
             }
         }
         private void RefreshDataGridForMembers() //TODO maybe better don't close connection after each operation?
         {
             //TODO maybe better use AsNotTracking
-            controlsEnableFlag(false); //while data from db is loading all controls enabled set to false
-            cancellationTokenSource = new CancellationTokenSource();
-            cancellationToken = cancellationTokenSource.Token;
+            ControlsEnableFlag(false); //while data from db is loading all controls enabled set to false
+            CancellationTokenSource = new CancellationTokenSource();
+            CancellationToken = CancellationTokenSource.Token;
             Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(() =>
                 {
-                    using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                    using (LibraryContextForEFcore db = new())
                     {
-                        if (cancellationToken.IsCancellationRequested) { return; }
+                        if (CancellationToken.IsCancellationRequested) { return; }
                         this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 0, 25); //TODO check if searched by IIN
                         var users = db.Members.Select(m => new
                         {
@@ -138,24 +133,24 @@ namespace Library
                             m.Surname,
                             m.Age,
                         }).ToList();
-                        if (cancellationToken.IsCancellationRequested) { return; }
+                        if (CancellationToken.IsCancellationRequested) { return; }
                         this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 25, 85);
-                        if (cancellationToken.IsCancellationRequested) { return; }
+                        if (CancellationToken.IsCancellationRequested) { return; }
                         this.Invoke(new Action(() =>
                         {
                             dataGridViewForMembers.DataSource = users; //TODO error catch or logic to avoid
                         }));
-                        if (cancellationToken.IsCancellationRequested) { return; }
+                        if (CancellationToken.IsCancellationRequested) { return; }
                         this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 50, 100);
                     }
                     Thread.Sleep(500);
-                    if (cancellationToken.IsCancellationRequested) { return; }
+                    if (CancellationToken.IsCancellationRequested) { return; }
                     this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
-                    if (cancellationToken.IsCancellationRequested) { return; }
-                    this.Invoke(controlsEnableFlag, true); // after data load from db set all controls enabled true
-                }), cancellationToken); //TODO all invoke call exception if form isdisposed earlier than invokable method
+                    if (CancellationToken.IsCancellationRequested) { return; }
+                    this.Invoke(ControlsEnableFlag, true); // after data load from db set all controls enabled true
+                }), CancellationToken); //TODO all invoke call exception if form isdisposed earlier than invokable method
         }
-        void controlsEnableFlag(bool flag)
+        void ControlsEnableFlag(bool flag)
         //Set all controls enabled property according to flag
         {
             foreach (Control item in this.Controls)
@@ -165,64 +160,62 @@ namespace Library
                 })); 
             }
         }
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
         }
-        private void fMembers_FormClosing(object sender, FormClosingEventArgs e)
+        private void FMembers_FormClosing(object sender, FormClosingEventArgs e)
         {
-            cancellationTokenSource.Cancel(); //most likely bad arhitecture but allow to avoid error(this.invoke after this closed)
+            CancellationTokenSource!.Cancel(); //most likely bad arhitecture but allow to avoid error(this.invoke after this closed)
         }
         private void TbIINSearch_Click(object sender, EventArgs e)
         {
             TbIINSearch.Text = "";
         }
 
-        private void leToolStripMenuItem_Click(object sender, EventArgs e)
+        private void LeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (bool b, long i) = isIIN_Clicked(IIN);
+            (bool b, long i) = IsIIN_Clicked(IIN);
             if (b)
             {
                 MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("BORROW", i));
-                flendOrRecieveBook.ShowDialog();
+                FlendOrRecieveBook.ShowDialog();
                 RefreshDataGridForMembers();
             }
         }
 
-        private void seeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)//borrowed books*
+        private void SeeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)//borrowed books*
         {
             //this method checked selected member for borrowed books and if true sends data to another form
-           (bool b, long i) = isIIN_Clicked(IIN);
+           (bool b, long i) = IsIIN_Clicked(IIN);
             if (b)
             {
-                using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                using LibraryContextForEFcore db = new();
+                Member? selectedMemberName = db.Members.Where(m => m.IIN == i).Select(m => new Member()
                 {
-                    Member? selectedMemberName = db.Members.Where(m => m.IIN == i).Select(m => new Member()
+                    Name = m.Name,
+                    Surname = m.Surname
+                }).FirstOrDefault();
+                var selectedBooks = db.Members.Where(m => m.IIN == i)
+                    .Include(m => m.Books).SelectMany(m => m.Books.Select(b => new
                     {
-                        Name = m.Name,
-                        Surname = m.Surname
-                    }).FirstOrDefault();
-                    var selectedBooks = db.Members.Where(m => m.IIN == i)
-                        .Include(m => m.Books).SelectMany(m => m.Books.Select(b => new
-                        {
-                            b.Id,
-                            b.Title,
-                            b.Genre
-                        })).ToList();
-                    if (selectedBooks.Count > 0)
-                    {
-                        MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("RETURN", i));
-                        flendOrRecieveBook.ShowDialog();
-                        RefreshDataGridForMembers();
-                    }
-                    else
-                    {
-                        MessageBox.Show($"{selectedMemberName!.Name} {selectedMemberName!.Surname} don't borrowed yet");
-                    }
+                        b.Id,
+                        b.Title,
+                        b.Genre
+                    })).ToList();
+                if (selectedBooks.Count > 0)
+                {
+                    MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("RETURN", i));
+                    FlendOrRecieveBook.ShowDialog();
+                    RefreshDataGridForMembers();
+                }
+                else
+                {
+                    MessageBox.Show($"{selectedMemberName!.Name} {selectedMemberName!.Surname} don't borrowed yet");
                 }
             }
         }//borrowed books
-        (bool,long) isIIN_Clicked(long IIN) //check data grid first column for IIN value and if true return tuple
+        (bool,long) IsIIN_Clicked(long IIN) //check data grid first column for IIN value and if true return tuple
         {
             if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
                 && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN))

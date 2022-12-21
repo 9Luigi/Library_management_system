@@ -20,7 +20,7 @@ namespace Library
                 }
             }
         }
-        static internal bool checkTextBoxBaseTextOnNull(TextBoxBase textBoxBase)
+        static internal bool CheckTextBoxBaseTextOnNull(TextBoxBase textBoxBase)
         {//check properties for null and by RegexController
 
             if (textBoxBase.Text == null)

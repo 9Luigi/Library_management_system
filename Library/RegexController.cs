@@ -16,32 +16,32 @@ namespace Library
         const string AdressPattern = @"^([a-zA-Z]+|[а-яА-яё]+)\s([0-9]{1,3})\-([0-9]{1,3})$";
         static string? selectedPattern;
         static string? correctSymbols;
-        static string correctNameAndPatronymicSymbols = "latin, cyrillic characters and sign -";
-        static string correctSurnameSymbols = "latin, cyrillic characters and signs -.'";
-        static DateTime minimumAge = DateTime.Now.AddYears(-14); //
-        static string correctBirdthday = $"from 01.01.1900 to {minimumAge.ToString()}";
-        static string correctAdress = "Example 168-32";
+        const string correctNameAndPatronymicSymbols = "latin, cyrillic characters and sign -";
+        const string correctSurnameSymbols = "latin, cyrillic characters and signs -.'";
+        static readonly DateTime minimumAge = DateTime.Now.AddYears(-14); //
+        static readonly string correctBirdthday = $"from 01.01.1900 to {minimumAge}";
+        const string correctAdress = "Example 168-32";
         static public bool Check(string input,Control control)
         {
             switch (control.Name)
             {
-                case "tbName":
-                case "tbPatronymic":
+                case "TBName":
+                case "TBPatronymic":
                     selectedPattern = nameAndPatronomycPattern;
                     correctSymbols = correctNameAndPatronymicSymbols;
                     break;
-                case "mtbBirthday":
+                case "MTBBirthday":
                     selectedPattern = birthdayPattern;
                     correctSymbols = correctBirdthday;
                     break;
-                case "tbSurname":
+                case "TBSurname":
                     selectedPattern = surnamePattern;
                     correctSymbols = correctSurnameSymbols;
                     break;
-                case "mtbPhoneNumber":
+                case "MTBPhoneNumber":
                     selectedPattern = phoneNumberPattern;
                     break;
-                case "mtbAdress":
+                case "MTBAdress":
                     selectedPattern = AdressPattern;
                     correctSymbols = correctAdress;
                     break;
@@ -50,7 +50,7 @@ namespace Library
             }
             if (selectedPattern != null)
             {
-                Regex regex = new Regex(selectedPattern,RegexOptions.IgnoreCase);
+                Regex regex = new(selectedPattern,RegexOptions.IgnoreCase);
                 if (!regex.IsMatch(input))
                 {
                     MessageBox.Show($"value of field {control.Name} is not correct, " +

@@ -10,7 +10,7 @@ namespace Library
             InitializeComponent();
             
         }
-        internal fMembers fm { get; private set; }
+        internal FMembers fm { get; private set; }
         private void bCatalog_Click(object sender, EventArgs e)
         {
 
@@ -27,7 +27,7 @@ namespace Library
 
         private void fMain_Load(object sender, EventArgs e)
         {
-            fm = new fMembers();
+            fm = new FMembers();
         }
     }
 }

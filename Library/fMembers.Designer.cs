@@ -1,6 +1,6 @@
 ﻿namespace Library
 {
-    partial class fMembers
+    partial class FMembers
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(fMembers));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FMembers));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.memberToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addMemberToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -73,14 +73,14 @@
             this.addMemberToolStripMenuItem.Name = "addMemberToolStripMenuItem";
             this.addMemberToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.addMemberToolStripMenuItem.Text = "Add member";
-            this.addMemberToolStripMenuItem.Click += new System.EventHandler(this.addMemberToolStripMenuItem_Click);
+            this.addMemberToolStripMenuItem.Click += new System.EventHandler(this.AddMemberToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(38, 20);
             this.exitToolStripMenuItem.Text = "Exit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
             // dataGridViewForMembers
             // 
@@ -100,7 +100,7 @@
             this.dataGridViewForMembers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.dataGridViewForMembers.Size = new System.Drawing.Size(572, 316);
             this.dataGridViewForMembers.TabIndex = 2;
-            this.dataGridViewForMembers.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewForMembers_CellMouseClick);
+            this.dataGridViewForMembers.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DataGridViewForMembers_CellMouseClick);
             // 
             // cmMember
             // 
@@ -117,28 +117,28 @@
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(230, 22);
             this.editToolStripMenuItem.Text = "Edit";
-            this.editToolStripMenuItem.Click += new System.EventHandler(this.editToolStripMenuItem_Click);
+            this.editToolStripMenuItem.Click += new System.EventHandler(this.EditToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem
             // 
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
             this.deleteToolStripMenuItem.Size = new System.Drawing.Size(230, 22);
             this.deleteToolStripMenuItem.Text = "Delete";
-            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
+            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.DeleteToolStripMenuItem_Click);
             // 
             // leToolStripMenuItem
             // 
             this.leToolStripMenuItem.Name = "leToolStripMenuItem";
             this.leToolStripMenuItem.Size = new System.Drawing.Size(230, 22);
             this.leToolStripMenuItem.Text = "Borrow a book";
-            this.leToolStripMenuItem.Click += new System.EventHandler(this.leToolStripMenuItem_Click);
+            this.leToolStripMenuItem.Click += new System.EventHandler(this.LeToolStripMenuItem_Click);
             // 
             // seeLendedBooksForThisMemberToolStripMenuItem
             // 
             this.seeLendedBooksForThisMemberToolStripMenuItem.Name = "seeLendedBooksForThisMemberToolStripMenuItem";
             this.seeLendedBooksForThisMemberToolStripMenuItem.Size = new System.Drawing.Size(230, 22);
             this.seeLendedBooksForThisMemberToolStripMenuItem.Text = "Borrowed books/ return book";
-            this.seeLendedBooksForThisMemberToolStripMenuItem.Click += new System.EventHandler(this.seeLendedBooksForThisMemberToolStripMenuItem_Click);
+            this.seeLendedBooksForThisMemberToolStripMenuItem.Click += new System.EventHandler(this.SeeLendedBooksForThisMemberToolStripMenuItem_Click);
             // 
             // pictureBox1
             // 
@@ -175,7 +175,7 @@
             this.pbMembers.Step = 1;
             this.pbMembers.TabIndex = 6;
             // 
-            // fMembers
+            // FMembers
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -186,10 +186,10 @@
             this.Controls.Add(this.dataGridViewForMembers);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "fMembers";
+            this.Name = "FMembers";
             this.Text = "Members";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.fMembers_FormClosing);
-            this.Load += new System.EventHandler(this.fMembers_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FMembers_FormClosing);
+            this.Load += new System.EventHandler(this.FMembers_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewForMembers)).EndInit();

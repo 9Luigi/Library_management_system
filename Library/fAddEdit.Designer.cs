@@ -1,6 +1,6 @@
 ﻿namespace Library
 {
-    partial class fAddEdit
+    partial class FaddEdit_prop
     {
         /// <summary>
         /// Required designer variable.
@@ -28,12 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.tbSurname = new System.Windows.Forms.TextBox();
-            this.tbPatronymic = new System.Windows.Forms.TextBox();
-            this.tbAge = new System.Windows.Forms.TextBox();
+            this.TBSurname = new System.Windows.Forms.TextBox();
+            this.TBPatronymic = new System.Windows.Forms.TextBox();
+            this.TBAge = new System.Windows.Forms.TextBox();
             this.pbPhoto = new System.Windows.Forms.PictureBox();
-            this.bSelectPhoto = new System.Windows.Forms.Button();
-            this.bAddMember = new System.Windows.Forms.Button();
+            this.BSelectPhoto = new System.Windows.Forms.Button();
+            this.BAddMember = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -42,42 +42,42 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
-            this.mtbPhoneNumber = new System.Windows.Forms.MaskedTextBox();
-            this.mtbBirthday = new System.Windows.Forms.MaskedTextBox();
-            this.mtbIIN = new System.Windows.Forms.MaskedTextBox();
-            this.tbName = new System.Windows.Forms.TextBox();
-            this.mtbAdress = new System.Windows.Forms.MaskedTextBox();
-            this.bUpdateMember = new System.Windows.Forms.Button();
+            this.MTBPhoneNumber = new System.Windows.Forms.MaskedTextBox();
+            this.MTBBirthday = new System.Windows.Forms.MaskedTextBox();
+            this.MTBIIN = new System.Windows.Forms.MaskedTextBox();
+            this.TBName = new System.Windows.Forms.TextBox();
+            this.MTBAdress = new System.Windows.Forms.MaskedTextBox();
+            this.BUpdateMember = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbPhoto)).BeginInit();
             this.SuspendLayout();
             // 
-            // tbSurname
+            // TBSurname
             // 
-            this.tbSurname.Location = new System.Drawing.Point(12, 50);
-            this.tbSurname.Name = "tbSurname";
-            this.tbSurname.Size = new System.Drawing.Size(100, 23);
-            this.tbSurname.TabIndex = 1;
-            this.tbSurname.Click += new System.EventHandler(this.TextBoxBase_OnClick);
-            this.tbSurname.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
+            this.TBSurname.Location = new System.Drawing.Point(12, 50);
+            this.TBSurname.Name = "TBSurname";
+            this.TBSurname.Size = new System.Drawing.Size(100, 23);
+            this.TBSurname.TabIndex = 1;
+            this.TBSurname.Click += new System.EventHandler(this.TextBoxBase_OnClick);
+            this.TBSurname.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
             // 
-            // tbPatronymic
+            // TBPatronymic
             // 
-            this.tbPatronymic.Location = new System.Drawing.Point(12, 88);
-            this.tbPatronymic.Name = "tbPatronymic";
-            this.tbPatronymic.Size = new System.Drawing.Size(100, 23);
-            this.tbPatronymic.TabIndex = 2;
-            this.tbPatronymic.Click += new System.EventHandler(this.TextBoxBase_OnClick);
-            this.tbPatronymic.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
+            this.TBPatronymic.Location = new System.Drawing.Point(12, 88);
+            this.TBPatronymic.Name = "TBPatronymic";
+            this.TBPatronymic.Size = new System.Drawing.Size(100, 23);
+            this.TBPatronymic.TabIndex = 2;
+            this.TBPatronymic.Click += new System.EventHandler(this.TextBoxBase_OnClick);
+            this.TBPatronymic.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
             // 
-            // tbAge
+            // TBAge
             // 
-            this.tbAge.Enabled = false;
-            this.tbAge.Location = new System.Drawing.Point(12, 164);
-            this.tbAge.Name = "tbAge";
-            this.tbAge.Size = new System.Drawing.Size(100, 23);
-            this.tbAge.TabIndex = 4;
-            this.tbAge.Click += new System.EventHandler(this.TextBoxBase_OnClick);
-            this.tbAge.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
+            this.TBAge.Enabled = false;
+            this.TBAge.Location = new System.Drawing.Point(12, 164);
+            this.TBAge.Name = "TBAge";
+            this.TBAge.Size = new System.Drawing.Size(100, 23);
+            this.TBAge.TabIndex = 4;
+            this.TBAge.Click += new System.EventHandler(this.TextBoxBase_OnClick);
+            this.TBAge.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
             // 
             // pbPhoto
             // 
@@ -88,25 +88,25 @@
             this.pbPhoto.TabIndex = 9;
             this.pbPhoto.TabStop = false;
             // 
-            // bSelectPhoto
+            // BSelectPhoto
             // 
-            this.bSelectPhoto.Location = new System.Drawing.Point(314, 307);
-            this.bSelectPhoto.Name = "bSelectPhoto";
-            this.bSelectPhoto.Size = new System.Drawing.Size(101, 23);
-            this.bSelectPhoto.TabIndex = 8;
-            this.bSelectPhoto.Text = "Select photo*";
-            this.bSelectPhoto.UseVisualStyleBackColor = true;
-            this.bSelectPhoto.Click += new System.EventHandler(this.bSelectPhoto_Click);
+            this.BSelectPhoto.Location = new System.Drawing.Point(314, 307);
+            this.BSelectPhoto.Name = "BSelectPhoto";
+            this.BSelectPhoto.Size = new System.Drawing.Size(101, 23);
+            this.BSelectPhoto.TabIndex = 8;
+            this.BSelectPhoto.Text = "Select photo*";
+            this.BSelectPhoto.UseVisualStyleBackColor = true;
+            this.BSelectPhoto.Click += new System.EventHandler(this.BSelectPhoto_Click);
             // 
-            // bAddMember
+            // BAddMember
             // 
-            this.bAddMember.Location = new System.Drawing.Point(12, 336);
-            this.bAddMember.Name = "bAddMember";
-            this.bAddMember.Size = new System.Drawing.Size(119, 46);
-            this.bAddMember.TabIndex = 9;
-            this.bAddMember.Text = "Add member";
-            this.bAddMember.UseVisualStyleBackColor = true;
-            this.bAddMember.Click += new System.EventHandler(this.bAddMember_Click);
+            this.BAddMember.Location = new System.Drawing.Point(12, 336);
+            this.BAddMember.Name = "BAddMember";
+            this.BAddMember.Size = new System.Drawing.Size(119, 46);
+            this.BAddMember.TabIndex = 9;
+            this.BAddMember.Text = "Add member";
+            this.BAddMember.UseVisualStyleBackColor = true;
+            this.BAddMember.Click += new System.EventHandler(this.BAddMember_Click);
             // 
             // label1
             // 
@@ -180,74 +180,74 @@
             this.label8.TabIndex = 19;
             this.label8.Text = "Phone number";
             // 
-            // mtbPhoneNumber
+            // MTBPhoneNumber
             // 
-            this.mtbPhoneNumber.Location = new System.Drawing.Point(12, 278);
-            this.mtbPhoneNumber.Mask = "+7(999) 000-0000";
-            this.mtbPhoneNumber.Name = "mtbPhoneNumber";
-            this.mtbPhoneNumber.Size = new System.Drawing.Size(100, 23);
-            this.mtbPhoneNumber.TabIndex = 7;
-            this.mtbPhoneNumber.Click += new System.EventHandler(this.TextBoxBase_OnClick);
-            this.mtbPhoneNumber.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
+            this.MTBPhoneNumber.Location = new System.Drawing.Point(12, 278);
+            this.MTBPhoneNumber.Mask = "+7(999) 000-0000";
+            this.MTBPhoneNumber.Name = "MTBPhoneNumber";
+            this.MTBPhoneNumber.Size = new System.Drawing.Size(100, 23);
+            this.MTBPhoneNumber.TabIndex = 7;
+            this.MTBPhoneNumber.Click += new System.EventHandler(this.TextBoxBase_OnClick);
+            this.MTBPhoneNumber.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
             // 
-            // mtbBirthday
+            // MTBBirthday
             // 
-            this.mtbBirthday.Location = new System.Drawing.Point(12, 202);
-            this.mtbBirthday.Mask = "00/00/0000";
-            this.mtbBirthday.Name = "mtbBirthday";
-            this.mtbBirthday.Size = new System.Drawing.Size(100, 23);
-            this.mtbBirthday.TabIndex = 5;
-            this.mtbBirthday.ValidatingType = typeof(System.DateTime);
-            this.mtbBirthday.Click += new System.EventHandler(this.TextBoxBase_OnClick);
-            this.mtbBirthday.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
+            this.MTBBirthday.Location = new System.Drawing.Point(12, 202);
+            this.MTBBirthday.Mask = "00/00/0000";
+            this.MTBBirthday.Name = "MTBBirthday";
+            this.MTBBirthday.Size = new System.Drawing.Size(100, 23);
+            this.MTBBirthday.TabIndex = 5;
+            this.MTBBirthday.ValidatingType = typeof(System.DateTime);
+            this.MTBBirthday.Click += new System.EventHandler(this.TextBoxBase_OnClick);
+            this.MTBBirthday.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
             // 
-            // mtbIIN
+            // MTBIIN
             // 
-            this.mtbIIN.Location = new System.Drawing.Point(12, 126);
-            this.mtbIIN.Mask = "000000000000";
-            this.mtbIIN.Name = "mtbIIN";
-            this.mtbIIN.Size = new System.Drawing.Size(100, 23);
-            this.mtbIIN.TabIndex = 3;
-            this.mtbIIN.ValidatingType = typeof(int);
-            this.mtbIIN.Click += new System.EventHandler(this.TextBoxBase_OnClick);
-            this.mtbIIN.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
+            this.MTBIIN.Location = new System.Drawing.Point(12, 126);
+            this.MTBIIN.Mask = "000000000000";
+            this.MTBIIN.Name = "MTBIIN";
+            this.MTBIIN.Size = new System.Drawing.Size(100, 23);
+            this.MTBIIN.TabIndex = 3;
+            this.MTBIIN.ValidatingType = typeof(int);
+            this.MTBIIN.Click += new System.EventHandler(this.TextBoxBase_OnClick);
+            this.MTBIIN.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
             // 
-            // tbName
+            // TBName
             // 
-            this.tbName.Location = new System.Drawing.Point(12, 12);
-            this.tbName.Name = "tbName";
-            this.tbName.Size = new System.Drawing.Size(100, 23);
-            this.tbName.TabIndex = 0;
-            this.tbName.Click += new System.EventHandler(this.TextBoxBase_OnClick);
-            this.tbName.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
+            this.TBName.Location = new System.Drawing.Point(12, 12);
+            this.TBName.Name = "TBName";
+            this.TBName.Size = new System.Drawing.Size(100, 23);
+            this.TBName.TabIndex = 0;
+            this.TBName.Click += new System.EventHandler(this.TextBoxBase_OnClick);
+            this.TBName.Enter += new System.EventHandler(this.TextBoxBase_OnFocusEnter);
             // 
-            // mtbAdress
+            // MTBAdress
             // 
-            this.mtbAdress.Location = new System.Drawing.Point(12, 240);
-            this.mtbAdress.Name = "mtbAdress";
-            this.mtbAdress.Size = new System.Drawing.Size(100, 23);
-            this.mtbAdress.TabIndex = 6;
+            this.MTBAdress.Location = new System.Drawing.Point(12, 240);
+            this.MTBAdress.Name = "MTBAdress";
+            this.MTBAdress.Size = new System.Drawing.Size(100, 23);
+            this.MTBAdress.TabIndex = 6;
             // 
-            // bUpdateMember
+            // BUpdateMember
             // 
-            this.bUpdateMember.Location = new System.Drawing.Point(212, 336);
-            this.bUpdateMember.Name = "bUpdateMember";
-            this.bUpdateMember.Size = new System.Drawing.Size(119, 46);
-            this.bUpdateMember.TabIndex = 10;
-            this.bUpdateMember.Text = "Update member";
-            this.bUpdateMember.UseVisualStyleBackColor = true;
-            this.bUpdateMember.Click += new System.EventHandler(this.bUpdateMember_Click);
+            this.BUpdateMember.Location = new System.Drawing.Point(212, 336);
+            this.BUpdateMember.Name = "BUpdateMember";
+            this.BUpdateMember.Size = new System.Drawing.Size(119, 46);
+            this.BUpdateMember.TabIndex = 10;
+            this.BUpdateMember.Text = "Update member";
+            this.BUpdateMember.UseVisualStyleBackColor = true;
+            this.BUpdateMember.Click += new System.EventHandler(this.BUpdateMember_Click);
             // 
-            // fAddEdit
+            // FaddEdit_prop
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(515, 394);
-            this.Controls.Add(this.bUpdateMember);
-            this.Controls.Add(this.mtbAdress);
-            this.Controls.Add(this.mtbIIN);
-            this.Controls.Add(this.mtbBirthday);
-            this.Controls.Add(this.mtbPhoneNumber);
+            this.Controls.Add(this.BUpdateMember);
+            this.Controls.Add(this.MTBAdress);
+            this.Controls.Add(this.MTBIIN);
+            this.Controls.Add(this.MTBBirthday);
+            this.Controls.Add(this.MTBPhoneNumber);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
@@ -256,14 +256,14 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.bAddMember);
-            this.Controls.Add(this.bSelectPhoto);
+            this.Controls.Add(this.BAddMember);
+            this.Controls.Add(this.BSelectPhoto);
             this.Controls.Add(this.pbPhoto);
-            this.Controls.Add(this.tbAge);
-            this.Controls.Add(this.tbPatronymic);
-            this.Controls.Add(this.tbSurname);
-            this.Controls.Add(this.tbName);
-            this.Name = "fAddEdit";
+            this.Controls.Add(this.TBAge);
+            this.Controls.Add(this.TBPatronymic);
+            this.Controls.Add(this.TBSurname);
+            this.Controls.Add(this.TBName);
+            this.Name = "FaddEdit_prop";
             ((System.ComponentModel.ISupportInitialize)(this.pbPhoto)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -271,12 +271,12 @@
         }
 
         #endregion
-        private TextBox tbSurname;
-        private TextBox tbPatronymic;
-        private TextBox tbAge;
+        private TextBox TBSurname;
+        private TextBox TBPatronymic;
+        private TextBox TBAge;
         private PictureBox pbPhoto;
-        private Button bSelectPhoto;
-        private Button bAddMember;
+        private Button BSelectPhoto;
+        private Button BAddMember;
         private Label label1;
         private Label label2;
         private Label label3;
@@ -285,11 +285,11 @@
         private Label label6;
         private Label label7;
         private Label label8;
-        private MaskedTextBox mtbPhoneNumber;
-        private MaskedTextBox mtbBirthday;
-        private MaskedTextBox mtbIIN;
-        private TextBox tbName;
-        private MaskedTextBox mtbAdress;
-        private Button bUpdateMember;
+        private MaskedTextBox MTBPhoneNumber;
+        private MaskedTextBox MTBBirthday;
+        private MaskedTextBox MTBIIN;
+        private TextBox TBName;
+        private MaskedTextBox MTBAdress;
+        private Button BUpdateMember;
     }
 }

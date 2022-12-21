@@ -141,7 +141,7 @@ namespace Library.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Title");
 
-                    b.Property<byte[]>("coverImage")
+                    b.Property<byte[]>("CoverImage")
                         .IsRequired()
                         .HasColumnType("varbinary(max)")
                         .HasColumnName("CoverImage");

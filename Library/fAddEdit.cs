@@ -1,32 +1,32 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using static Library.fMembers;
+using static Library.FMembers;
 
 namespace Library
 {
-    public partial class fAddEdit : Form
+    public partial class FaddEdit_prop : Form
     {
-        byte[] photo { get; set; }
-        public fAddEdit()
+        byte[]? Photo { get; set; }
+        public FaddEdit_prop()
         {
             MemberCreateOrUpdateEvent += ActionRequested; //subscribe to event, event is invoked on update/create calls
             InitializeComponent();
             pbPhoto.Image = Properties.Resources.NoImage;
         }
-        internal Member? memberToEdit { get; set; }
-        private void bSelectPhoto_Click(object sender, EventArgs e)
+        internal Member? MemberToEdit { get; set; }
+        private void BSelectPhoto_Click(object sender, EventArgs e)
         {
-            OpenFileDialog fd = new OpenFileDialog();
+            OpenFileDialog fd = new();
             fd.ShowDialog();
             pbPhoto.Image = Image.FromFile(fd.FileName);
-            photo = File.ReadAllBytes(fd.FileName);
+            Photo = File.ReadAllBytes(fd.FileName);
             fd.Dispose();
         }
 
-        private void bAddMember_Click(object sender, EventArgs e)
+        private void BAddMember_Click(object sender, EventArgs e)
         {
-            if (checkFieldsBeforeAction())
+            if (CheckFieldsBeforeAction())
             {
-                actionWithMember("CREATE");
+                ActionWithMember("CREATE");
             }
         }
         private void TextBoxBase_OnFocusEnter(object sender, EventArgs e)
@@ -42,46 +42,44 @@ namespace Library
             switch (e.Action)
             {
                 case "EDIT":
-                    bUpdateMember.Enabled = true;
-                    bAddMember.Enabled = false;
-                    mtbIIN.Enabled = false;
-                    mtbIIN.Text = e.IIN.ToString();
+                    BUpdateMember.Enabled = true;
+                    BAddMember.Enabled = false;
+                    MTBIIN.Enabled = false;
+                    MTBIIN.Text = e.IIN.ToString();
 
-                    using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+                    using (LibraryContextForEFcore db = new())
                     {
                         try
                         {
-                            memberToEdit = db.Members.FirstOrDefault(m => m.IIN == e.IIN);
+                            MemberToEdit = db.Members.FirstOrDefault(m => m.IIN == e.IIN);
                         }
                         catch (Exception)
                         {
                             MessageBox.Show("Cannot load data, probably member was deleted by another employee while you edit, try again please");
                         }
-                        mtbIIN.Text = memberToEdit!.IIN.ToString();
-                        tbName.Text = memberToEdit.Name;
-                        tbSurname.Text = memberToEdit.Surname;
-                        tbPatronymic.Text = memberToEdit.Patronymic;
-                        tbAge.Text = memberToEdit.Age.ToString();
-                        mtbBirthday.Text = memberToEdit.BirthDay.ToString();
-                        mtbAdress.Text = memberToEdit.Adress;
-                        mtbPhoneNumber.Text = memberToEdit.PhoneNumber;
-                        byte[]? imageByte = memberToEdit.Photo;
-                        using (MemoryStream ms = new MemoryStream(imageByte!))
+                        MTBIIN.Text = MemberToEdit!.IIN.ToString();
+                        TBName.Text = MemberToEdit.Name;
+                        TBSurname.Text = MemberToEdit.Surname;
+                        TBPatronymic.Text = MemberToEdit.Patronymic;
+                        TBAge.Text = MemberToEdit.Age.ToString();
+                        MTBBirthday.Text = MemberToEdit.BirthDay.ToString();
+                        MTBAdress.Text = MemberToEdit.Adress;
+                        MTBPhoneNumber.Text = MemberToEdit.PhoneNumber;
+                        byte[]? imageByte = MemberToEdit.Photo;
+                        using MemoryStream ms = new(imageByte!);
+                        try
                         {
-                            try
-                            {
-                                pbPhoto.Image = Image.FromStream(ms);
-                            }
-                            catch
-                            {
-                                pbPhoto.Image = Properties.Resources.NoImage;
-                            }
+                            pbPhoto.Image = Image.FromStream(ms);
+                        }
+                        catch
+                        {
+                            pbPhoto.Image = Properties.Resources.NoImage;
                         }
                     }
                     break;
                 case "CREATE":
-                    bUpdateMember.Enabled = false;
-                    bAddMember.Enabled = true;
+                    BUpdateMember.Enabled = false;
+                    BAddMember.Enabled = true;
                     TextBoxBaseController.AllTextBoxBaseOnFormClear(this);
                     pictureBoxController.pictureBoxImageSetDefault(pbPhoto);
                     break;
@@ -89,33 +87,26 @@ namespace Library
                     break;
             }
         }
-        private void bUpdateMember_Click(object sender, EventArgs e)
-        {
-            if (checkFieldsBeforeAction())
-            {
-                actionWithMember("UPDATE");
-            }
-        }
-        private bool checkFieldsBeforeAction()
+        private bool CheckFieldsBeforeAction()
         {//check properties for null and by RegexController
             foreach (Control control in this.Controls)
             {
-                if (control is TextBoxBase textBoxBase && !TextBoxBaseController.checkTextBoxBaseTextOnNull(textBoxBase))
+                if (control is TextBoxBase textBoxBase && !TextBoxBaseController.CheckTextBoxBaseTextOnNull(textBoxBase))
                 {
                     return false;
                 }
             }
-            if (RegexController.Check(tbName.Text, tbName) && RegexController.Check(tbSurname.Text, tbSurname)
-            && RegexController.Check(mtbBirthday.Text, mtbBirthday) &&
-            RegexController.Check(mtbAdress.Text, mtbAdress) && RegexController.Check(mtbPhoneNumber.Text, mtbPhoneNumber))
+            if (RegexController.Check(TBName.Text, TBName) && RegexController.Check(TBSurname.Text, TBSurname)
+            && RegexController.Check(MTBBirthday.Text, MTBBirthday) &&
+            RegexController.Check(MTBAdress.Text, MTBAdress) && RegexController.Check(MTBPhoneNumber.Text, MTBPhoneNumber))
             {
-                if (tbPatronymic.Text == "" || tbPatronymic.Text == "None") return true;
-                else if (RegexController.Check(tbPatronymic.Text, tbPatronymic)) return true;
+                if (TBPatronymic.Text == "" || TBPatronymic.Text == "None") return true;
+                else if (RegexController.Check(TBPatronymic.Text, TBPatronymic)) return true;
                 else return false;
             }
             else return false;
         }
-        string checkIfHasPatronymic(string patronymic)
+        private static string CheckIfHasPatronymic(string patronymic)
         {
             if (patronymic != "")
             {
@@ -126,84 +117,90 @@ namespace Library
                 return "None";
             }
         }
-        void actionWithMember(string operation)
+        private void ActionWithMember(string operation)
         {
-            using (LibraryContextForEFcore db = new LibraryContextForEFcore())
+            using LibraryContextForEFcore db = new();
+            switch (operation)
             {
-                switch (operation)
-                {
-                    case "CREATE":
-                        Member createdMember = new Member
-                            (
-                                tbName.Text,
-                                tbSurname.Text,
-                                DateTime.Parse(mtbBirthday.Text),
-                                mtbAdress.Text,
-                                Convert.ToInt64(mtbIIN.Text), //TODO better parse long?
-                                mtbPhoneNumber.Text,
-                                photo,
-                                checkIfHasPatronymic(tbPatronymic.Text)
-                            );
-                        db.Add(createdMember);
-                        int answer = db.SaveChanges();
-                        try
+                case "CREATE":
+                    Member createdMember = new
+                        (
+                            TBName.Text,
+                            TBSurname.Text,
+                            DateTime.Parse(MTBBirthday.Text),
+                            MTBAdress.Text,
+                            Convert.ToInt64(MTBIIN.Text), //TODO better parse long?
+                            MTBPhoneNumber.Text,
+                            Photo!,
+                            CheckIfHasPatronymic(TBPatronymic.Text)
+                        );
+                    db.Add(createdMember);
+                    int answer = db.SaveChanges();
+                    try
+                    {
+                        if (answer == 1)
                         {
-                            if (answer == 1)
+                            DialogResult result = MessageBox.Show
+                                (
+                                    "Do you want to add another one?",
+                                    $"{createdMember.Name} {createdMember.Surname} added succesfully",
+                                    MessageBoxButtons.YesNo
+                                );
+                            if (result == DialogResult.Yes)
                             {
-                                DialogResult result = MessageBox.Show
-                                    (
-                                        "Do you want to add another one?",
-                                        $"{createdMember.Name} {createdMember.Surname} added succesfully",
-                                        MessageBoxButtons.YesNo
-                                    );
-                                if (result == DialogResult.Yes)
-                                {
-                                    TextBoxBaseController.AllTextBoxBaseOnFormClear(this);
-                                    pictureBoxController.pictureBoxImageSetDefault(pbPhoto);
-                                }
-                                else
-                                {
-                                    this.Close();
-                                }
-                            }
-                            else MessageBox.Show($"Cannot add {createdMember.Name} {createdMember.Surname}");
-                        }
-                        catch (DbUpdateException)
-                        {
-                            MessageBox.Show("While you were editing this member, his data was updated or delete, try again please");
-                        }
-                        break;
-                    case "UPDATE":
-                        bAddMember.Enabled = false;
-                        db.Attach(memberToEdit!);
-                        memberToEdit!.Name = tbName.Text;
-                        memberToEdit.Surname = tbSurname.Text;
-                        memberToEdit.BirthDay = DateTime.Parse(mtbBirthday.Text);
-                        memberToEdit.Adress = mtbAdress.Text;
-                        memberToEdit.PhoneNumber = mtbPhoneNumber.Text;
-                        memberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);//TODO Check null
-                        memberToEdit.Patronymic = checkIfHasPatronymic(tbPatronymic.Text);
-                        try
-                        {
-                            int number = db.SaveChanges();//TODO check values on change before call savechanges
-                            //TODO check fields, if their values did't change then don't call SaveChages
-                            if (number == 1)
-                            {
-                                MessageBox.Show($"{memberToEdit.Name} {memberToEdit.Surname} updated successful");
-                                Close();
+                                TextBoxBaseController.AllTextBoxBaseOnFormClear(this);
+                                pictureBoxController.pictureBoxImageSetDefault(pbPhoto);
                             }
                             else
                             {
-                                MessageBox.Show("You don't change any data, change or cancel please");
+                                this.Close();
                             }
                         }
-                        catch (DbUpdateException)
+                        else MessageBox.Show($"Cannot add {createdMember.Name} {createdMember.Surname}");
+                    }
+                    catch (DbUpdateException)
+                    {
+                        MessageBox.Show("While you were editing this member, his data was updated or delete, try again please");
+                    }
+                    break;
+                case "UPDATE":
+                    BAddMember.Enabled = false;
+                    db.Attach(MemberToEdit!);
+                    MemberToEdit!.Name = TBName.Text;
+                    MemberToEdit.Surname = TBSurname.Text;
+                    MemberToEdit.BirthDay = DateTime.Parse(MTBBirthday.Text);
+                    MemberToEdit.Adress = MTBAdress.Text;
+                    MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
+                    MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);//TODO Check null
+                    MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
+                    try
+                    {
+                        int number = db.SaveChanges();//TODO check values on change before call savechanges
+                                                      //TODO check fields, if their values did't change then don't call SaveChages
+                        if (number == 1)
                         {
-                            MessageBox.Show("While you were editing this member, his data was updated or delete, try again with new data or close please");
-                            memberToEdit = db.Members.FirstOrDefault(m => m.IIN == Convert.ToInt64(mtbIIN.Text));
+                            MessageBox.Show($"{MemberToEdit.Name} {MemberToEdit.Surname} updated successful");
+                            Close();
                         }
-                        break;
-                }
+                        else
+                        {
+                            MessageBox.Show("You don't change any data, change or cancel please");
+                        }
+                    }
+                    catch (DbUpdateException)
+                    {
+                        MessageBox.Show("While you were editing this member, his data was updated or delete, try again with new data or close please");
+                        MemberToEdit = db.Members.FirstOrDefault(m => m.IIN == Convert.ToInt64(MTBIIN.Text));
+                    }
+                    break;
+            }
+        }
+
+        private void BUpdateMember_Click(object sender, EventArgs e)
+        {
+            if (CheckFieldsBeforeAction())
+            {
+                ActionWithMember("UPDATE");
             }
         }
     }
