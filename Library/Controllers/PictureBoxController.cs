@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Library
+namespace Library.Controllers
 {
     static internal class pictureBoxController
     {
-       static internal void pictureBoxImageSetDefault(PictureBox pictureBox)
+        static internal void pictureBoxImageSetDefault(PictureBox pictureBox)
         {
             pictureBox.Image = Properties.Resources.NoImage;
         }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Library
+namespace Library.Models
 {
     internal class Author
     {
@@ -16,7 +16,7 @@ namespace Library
         public byte[] AuthorVersion { get; set; }
         public List<Book> Books { get; set; } = new();
         public Author() { }
-        public Author(string name, string surname, string biography="None")
+        public Author(string name, string surname, string biography = "None")
         {
             Name = name;
             Surname = surname;

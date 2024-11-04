@@ -1,15 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Library.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Library
+namespace Library.EFConfigurations
 {
-    internal class EntityConfigurationForAuthor:IEntityTypeConfiguration<Author>
+    internal class EntityConfigurationForAuthor : IEntityTypeConfiguration<Author>
     {
         public void Configure(EntityTypeBuilder<Author> builder)
         {

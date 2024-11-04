@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Library.Controllers;
+using Library.Models;
+using Microsoft.EntityFrameworkCore;
 using static Library.FMembers;
 
 namespace Library
@@ -27,6 +29,10 @@ namespace Library
             if (CheckFieldsBeforeAction())
             {
                 ActionWithMember("CREATE");
+            }
+            else
+            {
+                MessageBox.Show("CheckFieldsBeforeAction failed");
             }
         }
         private void TextBoxBase_OnFocusEnter(object sender, EventArgs e)

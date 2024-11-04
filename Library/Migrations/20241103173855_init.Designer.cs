@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Migrations
 {
     [DbContext(typeof(LibraryContextForEFcore))]
-    [Migration("20221218192745_start17")]
-    partial class start17
+    [Migration("20241103173855_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -115,6 +115,11 @@ namespace Library.Migrations
                         .HasColumnType("rowversion")
                         .HasColumnName("Version");
 
+                    b.Property<byte[]>("CoverImage")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)")
+                        .HasColumnName("CoverImage");
+
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)")
@@ -126,7 +131,8 @@ namespace Library.Migrations
                         .HasColumnType("nvarchar(25)")
                         .HasColumnName("Genre");
 
-                    b.Property<DateTime>("PublicationDate")
+                    b.Property<DateTime?>("PublicationDate")
+                        .IsRequired()
                         .HasColumnType("datetime2")
                         .HasColumnName("publicationYear");
 
@@ -140,11 +146,6 @@ namespace Library.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Title");
-
-                    b.Property<byte[]>("CoverImage")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)")
-                        .HasColumnName("CoverImage");
 
                     b.HasKey("Id");
 
@@ -184,9 +185,7 @@ namespace Library.Migrations
                         .HasColumnName("Version");
 
                     b.Property<string>("Name")
-                        .IsConcurrencyToken()
                         .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasMaxLength(75)
                         .HasColumnType("nvarchar(75)")
                         .HasColumnName("Name");

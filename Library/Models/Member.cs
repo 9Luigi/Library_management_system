@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Library
+namespace Library.Models
 {
     internal class Member
     {
@@ -26,7 +26,7 @@ namespace Library
         public List<Book> Books { get; set; } = new();
         public Member() { }
 
-        public Member(string name, string surname, DateTime birthday, string adress, long iin,string Phonenumber, byte[] photo, string patronymic="None")
+        public Member(string name, string surname, DateTime birthday, string adress, long iin, string Phonenumber, byte[] photo, string patronymic = "None")
         {
             Name = name;
             Surname = surname;
@@ -39,7 +39,7 @@ namespace Library
             Photo = photo;
             Age = RegistrationDate.Year - BirthDay.Year;
             if (BirthDay > RegistrationDate.AddYears(-Age)) Age--;
-            if (Patronymic==null)
+            if (Patronymic == null)
             {
                 Patronymic = "None";
             }

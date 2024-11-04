@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Library.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
@@ -7,9 +8,9 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Library
+namespace Library.EFConfigurations
 {
-    internal class EntityConfigurationForMember:IEntityTypeConfiguration<Member>
+    internal class EntityConfigurationForMember : IEntityTypeConfiguration<Member>
     {
         public void Configure(EntityTypeBuilder<Member> builder)
         {

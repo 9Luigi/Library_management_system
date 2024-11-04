@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Library
+namespace Library.Controllers
 {
     static internal class RegexController
     {
@@ -21,7 +21,7 @@ namespace Library
         static readonly DateTime minimumAge = DateTime.Now.AddYears(-14); //
         static readonly string correctBirdthday = $"from 01.01.1900 to {minimumAge}";
         const string correctAdress = "Example 168-32";
-        static public bool Check(string input,Control control)
+        static public bool Check(string input, Control control)
         {
             switch (control.Name)
             {
@@ -50,7 +50,7 @@ namespace Library
             }
             if (selectedPattern != null)
             {
-                Regex regex = new(selectedPattern,RegexOptions.IgnoreCase);
+                Regex regex = new(selectedPattern, RegexOptions.IgnoreCase);
                 if (!regex.IsMatch(input))
                 {
                     MessageBox.Show($"value of field {control.Name} is not correct, " +

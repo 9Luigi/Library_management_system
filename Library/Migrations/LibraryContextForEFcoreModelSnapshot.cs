@@ -34,7 +34,7 @@ namespace Library.Migrations
 
                     b.HasIndex("BooksId");
 
-                    b.ToTable("AuthorBook", (string)null);
+                    b.ToTable("AuthorBook");
                 });
 
             modelBuilder.Entity("BookMember", b =>
@@ -49,7 +49,7 @@ namespace Library.Migrations
 
                     b.HasIndex("MembersId");
 
-                    b.ToTable("BookMember", (string)null);
+                    b.ToTable("BookMember");
                 });
 
             modelBuilder.Entity("Library.Author", b =>
@@ -91,7 +91,7 @@ namespace Library.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Authors", (string)null);
+                    b.ToTable("Authors");
                 });
 
             modelBuilder.Entity("Library.Book", b =>
@@ -112,6 +112,11 @@ namespace Library.Migrations
                         .HasColumnType("rowversion")
                         .HasColumnName("Version");
 
+                    b.Property<byte[]>("CoverImage")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)")
+                        .HasColumnName("CoverImage");
+
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)")
@@ -123,7 +128,8 @@ namespace Library.Migrations
                         .HasColumnType("nvarchar(25)")
                         .HasColumnName("Genre");
 
-                    b.Property<DateTime>("PublicationDate")
+                    b.Property<DateTime?>("PublicationDate")
+                        .IsRequired()
                         .HasColumnType("datetime2")
                         .HasColumnName("publicationYear");
 
@@ -138,14 +144,9 @@ namespace Library.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Title");
 
-                    b.Property<byte[]>("CoverImage")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)")
-                        .HasColumnName("CoverImage");
-
                     b.HasKey("Id");
 
-                    b.ToTable("Books", (string)null);
+                    b.ToTable("Books");
                 });
 
             modelBuilder.Entity("Library.Member", b =>
@@ -181,9 +182,7 @@ namespace Library.Migrations
                         .HasColumnName("Version");
 
                     b.Property<string>("Name")
-                        .IsConcurrencyToken()
                         .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasMaxLength(75)
                         .HasColumnType("nvarchar(75)")
                         .HasColumnName("Name");
@@ -225,7 +224,7 @@ namespace Library.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("Members", (string)null);
+                    b.ToTable("Members");
                 });
 
             modelBuilder.Entity("AuthorBook", b =>

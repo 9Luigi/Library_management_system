@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
 
-namespace Library
+namespace Library.Controllers
 {
     internal static class TextBoxBaseController
     {
