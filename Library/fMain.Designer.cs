@@ -20,91 +20,90 @@
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
+		#region Windows Form Designer generated code
 
-        /// <summary>
-        ///  Required method for Designer support - do not modify
-        ///  the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
-        {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FMain));
-            this.bCatalog = new System.Windows.Forms.Button();
-            this.bMembers = new System.Windows.Forms.Button();
-            this.pbCatalog = new System.Windows.Forms.PictureBox();
-            this.pbMembers = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.pbCatalog)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbMembers)).BeginInit();
-            this.SuspendLayout();
-            // 
-            // bCatalog
-            // 
-            this.bCatalog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.bCatalog.Location = new System.Drawing.Point(12, 394);
-            this.bCatalog.Name = "bCatalog";
-            this.bCatalog.Size = new System.Drawing.Size(280, 35);
-            this.bCatalog.TabIndex = 3;
-            this.bCatalog.Text = "Catalog";
-            this.bCatalog.UseVisualStyleBackColor = true;
-            this.bCatalog.Click += new System.EventHandler(this.bCatalog_Click);
-            // 
-            // bMembers
-            // 
-            this.bMembers.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bMembers.Location = new System.Drawing.Point(332, 394);
-            this.bMembers.Name = "bMembers";
-            this.bMembers.Size = new System.Drawing.Size(280, 35);
-            this.bMembers.TabIndex = 4;
-            this.bMembers.Text = "Members";
-            this.bMembers.UseVisualStyleBackColor = true;
-            this.bMembers.Click += new System.EventHandler(this.bMembers_Click);
-            // 
-            // pbCatalog
-            // 
-            this.pbCatalog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.pbCatalog.Image = ((System.Drawing.Image)(resources.GetObject("pbCatalog.Image")));
-            this.pbCatalog.Location = new System.Drawing.Point(12, 12);
-            this.pbCatalog.Name = "pbCatalog";
-            this.pbCatalog.Size = new System.Drawing.Size(280, 376);
-            this.pbCatalog.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pbCatalog.TabIndex = 5;
-            this.pbCatalog.TabStop = false;
-            // 
-            // pbMembers
-            // 
-            this.pbMembers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbMembers.Image = ((System.Drawing.Image)(resources.GetObject("pbMembers.Image")));
-            this.pbMembers.Location = new System.Drawing.Point(332, 12);
-            this.pbMembers.Name = "pbMembers";
-            this.pbMembers.Size = new System.Drawing.Size(280, 376);
-            this.pbMembers.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pbMembers.TabIndex = 6;
-            this.pbMembers.TabStop = false;
-            // 
-            // FMain
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(624, 441);
-            this.Controls.Add(this.pbMembers);
-            this.Controls.Add(this.pbCatalog);
-            this.Controls.Add(this.bMembers);
-            this.Controls.Add(this.bCatalog);
-            this.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.Margin = new System.Windows.Forms.Padding(4);
-            this.Name = "FMain";
-            this.Text = "Library";
-            ((System.ComponentModel.ISupportInitialize)(this.pbCatalog)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbMembers)).EndInit();
-            this.ResumeLayout(false);
+		/// <summary>
+		///  Required method for Designer support - do not modify
+		///  the contents of this method with the code editor.
+		/// </summary>
+		private void InitializeComponent()
+		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FMain));
+			bCatalog = new Button();
+			bMembers = new Button();
+			pbCatalog = new PictureBox();
+			pbMembers = new PictureBox();
+			((System.ComponentModel.ISupportInitialize)pbCatalog).BeginInit();
+			((System.ComponentModel.ISupportInitialize)pbMembers).BeginInit();
+			SuspendLayout();
+			// 
+			// bCatalog
+			// 
+			bCatalog.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			bCatalog.Location = new Point(12, 386);
+			bCatalog.Name = "bCatalog";
+			bCatalog.Size = new Size(280, 35);
+			bCatalog.TabIndex = 3;
+			bCatalog.Text = "Catalog";
+			bCatalog.UseVisualStyleBackColor = true;
+			bCatalog.Click += bCatalog_Click;
+			// 
+			// bMembers
+			// 
+			bMembers.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+			bMembers.Location = new Point(330, 386);
+			bMembers.Name = "bMembers";
+			bMembers.Size = new Size(280, 35);
+			bMembers.TabIndex = 4;
+			bMembers.Text = "Members";
+			bMembers.UseVisualStyleBackColor = true;
+			bMembers.Click += bMembers_Click;
+			// 
+			// pbCatalog
+			// 
+			pbCatalog.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+			pbCatalog.Image = (Image)resources.GetObject("pbCatalog.Image");
+			pbCatalog.Location = new Point(12, 12);
+			pbCatalog.Name = "pbCatalog";
+			pbCatalog.Size = new Size(280, 368);
+			pbCatalog.SizeMode = PictureBoxSizeMode.StretchImage;
+			pbCatalog.TabIndex = 5;
+			pbCatalog.TabStop = false;
+			// 
+			// pbMembers
+			// 
+			pbMembers.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
+			pbMembers.Image = (Image)resources.GetObject("pbMembers.Image");
+			pbMembers.Location = new Point(330, 12);
+			pbMembers.Name = "pbMembers";
+			pbMembers.Size = new Size(280, 368);
+			pbMembers.SizeMode = PictureBoxSizeMode.StretchImage;
+			pbMembers.TabIndex = 6;
+			pbMembers.TabStop = false;
+			// 
+			// FMain
+			// 
+			AutoScaleDimensions = new SizeF(11F, 22F);
+			AutoScaleMode = AutoScaleMode.Font;
+			ClientSize = new Size(622, 433);
+			Controls.Add(pbMembers);
+			Controls.Add(pbCatalog);
+			Controls.Add(bMembers);
+			Controls.Add(bCatalog);
+			Font = new Font("Times New Roman", 12F);
+			Margin = new Padding(4);
+			MaximizeBox = false;
+			Name = "FMain";
+			Text = "Library";
+			Load += FMain_Load;
+			((System.ComponentModel.ISupportInitialize)pbCatalog).EndInit();
+			((System.ComponentModel.ISupportInitialize)pbMembers).EndInit();
+			ResumeLayout(false);
+		}
 
-        }
+		#endregion
 
-        #endregion
-
-        private Button bCatalog;
+		private Button bCatalog;
         private Button bMembers;
         private PictureBox pbCatalog;
         private PictureBox pbMembers;
