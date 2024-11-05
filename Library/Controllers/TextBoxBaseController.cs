@@ -23,17 +23,17 @@ namespace Library.Controllers
         static internal bool CheckTextBoxBaseTextOnNull(TextBoxBase textBoxBase)
         {//check properties for null and by RegexController
 
-            if (textBoxBase.Text == null)
+            if (string.IsNullOrWhiteSpace(textBoxBase.Text))
             {
-                MessageBox.Show("fill in the empty requiered(*) fields");
-                return true;
+                MessageBox.Show(textBoxBase.Name + " is empty, fill in the empty requiered(*) fields");
+                return false;
             }
             if (textBoxBase.Text.Length > 75)
             {
                 MessageBox.Show($"{textBoxBase.Name} cannot be more than 75 symbols");
-                return true;
+                return false;
             }
-            else return false;
+            else return true;
         }
     }
 }

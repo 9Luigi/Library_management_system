@@ -9,8 +9,8 @@ namespace Library.Controllers
 {
     static internal class RegexController
     {
-        const string nameAndPatronomycPattern = "^[a-z,-]+$|^[а-яё,-]+$";//TODO 1 symbol in name?
-        const string birthdayPattern = @"^(0?[1-9]|[1-2][0-9]|3[01])(\/|.)(0?[1-9]|1[0-2])(\/|.)((19|20)\d\d)$"; //TODO last year should start with currentYear-14 (?)
+		const string nameAndPatronomycPattern = "^[a-zA-Zа-яА-ЯёЁ'-]+$";
+		const string birthdayPattern = @"^(0?[1-9]|[1-2][0-9]|3[01])(\/|.)(0?[1-9]|1[0-2])(\/|.)((19|20)\d\d)$"; //TODO last year should start with currentYear-14 (?)
         const string surnamePattern = "^[a-z,-.']+$|^[а-яё,.'-]+$";
         const string phoneNumberPattern = @"(\+7)(\([0-9]{3}\))\s([0-9]{3})-([0-9]{4})";
         const string AdressPattern = @"^([a-zA-Z]+|[а-яА-яё]+)\s([0-9]{1,3})\-([0-9]{1,3})$";
@@ -45,7 +45,7 @@ namespace Library.Controllers
                     selectedPattern = AdressPattern;
                     correctSymbols = correctAdress;
                     break;
-                default:
+                default:MessageBox.Show("RegexController.Check default invoked, not allowed!");
                     break;
             }
             if (selectedPattern != null)

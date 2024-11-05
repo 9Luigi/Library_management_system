@@ -30,10 +30,6 @@ namespace Library
             {
                 ActionWithMember("CREATE");
             }
-            else
-            {
-                MessageBox.Show("CheckFieldsBeforeAction failed");
-            }
         }
         private void TextBoxBase_OnFocusEnter(object sender, EventArgs e)
         {

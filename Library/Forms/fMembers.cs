@@ -147,6 +147,7 @@ namespace Library
                     }
                     Thread.Sleep(500);
                     if (CancellationToken.IsCancellationRequested) { return; }
+                    if(pbMembers.IsDisposed) { return; }
                     this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
                     if (CancellationToken.IsCancellationRequested) { return; }
                     this.Invoke(ControlsEnableFlag, true); // after data load from db set all controls enabled true
