@@ -128,7 +128,7 @@ namespace Library
                     {
                         if (CancellationToken.IsCancellationRequested) { return; }
                         this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 0, 25); //TODO check if searched by IIN
-                        var users = db.Members.Select(m => new //TODO handle exception of select and login to db
+                        var users = db.Members.Select(m => new //TODO handle exception of select and login to db or db not create
                         {
                             m.IIN,
                             m.Name,
