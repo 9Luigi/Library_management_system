@@ -118,16 +118,23 @@ namespace Library
         }
         private void RefreshDataGridForMembers() //TODO maybe better don't close connection after each operation?
         {
-            //TODO maybe better use AsNotTracking
-            ControlsEnableFlag(false); //while data from db is loading all controls enabled set to false
+			int totalMembersCount;
+			//TODO maybe better use AsNotTracking
+			ControlsEnableFlag(false); //while data from db is loading all controls enabled set to false
             CancellationTokenSource = new CancellationTokenSource();
             CancellationToken = CancellationTokenSource.Token;
             Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(() =>
                 {
                     using (LibraryContextForEFcore db = new())
                     {
-                        if (CancellationToken.IsCancellationRequested) { return; }
-                        this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 0, 25); //TODO check if searched by IIN
+
+                        totalMembersCount = db.Members.Count(); //recieve members count //TODO for correct progress bar refresh in future
+
+						if (CancellationToken.IsCancellationRequested) { return; }
+						this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
+                        this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 0 , 25);
+						
+                        //this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 0, 25); //TODO check if searched by IIN
                         var users = db.Members.Select(m => new //TODO handle exception of select and login to db or db not create
                         {
                             m.IIN,
@@ -136,24 +143,24 @@ namespace Library
                             m.Age,
                         }).ToList();
                         if (CancellationToken.IsCancellationRequested) { return; }
-                        this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 25, 85);
-                        if (CancellationToken.IsCancellationRequested) { return; }
-                        this.Invoke(new Action(() =>
+						this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 25, 50);
+						this.Invoke(new Action(() =>
                         {
                             dataGridViewForMembers.DataSource = users; //TODO error catch or logic to avoid
                         }));
                         if (CancellationToken.IsCancellationRequested) { return; }
-                        this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 50, 100);
+						this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 50, 100);
                     }
                     Thread.Sleep(500);
+
                     if (CancellationToken.IsCancellationRequested) { return; }
-                    if(pbMembers.IsDisposed) { return; }
-                    this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
-                    if (CancellationToken.IsCancellationRequested) { return; }
+					if(pbMembers.IsDisposed) { return; }
+
+					this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
                     this.Invoke(ControlsEnableFlag, true); // after data load from db set all controls enabled true
                 }), CancellationToken); //TODO all invoke call exception if form isdisposed earlier than invokable method
         }
-        void ControlsEnableFlag(bool flag)
+        void ControlsEnableFlag(bool flag) //TODO change name by more suitable
         //Set all controls enabled property according to flag
         {
             foreach (Control item in this.Controls)
