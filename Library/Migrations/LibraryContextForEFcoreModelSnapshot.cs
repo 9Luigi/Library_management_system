@@ -52,7 +52,7 @@ namespace Library.Migrations
                     b.ToTable("BookMember");
                 });
 
-            modelBuilder.Entity("Library.Author", b =>
+            modelBuilder.Entity("Library.Models.Author", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -94,7 +94,7 @@ namespace Library.Migrations
                     b.ToTable("Authors");
                 });
 
-            modelBuilder.Entity("Library.Book", b =>
+            modelBuilder.Entity("Library.Models.Book", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -149,7 +149,7 @@ namespace Library.Migrations
                     b.ToTable("Books");
                 });
 
-            modelBuilder.Entity("Library.Member", b =>
+            modelBuilder.Entity("Library.Models.Member", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -229,13 +229,13 @@ namespace Library.Migrations
 
             modelBuilder.Entity("AuthorBook", b =>
                 {
-                    b.HasOne("Library.Author", null)
+                    b.HasOne("Library.Models.Author", null)
                         .WithMany()
                         .HasForeignKey("AuthorsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Library.Book", null)
+                    b.HasOne("Library.Models.Book", null)
                         .WithMany()
                         .HasForeignKey("BooksId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -244,13 +244,13 @@ namespace Library.Migrations
 
             modelBuilder.Entity("BookMember", b =>
                 {
-                    b.HasOne("Library.Book", null)
+                    b.HasOne("Library.Models.Book", null)
                         .WithMany()
                         .HasForeignKey("BooksId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Library.Member", null)
+                    b.HasOne("Library.Models.Member", null)
                         .WithMany()
                         .HasForeignKey("MembersId")
                         .OnDelete(DeleteBehavior.Cascade)

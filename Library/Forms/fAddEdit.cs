@@ -1,6 +1,7 @@
 ﻿using Library.Controllers;
 using Library.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Windows.Forms;
 using static Library.FMembers;
 
 namespace Library
@@ -19,8 +20,19 @@ namespace Library
         {
             OpenFileDialog fd = new();
             fd.ShowDialog();
-            pbPhoto.Image = Image.FromFile(fd.FileName);
-            Photo = File.ReadAllBytes(fd.FileName);
+            var photo = Image.FromFile(fd.FileName);
+			double aspectRatio = (double)photo.Width / photo.Height;
+			double requiredAspectRatio = 3.0 / 4.0;
+			if (Math.Abs(aspectRatio - requiredAspectRatio) > 0.01)
+			{
+				MessageBox.Show("Photo might be 3:4");
+			}
+			else
+			{
+				pbPhoto.Image = photo;
+				Photo = File.ReadAllBytes(fd.FileName);
+			}
+			
             fd.Dispose();
         }
 
