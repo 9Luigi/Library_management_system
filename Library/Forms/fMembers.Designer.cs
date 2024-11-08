@@ -20,188 +20,175 @@
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
+		#region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
-        {
-            this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FMembers));
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.memberToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.addMemberToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dataGridViewForMembers = new System.Windows.Forms.DataGridView();
-            this.cmMember = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.leToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.seeLendedBooksForThisMemberToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.TbIINSearch = new System.Windows.Forms.TextBox();
-            this.pbMembers = new System.Windows.Forms.ProgressBar();
-            this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewForMembers)).BeginInit();
-            this.cmMember.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.SuspendLayout();
-            // 
-            // menuStrip1
-            // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.memberToolStripMenuItem,
-            this.exitToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(800, 24);
-            this.menuStrip1.TabIndex = 1;
-            this.menuStrip1.Text = "menuStrip1";
-            // 
-            // memberToolStripMenuItem
-            // 
-            this.memberToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addMemberToolStripMenuItem});
-            this.memberToolStripMenuItem.Name = "memberToolStripMenuItem";
-            this.memberToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
-            this.memberToolStripMenuItem.Text = "Member..";
-            // 
-            // addMemberToolStripMenuItem
-            // 
-            this.addMemberToolStripMenuItem.Name = "addMemberToolStripMenuItem";
-            this.addMemberToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-            this.addMemberToolStripMenuItem.Text = "Add member";
-            this.addMemberToolStripMenuItem.Click += new System.EventHandler(this.AddMemberToolStripMenuItem_Click);
-            // 
-            // exitToolStripMenuItem
-            // 
-            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(38, 20);
-            this.exitToolStripMenuItem.Text = "Exit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
-            // 
-            // dataGridViewForMembers
-            // 
-            this.dataGridViewForMembers.AllowUserToAddRows = false;
-            this.dataGridViewForMembers.AllowUserToDeleteRows = false;
-            this.dataGridViewForMembers.AllowUserToResizeColumns = false;
-            this.dataGridViewForMembers.AllowUserToResizeRows = false;
-            this.dataGridViewForMembers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridViewForMembers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewForMembers.Location = new System.Drawing.Point(12, 24);
-            this.dataGridViewForMembers.MultiSelect = false;
-            this.dataGridViewForMembers.Name = "dataGridViewForMembers";
-            this.dataGridViewForMembers.ReadOnly = true;
-            this.dataGridViewForMembers.RowTemplate.Height = 25;
-            this.dataGridViewForMembers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.dataGridViewForMembers.Size = new System.Drawing.Size(572, 316);
-            this.dataGridViewForMembers.TabIndex = 2;
-            this.dataGridViewForMembers.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DataGridViewForMembers_CellMouseClick);
-            // 
-            // cmMember
-            // 
-            this.cmMember.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.editToolStripMenuItem,
-            this.deleteToolStripMenuItem,
-            this.leToolStripMenuItem,
-            this.seeLendedBooksForThisMemberToolStripMenuItem});
-            this.cmMember.Name = "cmMember";
-            this.cmMember.Size = new System.Drawing.Size(231, 114);
-            // 
-            // editToolStripMenuItem
-            // 
-            this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(230, 22);
-            this.editToolStripMenuItem.Text = "Edit";
-            this.editToolStripMenuItem.Click += new System.EventHandler(this.EditToolStripMenuItem_Click);
-            // 
-            // deleteToolStripMenuItem
-            // 
-            this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(230, 22);
-            this.deleteToolStripMenuItem.Text = "Delete";
-            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.DeleteToolStripMenuItem_Click);
-            // 
-            // leToolStripMenuItem
-            // 
-            this.leToolStripMenuItem.Name = "leToolStripMenuItem";
-            this.leToolStripMenuItem.Size = new System.Drawing.Size(230, 22);
-            this.leToolStripMenuItem.Text = "Borrow a book";
-            this.leToolStripMenuItem.Click += new System.EventHandler(this.LeToolStripMenuItem_Click);
-            // 
-            // seeLendedBooksForThisMemberToolStripMenuItem
-            // 
-            this.seeLendedBooksForThisMemberToolStripMenuItem.Name = "seeLendedBooksForThisMemberToolStripMenuItem";
-            this.seeLendedBooksForThisMemberToolStripMenuItem.Size = new System.Drawing.Size(230, 22);
-            this.seeLendedBooksForThisMemberToolStripMenuItem.Text = "Borrowed books/ return book";
-            this.seeLendedBooksForThisMemberToolStripMenuItem.Click += new System.EventHandler(this.SeeLendedBooksForThisMemberToolStripMenuItem_Click);
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(590, 24);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(198, 316);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 3;
-            this.pictureBox1.TabStop = false;
-            // 
-            // TbIINSearch
-            // 
-            this.TbIINSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.TbIINSearch.Location = new System.Drawing.Point(326, 375);
-            this.TbIINSearch.Name = "TbIINSearch";
-            this.TbIINSearch.Size = new System.Drawing.Size(148, 23);
-            this.TbIINSearch.TabIndex = 4;
-            this.TbIINSearch.Text = "Enter IIN";
-            this.TbIINSearch.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.TbIINSearch.Click += new System.EventHandler(this.TbIINSearch_Click);
-            this.TbIINSearch.TextChanged += new System.EventHandler(this.TbIINSearch_TextChanged);
-            // 
-            // pbMembers
-            // 
-            this.pbMembers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbMembers.Location = new System.Drawing.Point(12, 346);
-            this.pbMembers.Name = "pbMembers";
-            this.pbMembers.Size = new System.Drawing.Size(776, 23);
-            this.pbMembers.Step = 1;
-            this.pbMembers.TabIndex = 6;
-            // 
-            // FMembers
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 439);
-            this.Controls.Add(this.pbMembers);
-            this.Controls.Add(this.TbIINSearch);
-            this.Controls.Add(this.pictureBox1);
-            this.Controls.Add(this.dataGridViewForMembers);
-            this.Controls.Add(this.menuStrip1);
-            this.MainMenuStrip = this.menuStrip1;
-            this.Name = "FMembers";
-            this.Text = "Members";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FMembers_FormClosing);
-            this.Load += new System.EventHandler(this.FMembers_Load);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewForMembers)).EndInit();
-            this.cmMember.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+		/// <summary>
+		/// Required method for Designer support - do not modify
+		/// the contents of this method with the code editor.
+		/// </summary>
+		private void InitializeComponent()
+		{
+			components = new System.ComponentModel.Container();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FMembers));
+			menuStrip1 = new MenuStrip();
+			memberToolStripMenuItem = new ToolStripMenuItem();
+			addMemberToolStripMenuItem = new ToolStripMenuItem();
+			exitToolStripMenuItem = new ToolStripMenuItem();
+			dataGridViewForMembers = new DataGridView();
+			cmMember = new ContextMenuStrip(components);
+			editToolStripMenuItem = new ToolStripMenuItem();
+			deleteToolStripMenuItem = new ToolStripMenuItem();
+			leToolStripMenuItem = new ToolStripMenuItem();
+			seeLendedBooksForThisMemberToolStripMenuItem = new ToolStripMenuItem();
+			pictureBox1 = new PictureBox();
+			TbIINSearch = new TextBox();
+			pbMembers = new ProgressBar();
+			menuStrip1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)dataGridViewForMembers).BeginInit();
+			cmMember.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+			SuspendLayout();
+			// 
+			// menuStrip1
+			// 
+			menuStrip1.Items.AddRange(new ToolStripItem[] { memberToolStripMenuItem, exitToolStripMenuItem });
+			menuStrip1.Location = new Point(0, 0);
+			menuStrip1.Name = "menuStrip1";
+			menuStrip1.Size = new Size(800, 24);
+			menuStrip1.TabIndex = 1;
+			menuStrip1.Text = "menuStrip1";
+			// 
+			// memberToolStripMenuItem
+			// 
+			memberToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { addMemberToolStripMenuItem });
+			memberToolStripMenuItem.Name = "memberToolStripMenuItem";
+			memberToolStripMenuItem.Size = new Size(70, 20);
+			memberToolStripMenuItem.Text = "Member..";
+			// 
+			// addMemberToolStripMenuItem
+			// 
+			addMemberToolStripMenuItem.Name = "addMemberToolStripMenuItem";
+			addMemberToolStripMenuItem.Size = new Size(144, 22);
+			addMemberToolStripMenuItem.Text = "Add member";
+			addMemberToolStripMenuItem.Click += AddMemberToolStripMenuItem_Click;
+			// 
+			// exitToolStripMenuItem
+			// 
+			exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+			exitToolStripMenuItem.Size = new Size(38, 20);
+			exitToolStripMenuItem.Text = "Exit";
+			exitToolStripMenuItem.Click += ExitToolStripMenuItem_Click;
+			// 
+			// dataGridViewForMembers
+			// 
+			dataGridViewForMembers.AllowUserToAddRows = false;
+			dataGridViewForMembers.AllowUserToDeleteRows = false;
+			dataGridViewForMembers.AllowUserToResizeColumns = false;
+			dataGridViewForMembers.AllowUserToResizeRows = false;
+			dataGridViewForMembers.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+			dataGridViewForMembers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			dataGridViewForMembers.Location = new Point(12, 24);
+			dataGridViewForMembers.MultiSelect = false;
+			dataGridViewForMembers.Name = "dataGridViewForMembers";
+			dataGridViewForMembers.ReadOnly = true;
+			dataGridViewForMembers.RowTemplate.Height = 25;
+			dataGridViewForMembers.SelectionMode = DataGridViewSelectionMode.CellSelect;
+			dataGridViewForMembers.Size = new Size(572, 316);
+			dataGridViewForMembers.TabIndex = 2;
+			dataGridViewForMembers.CellMouseClick += view_CellMouseClick;
+			// 
+			// cmMember
+			// 
+			cmMember.Items.AddRange(new ToolStripItem[] { editToolStripMenuItem, deleteToolStripMenuItem, leToolStripMenuItem, seeLendedBooksForThisMemberToolStripMenuItem });
+			cmMember.Name = "cmMember";
+			cmMember.Size = new Size(231, 92);
+			// 
+			// editToolStripMenuItem
+			// 
+			editToolStripMenuItem.Name = "editToolStripMenuItem";
+			editToolStripMenuItem.Size = new Size(230, 22);
+			editToolStripMenuItem.Text = "Edit";
+			editToolStripMenuItem.Click += EditToolStripMenuItem_Click;
+			// 
+			// deleteToolStripMenuItem
+			// 
+			deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
+			deleteToolStripMenuItem.Size = new Size(230, 22);
+			deleteToolStripMenuItem.Text = "Delete";
+			deleteToolStripMenuItem.Click += DeleteToolStripMenuItem_Click;
+			// 
+			// leToolStripMenuItem
+			// 
+			leToolStripMenuItem.Name = "leToolStripMenuItem";
+			leToolStripMenuItem.Size = new Size(230, 22);
+			leToolStripMenuItem.Text = "Borrow a book";
+			leToolStripMenuItem.Click += LeToolStripMenuItem_Click;
+			// 
+			// seeLendedBooksForThisMemberToolStripMenuItem
+			// 
+			seeLendedBooksForThisMemberToolStripMenuItem.Name = "seeLendedBooksForThisMemberToolStripMenuItem";
+			seeLendedBooksForThisMemberToolStripMenuItem.Size = new Size(230, 22);
+			seeLendedBooksForThisMemberToolStripMenuItem.Text = "Borrowed books/ return book";
+			seeLendedBooksForThisMemberToolStripMenuItem.Click += SeeLendedBooksForThisMemberToolStripMenuItem_Click;
+			// 
+			// pictureBox1
+			// 
+			pictureBox1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
+			pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
+			pictureBox1.Location = new Point(590, 24);
+			pictureBox1.Name = "pictureBox1";
+			pictureBox1.Size = new Size(198, 316);
+			pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+			pictureBox1.TabIndex = 3;
+			pictureBox1.TabStop = false;
+			// 
+			// TbIINSearch
+			// 
+			TbIINSearch.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+			TbIINSearch.Location = new Point(326, 375);
+			TbIINSearch.Name = "TbIINSearch";
+			TbIINSearch.Size = new Size(148, 23);
+			TbIINSearch.TabIndex = 4;
+			TbIINSearch.Text = "Enter IIN";
+			TbIINSearch.TextAlign = HorizontalAlignment.Center;
+			TbIINSearch.Click += TbIINSearch_Click;
+			TbIINSearch.TextChanged += TbIINSearch_TextChanged;
+			// 
+			// pbMembers
+			// 
+			pbMembers.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+			pbMembers.Location = new Point(12, 346);
+			pbMembers.Name = "pbMembers";
+			pbMembers.Size = new Size(776, 23);
+			pbMembers.Step = 1;
+			pbMembers.TabIndex = 6;
+			// 
+			// FMembers
+			// 
+			AutoScaleDimensions = new SizeF(7F, 15F);
+			AutoScaleMode = AutoScaleMode.Font;
+			ClientSize = new Size(800, 439);
+			Controls.Add(pbMembers);
+			Controls.Add(TbIINSearch);
+			Controls.Add(pictureBox1);
+			Controls.Add(dataGridViewForMembers);
+			Controls.Add(menuStrip1);
+			MainMenuStrip = menuStrip1;
+			Name = "FMembers";
+			Text = "Members";
+			FormClosing += FMembers_FormClosing;
+			Load += FMembers_Load;
+			menuStrip1.ResumeLayout(false);
+			menuStrip1.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)dataGridViewForMembers).EndInit();
+			cmMember.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+			ResumeLayout(false);
+			PerformLayout();
+		}
 
-        }
-
-        #endregion
-        private MenuStrip menuStrip1;
+		#endregion
+		private MenuStrip menuStrip1;
         private ToolStripMenuItem memberToolStripMenuItem;
         private ToolStripMenuItem exitToolStripMenuItem;
         private DataGridView dataGridViewForMembers;

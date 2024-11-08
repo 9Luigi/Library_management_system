@@ -12,7 +12,7 @@ namespace Library
             InitializeComponent();
             FlendOrRecieveBook = new FBorrowOrRecieveBook();
             FaddEdit_prop = new FaddEdit_prop();
-        }
+		}
         internal class MemberEventArgs : EventArgs //for transfer IIN and Action to other forms via event
         {
             internal long IIN { get; private set; }
@@ -23,7 +23,8 @@ namespace Library
                 Action = action;
             }
         }
-        internal FBorrowOrRecieveBook FlendOrRecieveBook { get; private set; }
+		
+		internal FBorrowOrRecieveBook FlendOrRecieveBook { get; private set; }
         internal FaddEdit_prop FaddEdit_prop { get; private set; }
         internal long IIN { get; set; }
         internal CancellationTokenSource? CancellationTokenSource { get; set; }
@@ -36,11 +37,13 @@ namespace Library
             MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("CREATE"));
             FaddEdit_prop.ShowDialog();
             RefreshDataGridForMembers();
+            
         }
         private void FMembers_Load(object sender, EventArgs e)
         {
-            RefreshDataGridForMembers();
-        }
+            DataGridViewController.CustomizeDataGridView(dataGridViewForMembers);
+			RefreshDataGridForMembers();
+		}
         private void EditToolStripMenuItem_Click(object sender, EventArgs e)
         {
             (bool b, long i) = IsIIN_Clicked(IIN);
@@ -79,7 +82,7 @@ namespace Library
             }
         }
 
-        private void DataGridViewForMembers_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        private void view_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right && e.RowIndex>-1 && e.ColumnIndex==0)
             {
@@ -218,7 +221,9 @@ namespace Library
                 }
             }
         }//borrowed books
-        (bool,long) IsIIN_Clicked(long IIN) //check data grid first column for IIN value and if true return tuple
+        (bool,long) IsIIN_Clicked(long IIN) //check data grid first column for IIN value and if true return tuple 
+            //TODO check for null 
+            //TODO refactor via index(click on row not only IIN cell for edit)
         {
             if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
                 && long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN))
