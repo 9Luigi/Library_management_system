@@ -22,8 +22,17 @@ namespace Library.Controllers
 			// remove headers
 			view.RowHeadersVisible = false;
 
-			// full width
-			view.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+			// width & hieght control
+			view.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells; //auto width
+			view.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells; //auto hieght
+			if (view.Columns.Count > 0)
+			{
+				view.Columns[view.Columns.Count - 1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill; //last column full fill
+			}
+			foreach (DataGridViewColumn column in view.Columns) //wrap text if shoud be
+			{
+				column.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+			}
 
 			// remove vertical scrollbar
 			view.ScrollBars = ScrollBars.Both;
