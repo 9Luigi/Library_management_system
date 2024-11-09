@@ -103,7 +103,7 @@ namespace Library
 				{
 					var MatchedMembers = db.Members.Where(m => EF.Functions.Like(m.IIN.ToString(), $"%{IIN}%")).
 						Select(m => new { m.IIN, m.Name, m.Surname, m.Age }).ToList();
-					dataGridViewForMembers.DataSource = MatchedMembers; //TODO something
+					dataGridViewForMembers.DataSource = MatchedMembers; //TODO something //???
 				}
 			}
 			else
@@ -125,7 +125,7 @@ namespace Library
 			ControlsEnableFlag(false); //while data from db is loading all controls enabled set to false
 			CancellationTokenSource = new CancellationTokenSource();
 			CancellationToken = CancellationTokenSource.Token;
-			Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(() =>
+			Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(async () => //TODO async+await instead of Task and CancelationToken
 				{
 					using (LibraryContextForEFcore db = new())
 					{
@@ -133,8 +133,7 @@ namespace Library
 						totalMembersCount = db.Members.Count(); //recieve members count //TODO for correct progress bar refresh in future
 
 						if (CancellationToken.IsCancellationRequested) { return; }
-						this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
-						this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 0, 25);
+						await ProgressBarController.pbProgressCgange(this, pbMembers, 0, 25);
 
 						//this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 0, 25); //TODO check if searched by IIN
 						var users = db.Members.Include(m => m.Books).Select(m => new //TODO handle exception of select and login to db or db not create
@@ -146,14 +145,14 @@ namespace Library
 							Books = string.Join(", ", m.Books.Select(b => b.Title)),
 						}).ToList();
 						if (CancellationToken.IsCancellationRequested) { return; }
-						this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 25, 50);
+						await ProgressBarController.pbProgressCgange(this, pbMembers,25, 50);
 						this.Invoke(new Action(() =>
 						{
 							dataGridViewForMembers.DataSource = users; //TODO error catch or logic to avoid/ avoid what? null?
 							DataGridViewController.CustomizeDataGridView(dataGridViewForMembers);
 						}));
 						if (CancellationToken.IsCancellationRequested) { return; }
-						this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 50, 100);
+						await ProgressBarController.pbProgressCgange(this, pbMembers, 50, 100);
 					}
 					Thread.Sleep(500);
 
