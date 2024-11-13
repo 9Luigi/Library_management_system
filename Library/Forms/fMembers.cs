@@ -120,11 +120,11 @@ namespace Library
 				dataGridViewForMembers.DataSource = users;
 			}
 		}
-		private void RefreshDataGridForMembers() //TODO maybe better don't close connection after each operation?
+		private async void RefreshDataGridForMembers() //TODO maybe better don't close connection after each operation?
 		{
 			int totalMembersCount;
 			//TODO maybe better use AsNotTracking
-			controlsController.SetControlsEnableFlag(this.Controls, false); //while data from db is loading all controls enabled set to false
+			await  controlsController.SetControlsEnableFlag(this, this.Controls, false); //while data from db is loading all controls enabled set to false
 			CancellationTokenSource = new CancellationTokenSource();
 			CancellationToken = CancellationTokenSource.Token;
 			Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(async () => //TODO async+await instead of Task and CancelationToken
@@ -137,7 +137,6 @@ namespace Library
 						if (CancellationToken.IsCancellationRequested) { return; }
 						await ProgressBarController.pbProgressCgange(this, pbMembers, 0, 25);
 
-						//this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 0, 25); //TODO check if searched by IIN
 						var users = db.Members.Include(m => m.Books).Select(m => new //TODO handle exception of select and login to db or db not create
 						{
 							m.IIN,
@@ -150,7 +149,7 @@ namespace Library
 						await ProgressBarController.pbProgressCgange(this, pbMembers,25, 50);
 						this.Invoke(new Action(() =>
 						{
-							dataGridViewForMembers.DataSource = users; //TODO error catch or logic to avoid/ avoid what? null?
+							dataGridViewForMembers.DataSource = users; 
 							DataGridViewController.CustomizeDataGridView(dataGridViewForMembers);
 						}));
 						if (CancellationToken.IsCancellationRequested) { return; }
@@ -162,7 +161,7 @@ namespace Library
 					if (pbMembers.IsDisposed) { return; }
 
 					this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
-					controlsController.SetControlsEnableFlag(this.Controls, true); // after data load from db set all controls enabled true
+					await controlsController.SetControlsEnableFlag(this, this.Controls, true); // after data load from db set all controls enabled true
 				}), CancellationToken); //TODO all invoke call exception if form isdisposed earlier than invokable method
 		}
 		

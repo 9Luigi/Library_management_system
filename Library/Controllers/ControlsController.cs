@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 
 namespace Library.Controllers
 {
-    class ControlsController
-    {
-		internal async Task SetControlsEnableFlag(Control.ControlCollection controls, bool flag) //Set all controls enabled property according to flag //await in other class
+	class ControlsController
+	{
+		internal async Task SetControlsEnableFlag(Form invokerForm, Control.ControlCollection controls, bool flag) //Set all controls enabled property according to flag //await in other class
 		{
-			foreach (Control item in controls)
-				item.Enabled = flag;
+			invokerForm.Invoke(new Action(() =>
+			{
+				foreach (Control item in controls)
+					item.Enabled = flag;
+			}));
 		}
 	}
 }
