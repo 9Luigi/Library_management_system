@@ -22,7 +22,8 @@ namespace Library.Controllers
         {
             pb.Invoke(new Action(() =>
             {
-                if (pb.Value == 100)
+				Task.Delay(100);
+				if (pb.Value == 100)
                 {
                     pb.Value = 0;
                     pb.Visible = false;

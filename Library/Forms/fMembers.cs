@@ -31,6 +31,8 @@ namespace Library
 		internal CancellationToken CancellationToken { get; set; }
 		internal delegate void MemberCreateOrUpdateDelegate(MemberEventArgs e);
 		static internal event MemberCreateOrUpdateDelegate? MemberCreateOrUpdateEvent;
+
+		ControlsController controlsController = new();
 		private void AddMemberToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			//Transfer data to FaddEdit_prop form, subscribed to MemberCreateOrUpdateEvent on FaddEdit_prop constructor
@@ -122,7 +124,7 @@ namespace Library
 		{
 			int totalMembersCount;
 			//TODO maybe better use AsNotTracking
-			ControlsEnableFlag(false); //while data from db is loading all controls enabled set to false
+			controlsController.SetControlsEnableFlag(this.Controls, false); //while data from db is loading all controls enabled set to false
 			CancellationTokenSource = new CancellationTokenSource();
 			CancellationToken = CancellationTokenSource.Token;
 			Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(async () => //TODO async+await instead of Task and CancelationToken
@@ -160,20 +162,10 @@ namespace Library
 					if (pbMembers.IsDisposed) { return; }
 
 					this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
-					this.Invoke(ControlsEnableFlag, true); // after data load from db set all controls enabled true
+					controlsController.SetControlsEnableFlag(this.Controls, true); // after data load from db set all controls enabled true
 				}), CancellationToken); //TODO all invoke call exception if form isdisposed earlier than invokable method
 		}
-		void ControlsEnableFlag(bool flag) //TODO change name by more suitable
-										   //Set all controls enabled property according to flag
-		{
-			foreach (Control item in this.Controls)
-			{
-				this.Invoke(new Action(() =>
-				{
-					item.Enabled = flag;
-				}));
-			}
-		}
+		
 		private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			this.Close();
