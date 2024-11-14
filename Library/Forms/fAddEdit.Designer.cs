@@ -48,50 +48,56 @@
 			TBName = new TextBox();
 			MTBAdress = new MaskedTextBox();
 			BUpdateMember = new Button();
+			AdressLabelHint = new Label();
 			((System.ComponentModel.ISupportInitialize)pbPhoto).BeginInit();
 			SuspendLayout();
 			// 
 			// TBSurname
 			// 
-			TBSurname.Location = new Point(12, 50);
+			TBSurname.Location = new Point(14, 67);
+			TBSurname.Margin = new Padding(3, 4, 3, 4);
 			TBSurname.Name = "TBSurname";
-			TBSurname.Size = new Size(100, 23);
+			TBSurname.Size = new Size(114, 27);
 			TBSurname.TabIndex = 1;
 			TBSurname.Click += TextBoxBase_OnClick;
 			TBSurname.Enter += TextBoxBase_OnFocusEnter;
 			// 
 			// TBPatronymic
 			// 
-			TBPatronymic.Location = new Point(12, 88);
+			TBPatronymic.Location = new Point(14, 117);
+			TBPatronymic.Margin = new Padding(3, 4, 3, 4);
 			TBPatronymic.Name = "TBPatronymic";
-			TBPatronymic.Size = new Size(100, 23);
+			TBPatronymic.Size = new Size(114, 27);
 			TBPatronymic.TabIndex = 2;
 			TBPatronymic.Click += TextBoxBase_OnClick;
 			TBPatronymic.Enter += TextBoxBase_OnFocusEnter;
 			// 
 			// TBAge
 			// 
-			TBAge.Location = new Point(12, 164);
+			TBAge.Location = new Point(14, 219);
+			TBAge.Margin = new Padding(3, 4, 3, 4);
 			TBAge.Name = "TBAge";
-			TBAge.Size = new Size(100, 23);
+			TBAge.Size = new Size(114, 27);
 			TBAge.TabIndex = 4;
 			TBAge.Click += TextBoxBase_OnClick;
 			TBAge.Enter += TextBoxBase_OnFocusEnter;
 			// 
 			// pbPhoto
 			// 
-			pbPhoto.Location = new Point(230, 12);
+			pbPhoto.Location = new Point(263, 16);
+			pbPhoto.Margin = new Padding(3, 4, 3, 4);
 			pbPhoto.Name = "pbPhoto";
-			pbPhoto.Size = new Size(270, 289);
+			pbPhoto.Size = new Size(309, 385);
 			pbPhoto.SizeMode = PictureBoxSizeMode.StretchImage;
 			pbPhoto.TabIndex = 9;
 			pbPhoto.TabStop = false;
 			// 
 			// BSelectPhoto
 			// 
-			BSelectPhoto.Location = new Point(314, 307);
+			BSelectPhoto.Location = new Point(359, 409);
+			BSelectPhoto.Margin = new Padding(3, 4, 3, 4);
 			BSelectPhoto.Name = "BSelectPhoto";
-			BSelectPhoto.Size = new Size(101, 23);
+			BSelectPhoto.Size = new Size(115, 31);
 			BSelectPhoto.TabIndex = 8;
 			BSelectPhoto.Text = "Select photo*";
 			BSelectPhoto.UseVisualStyleBackColor = true;
@@ -99,9 +105,10 @@
 			// 
 			// BAddMember
 			// 
-			BAddMember.Location = new Point(12, 336);
+			BAddMember.Location = new Point(14, 448);
+			BAddMember.Margin = new Padding(3, 4, 3, 4);
 			BAddMember.Name = "BAddMember";
-			BAddMember.Size = new Size(119, 46);
+			BAddMember.Size = new Size(136, 61);
 			BAddMember.TabIndex = 9;
 			BAddMember.Text = "Add member";
 			BAddMember.UseVisualStyleBackColor = true;
@@ -110,91 +117,93 @@
 			// label1
 			// 
 			label1.AutoSize = true;
-			label1.Location = new Point(118, 15);
+			label1.Location = new Point(135, 20);
 			label1.Name = "label1";
-			label1.Size = new Size(44, 15);
+			label1.Size = new Size(55, 20);
 			label1.TabIndex = 12;
 			label1.Text = "Name*";
 			// 
 			// label2
 			// 
 			label2.AutoSize = true;
-			label2.Location = new Point(118, 53);
+			label2.Location = new Point(135, 71);
 			label2.Name = "label2";
-			label2.Size = new Size(59, 15);
+			label2.Size = new Size(73, 20);
 			label2.TabIndex = 13;
 			label2.Text = "Surname*";
 			// 
 			// label3
 			// 
 			label3.AutoSize = true;
-			label3.Location = new Point(118, 91);
+			label3.Location = new Point(135, 121);
 			label3.Name = "label3";
-			label3.Size = new Size(68, 15);
+			label3.Size = new Size(82, 20);
 			label3.TabIndex = 14;
 			label3.Text = "Patronymic";
 			// 
 			// label4
 			// 
 			label4.AutoSize = true;
-			label4.Location = new Point(118, 129);
+			label4.Location = new Point(135, 172);
 			label4.Name = "label4";
-			label4.Size = new Size(27, 15);
+			label4.Size = new Size(34, 20);
 			label4.TabIndex = 15;
 			label4.Text = "IIN*";
 			// 
 			// label5
 			// 
 			label5.AutoSize = true;
-			label5.Location = new Point(118, 167);
+			label5.Location = new Point(135, 223);
 			label5.Name = "label5";
-			label5.Size = new Size(28, 15);
+			label5.Size = new Size(36, 20);
 			label5.TabIndex = 16;
 			label5.Text = "Age";
 			// 
 			// label6
 			// 
 			label6.AutoSize = true;
-			label6.Location = new Point(118, 205);
+			label6.Location = new Point(135, 273);
 			label6.Name = "label6";
-			label6.Size = new Size(56, 15);
+			label6.Size = new Size(70, 20);
 			label6.TabIndex = 17;
 			label6.Text = "Birthday*";
 			// 
 			// label7
 			// 
 			label7.AutoSize = true;
-			label7.Location = new Point(118, 243);
+			label7.Location = new Point(135, 324);
 			label7.Name = "label7";
-			label7.Size = new Size(42, 15);
+			label7.Size = new Size(53, 20);
 			label7.TabIndex = 18;
 			label7.Text = "Adress";
 			// 
 			// label8
 			// 
 			label8.AutoSize = true;
-			label8.Location = new Point(118, 281);
+			label8.Location = new Point(135, 380);
 			label8.Name = "label8";
-			label8.Size = new Size(86, 15);
+			label8.Size = new Size(105, 20);
 			label8.TabIndex = 19;
 			label8.Text = "Phone number";
 			// 
 			// MTBPhoneNumber
 			// 
-			MTBPhoneNumber.Location = new Point(12, 278);
+			MTBPhoneNumber.Location = new Point(14, 376);
+			MTBPhoneNumber.Margin = new Padding(3, 4, 3, 4);
 			MTBPhoneNumber.Mask = "+7(999) 000-0000";
 			MTBPhoneNumber.Name = "MTBPhoneNumber";
-			MTBPhoneNumber.Size = new Size(100, 23);
+			MTBPhoneNumber.Size = new Size(114, 27);
 			MTBPhoneNumber.TabIndex = 7;
 			MTBPhoneNumber.Click += TextBoxBase_OnClick;
 			MTBPhoneNumber.Enter += TextBoxBase_OnFocusEnter;
 			// 
 			// MTBBirthday
 			// 
-			MTBBirthday.Location = new Point(12, 202);
+			MTBBirthday.Location = new Point(14, 269);
+			MTBBirthday.Margin = new Padding(3, 4, 3, 4);
 			MTBBirthday.Mask = "00/00/0000";
 			MTBBirthday.Name = "MTBBirthday";
-			MTBBirthday.Size = new Size(100, 23);
+			MTBBirthday.Size = new Size(114, 27);
 			MTBBirthday.TabIndex = 5;
 			MTBBirthday.ValidatingType = typeof(DateTime);
 			MTBBirthday.Click += TextBoxBase_OnClick;
@@ -202,10 +211,11 @@
 			// 
 			// MTBIIN
 			// 
-			MTBIIN.Location = new Point(12, 126);
+			MTBIIN.Location = new Point(14, 168);
+			MTBIIN.Margin = new Padding(3, 4, 3, 4);
 			MTBIIN.Mask = "000000000000";
 			MTBIIN.Name = "MTBIIN";
-			MTBIIN.Size = new Size(100, 23);
+			MTBIIN.Size = new Size(114, 27);
 			MTBIIN.TabIndex = 3;
 			MTBIIN.ValidatingType = typeof(int);
 			MTBIIN.Click += TextBoxBase_OnClick;
@@ -213,35 +223,48 @@
 			// 
 			// TBName
 			// 
-			TBName.Location = new Point(12, 12);
+			TBName.Location = new Point(14, 16);
+			TBName.Margin = new Padding(3, 4, 3, 4);
 			TBName.Name = "TBName";
-			TBName.Size = new Size(100, 23);
+			TBName.Size = new Size(114, 27);
 			TBName.TabIndex = 0;
 			TBName.Click += TextBoxBase_OnClick;
 			TBName.Enter += TextBoxBase_OnFocusEnter;
 			// 
 			// MTBAdress
 			// 
-			MTBAdress.Location = new Point(12, 240);
+			MTBAdress.Location = new Point(14, 320);
+			MTBAdress.Margin = new Padding(3, 4, 3, 4);
 			MTBAdress.Name = "MTBAdress";
-			MTBAdress.Size = new Size(100, 23);
+			MTBAdress.Size = new Size(114, 27);
 			MTBAdress.TabIndex = 6;
 			// 
 			// BUpdateMember
 			// 
-			BUpdateMember.Location = new Point(212, 336);
+			BUpdateMember.Location = new Point(242, 448);
+			BUpdateMember.Margin = new Padding(3, 4, 3, 4);
 			BUpdateMember.Name = "BUpdateMember";
-			BUpdateMember.Size = new Size(119, 46);
+			BUpdateMember.Size = new Size(136, 61);
 			BUpdateMember.TabIndex = 10;
 			BUpdateMember.Text = "Update member";
 			BUpdateMember.UseVisualStyleBackColor = true;
 			BUpdateMember.Click += BUpdateMember_Click;
 			// 
+			// AdressLabelHint
+			// 
+			AdressLabelHint.AutoSize = true;
+			AdressLabelHint.Location = new Point(2, 351);
+			AdressLabelHint.Name = "AdressLabelHint";
+			AdressLabelHint.Size = new Size(267, 20);
+			AdressLabelHint.TabIndex = 20;
+			AdressLabelHint.Text = "Adress must be like Amangeldy 192-13";
+			// 
 			// FaddEdit_prop
 			// 
-			AutoScaleDimensions = new SizeF(7F, 15F);
+			AutoScaleDimensions = new SizeF(8F, 20F);
 			AutoScaleMode = AutoScaleMode.Font;
-			ClientSize = new Size(515, 394);
+			ClientSize = new Size(579, 525);
+			Controls.Add(AdressLabelHint);
 			Controls.Add(BUpdateMember);
 			Controls.Add(MTBAdress);
 			Controls.Add(MTBIIN);
@@ -262,6 +285,7 @@
 			Controls.Add(TBPatronymic);
 			Controls.Add(TBSurname);
 			Controls.Add(TBName);
+			Margin = new Padding(3, 4, 3, 4);
 			Name = "FaddEdit_prop";
 			((System.ComponentModel.ISupportInitialize)pbPhoto).EndInit();
 			ResumeLayout(false);
@@ -289,5 +313,6 @@
         private TextBox TBName;
         private MaskedTextBox MTBAdress;
         private Button BUpdateMember;
-    }
+		private Label AdressLabelHint;
+	}
 }

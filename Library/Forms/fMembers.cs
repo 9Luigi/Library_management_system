@@ -88,14 +88,13 @@ namespace Library
 			if (e.Button == MouseButtons.Right && e.RowIndex > -1 && e.ColumnIndex == 0)
 			{
 				dataGridViewForMembers.CurrentCell = dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
-				//TODO click to column name == Exception
 				Point relativeCursorPosition = dataGridViewForMembers.PointToClient(Cursor.Position);
 				cmMember.Show(dataGridViewForMembers, relativeCursorPosition);
 				//if clicked by right button cell is IIN then popup menu executes
 			}
 		}
 
-		private void TbIINSearch_TextChanged(object sender, EventArgs e) //TODO logic when lenght <3
+		private void TbIINSearch_TextChanged(object sender, EventArgs e) 
 		{
 			using LibraryContextForEFcore db = new();
 			if (TbIINSearch.Text.Length > 3)
@@ -163,7 +162,7 @@ namespace Library
 
 					this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
 					await controlsController.SetControlsEnableFlag(this, this.Controls, true); // after data load from db set all controls enabled true
-				}), CancellationToken); //TODO all invoke call exception if form isdisposed earlier than invokable method
+				}), CancellationToken);
 		}
 
 		private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
