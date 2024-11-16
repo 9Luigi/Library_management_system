@@ -1,16 +1,16 @@
 namespace Library
 {
-	public partial class FMain : Form
+	public partial class FormMain : Form
 	{
-		public FMain()
+		public FormMain()
 		{
 			InitializeComponent();
 			this.FormBorderStyle = FormBorderStyle.FixedSingle;
 			this.MaximizeBox = false;
 			this.MinimizeBox = true;
-			FM = new FMembers();
+			FM = new FormMembers();
 		}
-		internal FMembers FM { get; private set; }
+		internal FormMembers FM { get; private set; }
 		private void bCatalog_Click(object sender, EventArgs e)
 		{
 

@@ -1,6 +1,6 @@
 ﻿namespace Library
 {
-    partial class FCatalog
+    partial class FormCatalog
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
 		private void InitializeComponent()
 		{
 			components = new System.ComponentModel.Container();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FCatalog));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormCatalog));
 			menuStrip1 = new MenuStrip();
 			memberToolStripMenuItem = new ToolStripMenuItem();
 			addMemberToolStripMenuItem = new ToolStripMenuItem();

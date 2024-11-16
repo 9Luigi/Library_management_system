@@ -1,14 +1,15 @@
 ﻿using Library.Controllers;
 using Library.Models;
+using Library.Properties;
 using Microsoft.EntityFrameworkCore;
 using System.Windows.Forms;
-using static Library.FMembers;
+using static Library.FormMembers;
 
 namespace Library
 {
     public partial class FaddEdit_prop : Form
     {
-        byte[]? Photo { get; set; }
+        byte[]? PhotoAsBytes { get; set; }
         public FaddEdit_prop()
         {
             MemberCreateOrUpdateEvent += ActionRequested; //subscribe to event, event is invoked on update/create calls
@@ -18,22 +19,9 @@ namespace Library
         internal Member? MemberToEdit { get; set; }
         private void BSelectPhoto_Click(object sender, EventArgs e)
         {
-            OpenFileDialog fd = new();
-            fd.ShowDialog();
-            var photo = Image.FromFile(fd.FileName);
-			double aspectRatio = (double)photo.Width / photo.Height;
-			double requiredAspectRatio = 3.0 / 4.0;
-			if (Math.Abs(aspectRatio - requiredAspectRatio) > 0.01)
-			{
-				MessageBox.Show("Photo might be 3:4");
-			}
-			else
-			{
-				pbPhoto.Image = photo;
-				Photo = File.ReadAllBytes(fd.FileName);
-			}
-			
-            fd.Dispose();
+            var photo = PictureController.GetImageFromFileDialog();
+            pbPhoto.Image = photo is Image ? photo : Resources.NoImage;
+			PhotoAsBytes = photo is Image ? PictureController.ImageToByteConvert(photo) : null;
         }
 
         private void BAddMember_Click(object sender, EventArgs e)
@@ -49,7 +37,7 @@ namespace Library
         }
         private void TextBoxBase_OnClick(object sender, EventArgs e)
         {
-            //TODO think about it
+            
         }
         internal void ActionRequested(MemberEventArgs e)
         {//handle create/update event
@@ -143,9 +131,9 @@ namespace Library
                             TBSurname.Text,
                             DateTime.Parse(MTBBirthday.Text),
                             MTBAdress.Text,
-                            Convert.ToInt64(MTBIIN.Text), //TODO better parse long?
+                            Convert.ToInt64(MTBIIN.Text),
                             MTBPhoneNumber.Text,
-                            Photo!,
+							PhotoAsBytes!,
                             CheckIfHasPatronymic(TBPatronymic.Text)
                         );
                     db.Add(createdMember);
@@ -185,7 +173,7 @@ namespace Library
                     MemberToEdit.BirthDay = DateTime.Parse(MTBBirthday.Text);
                     MemberToEdit.Adress = MTBAdress.Text;
                     MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
-                    MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);//TODO Check null
+                    MemberToEdit.Photo = pbPhoto.Image == null ? PictureController.ImageToByteConvert(pbPhoto.Image!) : null;//null not possible?
                     MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
                     try
                     {

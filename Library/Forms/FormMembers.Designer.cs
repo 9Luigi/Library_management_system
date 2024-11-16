@@ -1,6 +1,6 @@
 ﻿namespace Library
 {
-    partial class FMembers
+    partial class FormMembers
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
 		private void InitializeComponent()
 		{
 			components = new System.ComponentModel.Container();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FMembers));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMembers));
 			menuStrip1 = new MenuStrip();
 			memberToolStripMenuItem = new ToolStripMenuItem();
 			addMemberToolStripMenuItem = new ToolStripMenuItem();

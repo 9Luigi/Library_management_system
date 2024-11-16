@@ -8,18 +8,41 @@ namespace Library.Controllers
 {
     static internal class PictureController
     {
-        internal static byte[] ImageToByteConvert(Image img)
+		internal static byte[] ImageToByteConvert(Image img)
         {//without this method if image don't changes via filedialog while editing exceptions trows
-            byte[] byteArray = new byte[0];
-            using (MemoryStream stream = new MemoryStream())
-            {
-                Bitmap bitmap = new Bitmap(img);
-                bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                stream.Close();
+			try
+			{
+				byte[] byteArray = new byte[0];
+				using (MemoryStream stream = new MemoryStream())
+				{
+					Bitmap bitmap = new Bitmap(img);
+					bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+					stream.Close();
 
-                byteArray = stream.ToArray();
-            }
-            return byteArray;
+					byteArray = stream.ToArray();
+				}
+				return byteArray;
+			}
+			catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); return null; }
         }
+		internal static Image GetImageFromFileDialog()
+		{
+			using OpenFileDialog fd = new();
+			fd.ShowDialog();
+			var photo = Image.FromFile(fd.FileName); 
+			//TODO out of memory exception
+			//TODO format check
+			double aspectRatio = (double)photo.Width / photo.Height;
+			double requiredAspectRatio = 3.0 / 4.0; //TODO add variants
+			if (Math.Abs(aspectRatio - requiredAspectRatio) > 0.01)
+			{
+				MessageBox.Show("Photo might be 3:4");
+				return null;
+			}
+			else
+			{
+				return photo;
+			}
+		}
     }
 }

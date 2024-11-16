@@ -9,13 +9,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static Library.FMembers;
+using static Library.FormMembers;
 
 namespace Library
 {
-    public partial class FBorrowOrRecieveBook : Form
+    public partial class FormBorrowOrRecieveBook : Form
     {
-        public FBorrowOrRecieveBook()
+        public FormBorrowOrRecieveBook()
         {
             MemberCreateOrUpdateEvent += SelectBooksByIIN;
             InitializeComponent();

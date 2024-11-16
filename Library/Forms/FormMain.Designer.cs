@@ -1,6 +1,6 @@
 ﻿namespace Library
 {
-    partial class FMain
+    partial class FormMain
     {
         /// <summary>
         ///  Required designer variable.
@@ -28,7 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FMain));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
 			bCatalog = new Button();
 			bMembers = new Button();
 			pbCatalog = new PictureBox();

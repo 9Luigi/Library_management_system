@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace Library
 {
-    public partial class FCatalog : Form
+    public partial class FormCatalog : Form
     {
-        public FCatalog()
+        public FormCatalog()
         {
             InitializeComponent();
         }

@@ -5,12 +5,12 @@ using System.Data;
 
 namespace Library
 {
-	public partial class FMembers : Form
+	public partial class FormMembers : Form
 	{
-		public FMembers()
+		public FormMembers()
 		{
 			InitializeComponent();
-			FlendOrRecieveBook = new FBorrowOrRecieveBook();
+			FlendOrRecieveBook = new FormBorrowOrRecieveBook();
 			FaddEdit_prop = new FaddEdit_prop();
 		}
 		internal class MemberEventArgs : EventArgs //for transfer IIN and Action to other forms via event
@@ -23,8 +23,7 @@ namespace Library
 				Action = action;
 			}
 		}
-
-		internal FBorrowOrRecieveBook FlendOrRecieveBook { get; private set; }
+		internal FormBorrowOrRecieveBook FlendOrRecieveBook { get; private set; }
 		internal FaddEdit_prop FaddEdit_prop { get; private set; }
 		internal long IIN { get; set; }
 		internal CancellationTokenSource? CancellationTokenSource { get; set; }
@@ -33,26 +32,25 @@ namespace Library
 		static internal event MemberCreateOrUpdateDelegate? MemberCreateOrUpdateEvent;
 
 		ControlsController controlsController = new();
-		private void AddMemberToolStripMenuItem_Click(object sender, EventArgs e)
+		private async void AddMemberToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			//Transfer data to FaddEdit_prop form, subscribed to MemberCreateOrUpdateEvent on FaddEdit_prop constructor
 			MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("CREATE"));
 			FaddEdit_prop.ShowDialog();
-			RefreshDataGridForMembers();
-
+			await RefreshDataGridForMembers();
 		}
-		private void FMembers_Load(object sender, EventArgs e)
+		private async void FMembers_Load(object sender, EventArgs e)
 		{
-			RefreshDataGridForMembers();
+			await RefreshDataGridForMembers();
 		}
-		private void EditToolStripMenuItem_Click(object sender, EventArgs e)
+		private async void EditToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			(bool b, long i) = IsIIN_Clicked(IIN);
 			if (b)
 			{
 				MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("EDIT", i));
 				FaddEdit_prop.ShowDialog();
-				RefreshDataGridForMembers();
+				await RefreshDataGridForMembers();
 			}
 		}
 
@@ -61,7 +59,7 @@ namespace Library
 			(bool b, long i) = IsIIN_Clicked(IIN);
 			if (b)
 			{
-				Task deleteMember = new TaskFactory().StartNew(new Action(() =>
+				 Task deleteMember = new TaskFactory().StartNew(new  Action(async () =>
 				{
 					using LibraryContextForEFcore db = new();
 					Member? memberToDelete = db.Members.FirstOrDefault(m => m.IIN == i);
@@ -71,7 +69,7 @@ namespace Library
 					{
 						if (db.SaveChanges() > 0)
 						{
-							RefreshDataGridForMembers();
+							await RefreshDataGridForMembers();
 							MessageBox.Show("Member succesfully removed");
 						}
 					}
@@ -94,7 +92,7 @@ namespace Library
 			}
 		}
 
-		private void TbIINSearch_TextChanged(object sender, EventArgs e) 
+		private void TbIINSearch_TextChanged(object sender, EventArgs e)
 		{
 			using LibraryContextForEFcore db = new();
 			if (TbIINSearch.Text.Length > 3)
@@ -178,18 +176,18 @@ namespace Library
 			TbIINSearch.Text = "";
 		}
 
-		private void LeToolStripMenuItem_Click(object sender, EventArgs e)
+		private async void LeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			(bool b, long i) = IsIIN_Clicked(IIN);
 			if (b)
 			{
 				MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("BORROW", i));
 				FlendOrRecieveBook.ShowDialog();
-				RefreshDataGridForMembers();
+				await RefreshDataGridForMembers();
 			}
 		}
 
-		private void SeeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)//borrowed books*
+		private async void SeeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)//borrowed books*
 		{
 			//this method checked selected member for borrowed books and if true sends data to another form
 			(bool b, long i) = IsIIN_Clicked(IIN);
@@ -212,7 +210,7 @@ namespace Library
 				{
 					MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("RETURN", i));
 					FlendOrRecieveBook.ShowDialog();
-					RefreshDataGridForMembers();
+					await RefreshDataGridForMembers();
 				}
 				else
 				{
