@@ -10,6 +10,7 @@ namespace Library
 		public FormMembers()
 		{
 			InitializeComponent();
+			CancellationTokenSource = new CancellationTokenSource();
 			FlendOrRecieveBook = new FormBorrowOrRecieveBook();
 			FaddEdit_prop = new FaddEdit_prop();
 		}
@@ -26,7 +27,7 @@ namespace Library
 		internal FormBorrowOrRecieveBook FlendOrRecieveBook { get; private set; }
 		internal FaddEdit_prop FaddEdit_prop { get; private set; }
 		internal long IIN { get; set; }
-		internal CancellationTokenSource? CancellationTokenSource { get; set; }
+		internal CancellationTokenSource CancellationTokenSource { get; set; }
 		internal CancellationToken CancellationToken { get; set; }
 		internal delegate void MemberCreateOrUpdateDelegate(MemberEventArgs e);
 		static internal event MemberCreateOrUpdateDelegate? MemberCreateOrUpdateEvent;
@@ -122,7 +123,6 @@ namespace Library
 			int totalMembersCount;
 			//TODO maybe better use AsNotTracking
 			await controlsController.SetControlsEnableFlag(this, this.Controls, false); //while data from db is loading all controls enabled set to false
-			CancellationTokenSource = new CancellationTokenSource();
 			CancellationToken = CancellationTokenSource.Token;
 			Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(async () => //TODO async+await instead of Task and CancelationToken
 				{
@@ -143,6 +143,7 @@ namespace Library
 							m.Age,
 							Books = string.Join(", ", m.Books.Select(b => b.Title)),
 						}).ToList();
+						if (pbMembers.IsDisposed) { return; }
 						if (CancellationToken.IsCancellationRequested) { return; }
 						await ProgressBarController.pbProgressCgange(this, pbMembers, 25, 50);
 						this.Invoke(new Action(() =>
@@ -150,6 +151,7 @@ namespace Library
 							dataGridViewForMembers.DataSource = users; //TODO error catch or logic to avoid/ avoid what? null?
 							DataGridViewController.CustomizeDataGridView(dataGridViewForMembers);
 						}));
+						if (pbMembers.IsDisposed) { return; }
 						if (CancellationToken.IsCancellationRequested) { return; }
 						await ProgressBarController.pbProgressCgange(this, pbMembers, 50, 100);
 					}

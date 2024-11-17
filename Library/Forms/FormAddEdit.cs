@@ -1,4 +1,5 @@
 ﻿using Library.Controllers;
+using Library.Controllers.PictureController;
 using Library.Models;
 using Library.Properties;
 using Microsoft.EntityFrameworkCore;
@@ -19,9 +20,9 @@ namespace Library
         internal Member? MemberToEdit { get; set; }
         private void BSelectPhoto_Click(object sender, EventArgs e)
         {
-            var photo = PictureController.GetImageFromFileDialog();
-            pbPhoto.Image = photo is Image ? photo : Resources.NoImage;
-			PhotoAsBytes = photo is Image ? PictureController.ImageToByteConvert(photo) : null;
+            var photo = PictureController.GetImageFromFile(); //opens file dialog and get image if capture success
+            pbPhoto.Image = photo is Image ? photo : Resources.NoImage; //show captured photo if capture was success
+			PhotoAsBytes = photo is Image ? PictureController.ImageToByteConvert(photo) : null; //convert photo to bytes array for transit to database
         }
 
         private void BAddMember_Click(object sender, EventArgs e)
