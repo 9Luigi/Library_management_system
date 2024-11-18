@@ -9,7 +9,7 @@ namespace Library.Controllers.PictureController
 	static internal class PictureController
 	{
 		internal static byte[] ImageToByteConvert(Image img)
-		{//without this method if image don't changes via filedialog while editing exceptions trows
+		{
 			try
 			{
 				byte[] byteArray = new byte[0];
@@ -36,12 +36,10 @@ namespace Library.Controllers.PictureController
 				if (string.IsNullOrEmpty(fd.FileName) || result != DialogResult.OK) return null;
 				var photo = Image.FromFile(fd.FileName);
 
-				double aspectRatio = (double)photo.Height / photo.Width;
-				photo = CorrectImageOrientation(photo);
+				double aspectRatio = (double)photo.Height / photo.Width; 
+				photo = CorrectImageOrientation(photo); //restrict photo rotation
 
-				/* var one = aspectRatio - AspectRatioRequirement.ThreeToFour;
-				var two = aspectRatio - AspectRatioRequirement.FourToFive;*/ //Debug
-				if (Math.Abs(aspectRatio - AspectRatioRequirement.ThreeToFour) > 0.01
+				if (Math.Abs(aspectRatio - AspectRatioRequirement.ThreeToFour) > 0.01 //check photo aspect ratio
 					&& Math.Abs(aspectRatio - AspectRatioRequirement.FourToFive) > 0.01)
 				{
 					MessageBox.Show("Photo might be 3:4 / 6:8 / 4:5"); //3:4 == 6:8
@@ -63,7 +61,7 @@ namespace Library.Controllers.PictureController
 				return null;
 			}
 		}
-		private static Image CorrectImageOrientation(Image image)
+		private static Image CorrectImageOrientation(Image image) //if photo has EXIF orientation tag it could rotate, this method restrict that behavior
 		{
 			const int orientationTag = 0x0112; // EXIF tag for orientation
 			if (image.PropertyIdList.Contains(orientationTag))
@@ -93,4 +91,3 @@ namespace Library.Controllers.PictureController
 		}
 	}
 }
-//TODO comment code
