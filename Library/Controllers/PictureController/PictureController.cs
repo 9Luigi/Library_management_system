@@ -15,15 +15,13 @@ namespace Library.Controllers.PictureController
 				byte[] byteArray = new byte[0];
 				using (MemoryStream stream = new MemoryStream())
 				{
-					Bitmap bitmap = new Bitmap(img);
-					bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-					stream.Close();
-
+					using (Bitmap bitmap = new Bitmap(img)) { bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png); }
 					byteArray = stream.ToArray();
+					stream.Close();
 				}
 				return byteArray;
 			}
-			catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); return null; }
+			catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); return null!; }
 		}
 		internal static Image? GetImageFromFile()
 		{

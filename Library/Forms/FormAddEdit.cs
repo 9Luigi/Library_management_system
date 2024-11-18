@@ -25,11 +25,11 @@ namespace Library
 			PhotoAsBytes = photo is Image ? PictureController.ImageToByteConvert(photo) : PictureController.ImageToByteConvert(Resources.NoImage); //convert photo to bytes array for transit to database
 		}
 
-		private void BAddMember_Click(object sender, EventArgs e)
+		private async void BAddMember_Click(object sender, EventArgs e)
 		{
 			if (CheckFieldsBeforeAction())
 			{
-				ActionWithMember("CREATE");
+				await ActionWithMember("CREATE");
 			}
 		}
 		private void TextBoxBase_OnFocusEnter(object sender, EventArgs e)
@@ -40,7 +40,7 @@ namespace Library
 		{
 
 		}
-		internal void ActionRequested(MemberEventArgs e)
+		internal async void ActionRequested(MemberEventArgs e)
 		{//handle create/update event
 			switch (e.Action)
 			{
@@ -54,7 +54,7 @@ namespace Library
 					{
 						try
 						{
-							MemberToEdit = db.Members.FirstOrDefault(m => m.IIN == e.IIN);
+							MemberToEdit = await db.Members.FirstOrDefaultAsync(m => m.IIN == e.IIN);
 						}
 						catch (Exception)
 						{
@@ -120,7 +120,7 @@ namespace Library
 				return "None";
 			}
 		}
-		private void ActionWithMember(string operation)
+		private async Task ActionWithMember(string operation)
 		{
 			using LibraryContextForEFcore db = new();
 			switch (operation)
@@ -137,8 +137,8 @@ namespace Library
 							PhotoAsBytes!,
 							CheckIfHasPatronymic(TBPatronymic.Text)
 						);
-					db.Add(createdMember);
-					int answer = db.SaveChanges();
+					await db.AddAsync(createdMember);
+					int answer = await db.SaveChangesAsync();
 					try
 					{
 						if (answer == 1)
@@ -185,7 +185,7 @@ namespace Library
 							MessageBox.Show("You did't change member's fields");
 							return;
 						}
-						int result = db.SaveChanges();
+						int result = await db.SaveChangesAsync();
 
 						if (result == 1)
 						{
@@ -214,11 +214,11 @@ namespace Library
 			}
 		}
 
-		private void BUpdateMember_Click(object sender, EventArgs e)
+		private async void BUpdateMember_Click(object sender, EventArgs e)
 		{
 			if (CheckFieldsBeforeAction())
 			{
-				ActionWithMember("UPDATE");
+				await ActionWithMember("UPDATE");
 			}
 		}
 	}

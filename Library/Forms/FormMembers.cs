@@ -118,7 +118,7 @@ namespace Library
 				dataGridViewForMembers.DataSource = users;
 			}
 		}
-		private async Task RefreshDataGridForMembers() //TODO maybe better don't close connection after each operation?
+		private async Task RefreshDataGridForMembers() //TODO think about transactions when remove or update entities
 		{
 			int totalMembersCount;
 			//TODO maybe better use AsNotTracking

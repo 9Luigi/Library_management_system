@@ -8,13 +8,28 @@ namespace Library.Controllers
 {
 	class ControlsController
 	{
-		internal async Task SetControlsEnableFlag(Form invokerForm, Control.ControlCollection controls, bool flag) //Set all controls enabled property according to flag //await in other class
+		internal async Task SetControlsEnableFlag(Form invokerForm, Control.ControlCollection controls, bool flag)
 		{
-			invokerForm.Invoke(new Action(() =>
+			await Task.Run(() =>
 			{
-				foreach (Control item in controls)
-					item.Enabled = flag;
-			}));
+				invokerForm.Invoke(new Action(() =>
+				{
+					SetEnabledRecursive(controls, flag);
+				}));
+			});
+		}
+		
+		private void SetEnabledRecursive(Control.ControlCollection controls, bool flag)//recursion
+		{
+			foreach (Control item in controls)
+			{
+				item.Enabled = flag;
+
+				if (item.HasChildren)
+				{
+					SetEnabledRecursive(item.Controls, flag);
+				}
+			}
 		}
 	}
 }
