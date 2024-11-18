@@ -8,6 +8,6 @@ namespace Library
 {
     internal class Repository
     {
-        //TODO to write
+        //TODO to write, via abstract class or interfaces
     }
 }
