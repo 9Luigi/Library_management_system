@@ -172,6 +172,7 @@ namespace Library
 					MemberToEdit!.Name = TBName.Text;
 					MemberToEdit.Surname = TBSurname.Text;
 					MemberToEdit.BirthDay = DateTime.Parse(MTBBirthday.Text);
+					MemberToEdit.Age = byte.Parse(TBAge.Text);
 					MemberToEdit.Adress = MTBAdress.Text;
 					MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
 					MemberToEdit.Photo = pbPhoto.Image != null ? PictureController.ImageToByteConvert(pbPhoto.Image!) : null;//null not possible?

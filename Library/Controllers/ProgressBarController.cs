@@ -11,7 +11,7 @@ namespace Library.Controllers
 			await Task.Run(() =>
 			{
 
-				pb.Visible = true;
+				invokeBy.Invoke(new Action(() => { pb.Visible = true; }));
 				for (int i = startValue; i < finalValue; i++)
 				{
 					Task.Delay(100);
