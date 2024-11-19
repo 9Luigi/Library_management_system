@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Library.Controllers.PictureController;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,6 +35,41 @@ namespace Library.Controllers
                 return false;
             }
             else return true;
-        }
+		}
+		//TODO to adopt
+		/*//{private bool UpdateField<T>(ref T field, T newValue)
+{
+    if (!EqualityComparer<T>.Default.Equals(field, newValue))
+    {
+        field = newValue;
+        return true;
     }
+    return false;
+}
+
+try
+{
+	bool hasChanges = false;
+
+	// Применяем обновления только если есть изменения
+	hasChanges |= UpdateField(ref MemberToEdit.Name, TBName.Text);
+	hasChanges |= UpdateField(ref MemberToEdit.Surname, TBSurname.Text);
+	hasChanges |= UpdateField(ref MemberToEdit.BirthDay, DateTime.Parse(MTBBirthday.Text));
+	hasChanges |= UpdateField(ref MemberToEdit.Age, byte.Parse(TBAge.Text));
+	hasChanges |= UpdateField(ref MemberToEdit.Adress, MTBAdress.Text);
+	hasChanges |= UpdateField(ref MemberToEdit.PhoneNumber, MTBPhoneNumber.Text);
+
+	var newPhoto = pbPhoto.Image != null ? PictureController.ImageToByteConvert(pbPhoto.Image!) : null;
+	hasChanges |= UpdateField(ref MemberToEdit.Photo, newPhoto);
+
+	hasChanges |= UpdateField(ref MemberToEdit.Patronymic, CheckIfHasPatronymic(TBPatronymic.Text));
+
+	// Если нет изменений, выходим
+	if (!hasChanges)
+	{
+		MessageBox.Show("You didn't change member's fields");
+		return;
+	}
+}*/
+	}
 }
