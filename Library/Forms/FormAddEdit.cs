@@ -168,7 +168,15 @@ namespace Library
 					break;
 				case "UPDATE":
 					BAddMember.Enabled = false; //TODO change age by IIN deconstruction
-					db.Attach(MemberToEdit!);
+					if (!HasMemberChanged(MemberToEdit!, TBName.Text, TBSurname.Text, CheckIfHasPatronymic(TBPatronymic.Text),
+					  DateTime.Parse(MTBBirthday.Text), byte.Parse(TBAge.Text), MTBAdress.Text, MTBPhoneNumber.Text,
+					  PictureController.ImageToByteConvert(pbPhoto.Image)))
+					{
+						db.Entry(MemberToEdit).State = EntityState.Unchanged;
+						MessageBox.Show("You did't change member's fields");
+						return;
+					}
+					db.Attach(MemberToEdit!); //TODO save only changed fields
 					MemberToEdit!.Name = TBName.Text;
 					MemberToEdit.Surname = TBSurname.Text;
 					MemberToEdit.BirthDay = DateTime.Parse(MTBBirthday.Text);
@@ -179,13 +187,7 @@ namespace Library
 					MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
 					try
 					{
-						var entry = db.Entry(MemberToEdit!);
-						bool hasChanges = entry.OriginalValues.Properties.Any(property => !Equals(entry.OriginalValues[property], entry.CurrentValues[property])); //check if fields change or not
-						if (!hasChanges)
-						{
-							MessageBox.Show("You did't change member's fields");
-							return;
-						}
+
 						int result = await db.SaveChangesAsync();
 
 						if (result == 1)
@@ -214,7 +216,18 @@ namespace Library
 					break;
 			}
 		}
-
+		private bool HasMemberChanged(Member member, string name, string surname, string patronymic, DateTime birthDay, byte age, string address, string phoneNumber, byte[]? photo)
+		{
+			return member.Name?.Trim().ToLower() != name.Trim().ToLower() ||
+				   member.Surname?.Trim().ToLower() != surname.Trim().ToLower() ||
+				   member.Patronymic?.Trim().ToLower() != patronymic.Trim().ToLower() ||
+				   member.BirthDay.Date != birthDay.Date ||
+				   member.Age != age ||
+				   member.Adress?.Trim().ToLower() != address.Trim().ToLower() ||
+				   member.PhoneNumber?.Trim() != phoneNumber.Trim() ||
+				   (member.Photo == null && photo != null) ||
+				   (member.Photo != null && !member.Photo.SequenceEqual(photo));
+		}
 		private async void BUpdateMember_Click(object sender, EventArgs e)
 		{
 			if (CheckFieldsBeforeAction())

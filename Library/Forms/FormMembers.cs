@@ -158,7 +158,7 @@ namespace Library
 					Thread.Sleep(500);
 
 					if (CancellationToken.IsCancellationRequested) { return; }
-					if (pbMembers.IsDisposed) { return; }
+					if (pbMembers.IsDisposed) { return; } //TOOD sometimes don't return and below section is invoked
 
 					this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
 					await controlsController.SetControlsEnableFlag(this, this.Controls, true); // after data load from db set all controls enabled true
