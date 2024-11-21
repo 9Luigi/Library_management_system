@@ -17,11 +17,15 @@ namespace Library.Controllers.PictureController
 				{
 					using (Bitmap bitmap = new Bitmap(img)) { bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png); }
 					byteArray = stream.ToArray();
-					stream.Close();
 				}
 				return byteArray;
 			}
-			catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); return null!; }
+			catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); return null; }
+		}
+		internal static Image ConvertByteToImage(byte[] imageByte)
+		{
+			using MemoryStream ms = new(imageByte!);
+			return Image.FromStream(ms);
 		}
 		internal static Image? GetImageFromFile()
 		{
@@ -34,11 +38,12 @@ namespace Library.Controllers.PictureController
 				if (string.IsNullOrEmpty(fd.FileName) || result != DialogResult.OK) return null;
 				var photo = Image.FromFile(fd.FileName);
 
-				double aspectRatio = (double)photo.Height / photo.Width; 
+				double aspectRatio = (double)photo.Width / photo.Height;
 				photo = CorrectImageOrientation(photo); //restrict photo rotation
 
 				if (Math.Abs(aspectRatio - AspectRatioRequirement.ThreeToFour) > 0.01 //check photo aspect ratio
-					&& Math.Abs(aspectRatio - AspectRatioRequirement.FourToFive) > 0.01)
+					&& Math.Abs(aspectRatio - AspectRatioRequirement.FourToFive) > 0.01
+					&& Math.Abs(aspectRatio - AspectRatioRequirement.TenToTwelve) > 0.01)
 				{
 					MessageBox.Show("Photo might be 3:4 / 6:8 / 4:5"); //3:4 == 6:8
 					return null;

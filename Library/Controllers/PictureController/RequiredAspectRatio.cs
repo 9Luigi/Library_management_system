@@ -10,5 +10,6 @@ namespace Library.Controllers.PictureController
 	{
 		public static double ThreeToFour = 3.0 / 4; 
 		public static double FourToFive = 4.0 / 5; 
+		public static double TenToTwelve = 10.0 / 12;
 	}
 }

@@ -69,14 +69,12 @@ namespace Library
 						MTBAdress.Text = MemberToEdit.Adress;
 						MTBPhoneNumber.Text = MemberToEdit.PhoneNumber;
 						byte[]? imageByte = MemberToEdit.Photo;
-						using MemoryStream ms = new(imageByte!);
-						try
+						if (imageByte == null) { pbPhoto.Image = Resources.NoImage; return; }
+						var photo = PictureController.ConvertByteToImage(imageByte);
+						if (photo is Image)
 						{
-							pbPhoto.Image = Image.FromStream(ms);
-						}
-						catch
-						{
-							pbPhoto.Image = Properties.Resources.NoImage;
+							pbPhoto.Image = photo;
+							return;
 						}
 					}
 					break;
@@ -168,7 +166,7 @@ namespace Library
 					break;
 				case "UPDATE":
 					BAddMember.Enabled = false; //TODO change age by IIN deconstruction
-					if (!HasMemberChanged(MemberToEdit!, TBName.Text, TBSurname.Text, CheckIfHasPatronymic(TBPatronymic.Text),
+					if (!CheckAndMarkChanges(db, MemberToEdit!, TBName.Text, TBSurname.Text, CheckIfHasPatronymic(TBPatronymic.Text),
 					  DateTime.Parse(MTBBirthday.Text), byte.Parse(TBAge.Text), MTBAdress.Text, MTBPhoneNumber.Text,
 					  PictureController.ImageToByteConvert(pbPhoto.Image)))
 					{
@@ -176,17 +174,16 @@ namespace Library
 						MessageBox.Show("You did't change member's fields");
 						return;
 					}
-					db.Attach(MemberToEdit!); //TODO save only changed fields
-					MemberToEdit!.Name = TBName.Text;
-					MemberToEdit.Surname = TBSurname.Text;
-					MemberToEdit.BirthDay = DateTime.Parse(MTBBirthday.Text);
-					MemberToEdit.Age = byte.Parse(TBAge.Text);
-					MemberToEdit.Adress = MTBAdress.Text;
-					MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
-					MemberToEdit.Photo = pbPhoto.Image != null ? PictureController.ImageToByteConvert(pbPhoto.Image!) : null;//null not possible?
-					MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
 					try
 					{
+						MemberToEdit!.Name = TBName.Text;
+						MemberToEdit.Surname = TBSurname.Text;
+						MemberToEdit.BirthDay = DateTime.Parse(MTBBirthday.Text);
+						MemberToEdit.Age = byte.Parse(TBAge.Text);
+						MemberToEdit.Adress = MTBAdress.Text;
+						MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
+						MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image!);//null not possible?
+						MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
 
 						int result = await db.SaveChangesAsync();
 
@@ -216,18 +213,61 @@ namespace Library
 					break;
 			}
 		}
-		private bool HasMemberChanged(Member member, string name, string surname, string patronymic, DateTime birthDay, byte age, string address, string phoneNumber, byte[]? photo)
+		private bool CheckAndMarkChanges(DbContext db, Member member, string name, string surname, string patronymic, DateTime birthDay, byte age, string address, string phoneNumber, byte[]? photo)
 		{
-			return member.Name?.Trim().ToLower() != name.Trim().ToLower() ||
-				   member.Surname?.Trim().ToLower() != surname.Trim().ToLower() ||
-				   member.Patronymic?.Trim().ToLower() != patronymic.Trim().ToLower() ||
-				   member.BirthDay.Date != birthDay.Date ||
-				   member.Age != age ||
-				   member.Adress?.Trim().ToLower() != address.Trim().ToLower() ||
-				   member.PhoneNumber?.Trim() != phoneNumber.Trim() ||
-				   (member.Photo == null && photo != null) ||
-				   (member.Photo != null && !member.Photo.SequenceEqual(photo));
+			bool hasChanged = false;
+
+			if (!string.Equals(member.Name?.Trim(), name?.Trim(), StringComparison.OrdinalIgnoreCase))
+			{
+				db.Entry(member).State = EntityState.Modified;
+				hasChanged = true;
+			}
+
+			if (!string.Equals(member.Surname?.Trim(), surname?.Trim(), StringComparison.OrdinalIgnoreCase))
+			{
+				db.Entry(member).State = EntityState.Modified;
+				hasChanged = true;
+			}
+
+			if (!string.Equals(member.Patronymic?.Trim(), patronymic?.Trim(), StringComparison.OrdinalIgnoreCase))
+			{
+				db.Entry(member).State = EntityState.Modified;
+				hasChanged = true;
+			}
+
+			if (member.BirthDay.Date != birthDay.Date)
+			{
+				db.Entry(member).State = EntityState.Modified;
+				hasChanged = true;
+			}
+
+			if (member.Age != age)
+			{
+				db.Entry(member).State = EntityState.Modified;
+				hasChanged = true;
+			}
+
+			if (!string.Equals(member.Adress?.Trim(), address?.Trim(), StringComparison.OrdinalIgnoreCase))
+			{
+				db.Entry(member).State = EntityState.Modified;
+				hasChanged = true;
+			}
+
+			if (!string.Equals(member.PhoneNumber?.Trim(), phoneNumber?.Trim(), StringComparison.OrdinalIgnoreCase))
+			{
+				db.Entry(member).State = EntityState.Modified;
+				hasChanged = true;
+			}
+
+			if ((member.Photo == null && photo != null) || (member.Photo != null && !member.Photo.SequenceEqual(photo)))
+			{
+				db.Entry(member).State = EntityState.Modified;
+				hasChanged = true;
+			}
+
+			return hasChanged;
 		}
+
 		private async void BUpdateMember_Click(object sender, EventArgs e)
 		{
 			if (CheckFieldsBeforeAction())
