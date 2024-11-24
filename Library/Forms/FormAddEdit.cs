@@ -204,6 +204,7 @@ namespace Library
 					catch (DbUpdateException ex)
 					{
 						MessageBox.Show($"Database update error: {ex.Message}");
+						if (MemberToEdit == null) return;
 						db.Entry(MemberToEdit).Reload();
 					}
 					catch (Exception ex)
