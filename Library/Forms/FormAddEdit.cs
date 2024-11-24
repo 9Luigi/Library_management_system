@@ -2,7 +2,9 @@
 using Library.Controllers.PictureController;
 using Library.Models;
 using Library.Properties;
+using Library.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using System.Windows.Forms;
 using static Library.FormMembers;
 
@@ -40,49 +42,39 @@ namespace Library
 		{
 
 		}
-		internal async void ActionRequested(MemberEventArgs e)
-		{//handle create/update event
+		internal async void ActionRequested(MemberEventArgs e) // Handle create/update events
+		{
 			switch (e.Action)
 			{
 				case "EDIT":
 					BUpdateMember.Enabled = true;
 					BAddMember.Enabled = false;
 					MTBIIN.Enabled = false;
-					MTBIIN.Text = e.IIN.ToString();
-
-					using (LibraryContextForEFcore db = new())
+					try
 					{
-						try
+						using (LibraryContextForEFcore db = new())
 						{
 							MemberToEdit = await db.Members.FirstOrDefaultAsync(m => m.IIN == e.IIN);
+							if (MemberToEdit != null)
+							{
+								FillMemberData(MemberToEdit);
+							}
+							else
+							{
+								MessageBox.Show("Cannot load data, probably member was deleted by another employee while you edit, try again please");
+							}
 						}
-						catch (Exception)
-						{
-							MessageBox.Show("Cannot load data, probably member was deleted by another employee while you edit, try again please");
-						}
-						MTBIIN.Text = MemberToEdit!.IIN.ToString();
-						TBName.Text = MemberToEdit.Name;
-						TBSurname.Text = MemberToEdit.Surname;
-						TBPatronymic.Text = MemberToEdit.Patronymic;
-						TBAge.Text = MemberToEdit.Age.ToString();
-						MTBBirthday.Text = MemberToEdit.BirthDay.ToString();
-						MTBAdress.Text = MemberToEdit.Adress;
-						MTBPhoneNumber.Text = MemberToEdit.PhoneNumber;
-						byte[]? imageByte = MemberToEdit.Photo;
-						if (imageByte == null) { pbPhoto.Image = Resources.NoImage; return; }
-						var photo = PictureController.ConvertByteToImage(imageByte);
-						if (photo is Image)
-						{
-							pbPhoto.Image = photo;
-							return;
-						}
+					}
+					catch (Exception)
+					{
+						MessageBox.Show("An error occurred while loading member data.");
 					}
 					break;
 				case "CREATE":
+					MTBIIN.Enabled = true;
 					BUpdateMember.Enabled = false;
 					BAddMember.Enabled = true;
-					TextBoxBaseController.AllTextBoxBaseOnFormClear(this);
-					pictureBoxController.pictureBoxImageSetDefault(pbPhoto);
+					ResetForm();
 					break;
 				default:
 					break;
@@ -101,7 +93,7 @@ namespace Library
 			&& RegexController.Check(MTBBirthday.Text, MTBBirthday) &&
 			RegexController.Check(MTBAdress.Text, MTBAdress) && RegexController.Check(MTBPhoneNumber.Text, MTBPhoneNumber))
 			{
-				if (TBPatronymic.Text == "" || TBPatronymic.Text == "None") return true;
+				if (string.IsNullOrEmpty(TBPatronymic.Text) || TBPatronymic.Text == "None") return true;
 				else if (RegexController.Check(TBPatronymic.Text, TBPatronymic)) return true;
 				else return false;
 			}
@@ -128,9 +120,9 @@ namespace Library
 						(
 							TBName.Text,
 							TBSurname.Text,
-							DateTime.Parse(MTBBirthday.Text),
+							DateTime.ParseExact(MTBBirthday.Text, "dd/MM/yyyy", CultureInfo.InvariantCulture),
 							MTBAdress.Text,
-							Convert.ToInt64(MTBIIN.Text),
+							Convert.ToInt64(MTBIIN.Text), //TODO check for duplicates cause it's primary key
 							MTBPhoneNumber.Text,
 							PhotoAsBytes!,
 							CheckIfHasPatronymic(TBPatronymic.Text)
@@ -149,8 +141,7 @@ namespace Library
 								);
 							if (result == DialogResult.Yes)
 							{
-								TextBoxBaseController.AllTextBoxBaseOnFormClear(this);
-								pictureBoxController.pictureBoxImageSetDefault(pbPhoto);
+								ResetForm();
 							}
 							else
 							{
@@ -159,17 +150,21 @@ namespace Library
 						}
 						else MessageBox.Show($"Cannot add {createdMember.Name} {createdMember.Surname} try again later");
 					}
-					catch (DbUpdateException)
+					catch (DbUpdateException ex)
 					{
-						MessageBox.Show("While you were editing this member, his data was updated or delete, try again please");
+						MessageBox.Show($"Error updating database: {ex.Message}. Please try again.");
+					}
+					catch (Exception ex)
+					{
+						MessageBox.Show($"An unexpected error occurred: {ex.Message}. Please contact support.");
 					}
 					break;
 				case "UPDATE":
-					BAddMember.Enabled = false; //TODO change age by IIN deconstruction
 					if (!CheckAndMarkChanges(db, MemberToEdit!, TBName.Text, TBSurname.Text, CheckIfHasPatronymic(TBPatronymic.Text),
-					  DateTime.Parse(MTBBirthday.Text), byte.Parse(TBAge.Text), MTBAdress.Text, MTBPhoneNumber.Text,
+					  DateTime.ParseExact(MTBBirthday.Text, "dd/MM/yyyy", CultureInfo.InvariantCulture), byte.Parse(TBAge.Text), MTBAdress.Text, MTBPhoneNumber.Text,
 					  PictureController.ImageToByteConvert(pbPhoto.Image)))
 					{
+						if (MemberToEdit == null) return;
 						db.Entry(MemberToEdit).State = EntityState.Unchanged;
 						MessageBox.Show("You did't change member's fields");
 						return;
@@ -189,11 +184,24 @@ namespace Library
 
 						if (result == 1)
 						{
-							MessageBox.Show($"{MemberToEdit.Name} {MemberToEdit.Surname} updated successful");
 							var closeDialog = MessageBox.Show($"{MemberToEdit.Name} {MemberToEdit.Surname} updated successfully. Close the form?", "Update Successful", MessageBoxButtons.YesNo);
 							if (closeDialog == DialogResult.Yes)
 							{
 								Close();
+							}
+							else
+							{
+								{
+									// Reset tracking of the member and reload the original data
+									db.Entry(MemberToEdit).State = EntityState.Detached;  // Detach the entity from the context
+									MemberToEdit = await db.Members.FirstOrDefaultAsync(m => m.IIN == MemberToEdit.IIN); // Reload original data
+									if (MemberToEdit == null) { MessageBox.Show("Member from data base is null"); return; }
+									// Reset fields with the original data
+									FillMemberData(MemberToEdit);
+									pbPhoto.Image = PictureController.ConvertByteToImage(MemberToEdit.Photo);
+									//Focus on first field
+									TBName.Focus();
+								}
 							}
 						}
 						else
@@ -214,7 +222,7 @@ namespace Library
 					break;
 			}
 		}
-		private bool CheckAndMarkChanges(DbContext db, Member member, string name, string surname, string patronymic, DateTime birthDay, byte age, string address, string phoneNumber, byte[]? photo)
+		private bool CheckAndMarkChanges(DbContext db, Member member, string name, string surname, string patronymic, DateTime birthDay, byte age, string address, string phoneNumber, byte[] photo)
 		{
 			bool hasChanged = false;
 
@@ -259,8 +267,7 @@ namespace Library
 				db.Entry(member).State = EntityState.Modified;
 				hasChanged = true;
 			}
-
-			if ((member.Photo == null && photo != null) || (member.Photo != null && !member.Photo.SequenceEqual(photo)))
+			if ((member.Photo == null && photo != null) || (member.Photo != null && !member.Photo.SequenceEqual(photo!))) //photo==null can't be cause parametr type byte[], not byte[]?
 			{
 				db.Entry(member).State = EntityState.Modified;
 				hasChanged = true;
@@ -275,6 +282,26 @@ namespace Library
 			{
 				await ActionWithMember("UPDATE");
 			}
+		}
+		private void FillMemberData(Member member)
+		{
+			MTBIIN.Text = member.IIN.ToString();
+			TBName.Text = member.Name;
+			TBSurname.Text = member.Surname;
+			TBPatronymic.Text = member.Patronymic;
+			MTBBirthday.Text = member.BirthDay.ToString("dd/MM/yyyy");
+			TBAge.Text = member.Age.ToString();
+			MTBAdress.Text = member.Adress;
+			MTBPhoneNumber.Text = member.PhoneNumber;
+
+			byte[]? imageByte = member.Photo;
+			pbPhoto.Image = imageByte != null ? PictureController.ConvertByteToImage(imageByte) : Resources.NoImage;
+		}
+		private void ResetForm()
+		{
+			TextBoxBaseController.AllTextBoxBaseOnFormClear(this);
+			pictureBoxController.pictureBoxImageSetDefault(pbPhoto);
+			TBName.Focus();
 		}
 	}
 }

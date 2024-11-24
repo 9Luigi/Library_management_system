@@ -13,26 +13,41 @@ namespace Library.Controllers.PictureController
 			try
 			{
 				byte[] byteArray = new byte[0];
-				using (MemoryStream stream = new MemoryStream())
+				using (MemoryStream ms = new MemoryStream())
 				{
-					using (Bitmap bitmap = new Bitmap(img)) { bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png); }
-					byteArray = stream.ToArray();
+					using (Bitmap bitmap = new Bitmap(img)) { bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png); }
+					byteArray = ms.ToArray();
 				}
 				return byteArray;
 			}
 			catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); return null; }
 		}
-		internal static Image ConvertByteToImage(byte[] imageByte)
+		internal static Image ConvertByteToImage(byte[]? imageByte)
 		{
-			using MemoryStream ms = new(imageByte!);
-			return Image.FromStream(ms);
+			if (imageByte == null || imageByte.Length == 0)
+			{
+				return Properties.Resources.NoImage;
+			}
+
+			try
+			{
+				using (MemoryStream ms = new MemoryStream(imageByte))
+				{
+					return Image.FromStream(ms);
+				}
+			}
+			catch (ArgumentException ex)
+			{
+				Console.WriteLine($"Ошибка при конвертации изображения: {ex.Message}");
+				return Properties.Resources.NoImage; 
+			}
 		}
 		internal static Image? GetImageFromFile()
 		{
 			try
 			{
 				using OpenFileDialog fd = new();
-				fd.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif";
+				fd.Filter = "Image Files|*.jpg;*.jpeg;";
 				var result = fd.ShowDialog();
 				var filePath = fd.FileName;
 				if (string.IsNullOrEmpty(fd.FileName) || result != DialogResult.OK) return null;

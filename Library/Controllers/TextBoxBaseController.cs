@@ -23,7 +23,7 @@ namespace Library.Controllers
         }
         static internal bool CheckTextBoxBaseTextOnNull(TextBoxBase textBoxBase)
         {//check properties for null and by RegexController
-
+            
             if (string.IsNullOrWhiteSpace(textBoxBase.Text))
             {
                 MessageBox.Show(textBoxBase.Name + " is empty, fill in the empty requiered(*) fields");

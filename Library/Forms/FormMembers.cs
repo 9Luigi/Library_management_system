@@ -60,21 +60,21 @@ namespace Library
 			(bool b, long i) = IsIIN_Clicked(IIN);
 			if (b)
 			{
-				 Task deleteMember = new TaskFactory().StartNew(new  Action(async () =>
-				{
-					using LibraryContextForEFcore db = new();
-					Member? memberToDelete = db.Members.FirstOrDefault(m => m.IIN == i);
-					db.Members.Remove(memberToDelete!);
-					DialogResult result = MessageBox.Show("Are you sure to remove?", "Removing member", MessageBoxButtons.YesNo);
-					if (result == DialogResult.Yes)
-					{
-						if (db.SaveChanges() > 0)
-						{
-							await RefreshDataGridForMembers();
-							MessageBox.Show("Member succesfully removed");
-						}
-					}
-				}));
+				Task deleteMember = new TaskFactory().StartNew(new Action(async () =>
+			   {
+				   using LibraryContextForEFcore db = new();
+				   Member? memberToDelete = db.Members.FirstOrDefault(m => m.IIN == i);
+				   db.Members.Remove(memberToDelete!);
+				   DialogResult result = MessageBox.Show("Are you sure to remove?", "Removing member", MessageBoxButtons.YesNo);
+				   if (result == DialogResult.Yes)
+				   {
+					   if (db.SaveChanges() > 0)
+					   {
+						   await RefreshDataGridForMembers();
+						   MessageBox.Show("Member succesfully removed");
+					   }
+				   }
+			   }));
 			}
 			else
 			{
@@ -141,8 +141,9 @@ namespace Library
 							m.Name,
 							m.Surname,
 							m.Age,
+							m.RegistrationDate,
 							Books = string.Join(", ", m.Books.Select(b => b.Title)),
-						}).ToList();
+						}).OrderByDescending(m => m.RegistrationDate).ToList();
 						if (pbMembers.IsDisposed) { return; }
 						if (CancellationToken.IsCancellationRequested) { return; }
 						await ProgressBarController.pbProgressCgange(this, pbMembers, 25, 50);
@@ -201,13 +202,13 @@ namespace Library
 					Name = m.Name,
 					Surname = m.Surname
 				}).FirstOrDefault();
-				var selectedBooks = db.Members.Where(m => m.IIN == i)
+				var selectedBooks = await db.Members.Where(m => m.IIN == i)
 					.Include(m => m.Books).SelectMany(m => m.Books.Select(b => new
 					{
 						b.Id,
 						b.Title,
 						b.Genre
-					})).ToList();
+					})).ToListAsync();
 				if (selectedBooks.Count > 0)
 				{
 					MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("RETURN", i));
