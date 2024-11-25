@@ -16,11 +16,10 @@ namespace Library.Controllers.PictureController
 				using (MemoryStream ms = new MemoryStream())
 				{
 					using (Bitmap bitmap = new Bitmap(img)) { bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png); }
-					byteArray = ms.ToArray();
+					return ms.ToArray();
 				}
-				return byteArray;
 			}
-			catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); return null; }
+			catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); return new byte[0]; }
 		}
 		internal static Image ConvertByteToImage(byte[]? imageByte)
 		{

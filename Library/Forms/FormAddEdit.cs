@@ -120,7 +120,7 @@ namespace Library
 						(
 							TBName.Text,
 							TBSurname.Text,
-							DateTime.ParseExact(MTBBirthday.Text, "dd/MM/yyyy", CultureInfo.InvariantCulture),
+							DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture),
 							MTBAdress.Text,
 							Convert.ToInt64(MTBIIN.Text), //TODO check for duplicates cause it's primary key
 							MTBPhoneNumber.Text,
@@ -128,9 +128,10 @@ namespace Library
 							CheckIfHasPatronymic(TBPatronymic.Text)
 						);
 					await db.AddAsync(createdMember);
-					int answer = await db.SaveChangesAsync();
+					
 					try
 					{
+						int answer = await db.SaveChangesAsync();
 						if (answer == 1)
 						{
 							DialogResult result = MessageBox.Show
@@ -152,7 +153,7 @@ namespace Library
 					}
 					catch (DbUpdateException ex)
 					{
-						MessageBox.Show($"Error updating database: {ex.Message}. Please try again.");
+						MessageBox.Show($"Error updating database: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
 					}
 					catch (Exception ex)
 					{
@@ -161,7 +162,7 @@ namespace Library
 					break;
 				case "UPDATE":
 					if (!CheckAndMarkChanges(db, MemberToEdit!, TBName.Text, TBSurname.Text, CheckIfHasPatronymic(TBPatronymic.Text),
-					  DateTime.ParseExact(MTBBirthday.Text, "dd/MM/yyyy", CultureInfo.InvariantCulture), byte.Parse(TBAge.Text), MTBAdress.Text, MTBPhoneNumber.Text,
+					  DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture), byte.Parse(TBAge.Text), MTBAdress.Text, MTBPhoneNumber.Text,
 					  PictureController.ImageToByteConvert(pbPhoto.Image)))
 					{
 						if (MemberToEdit == null) return;
@@ -177,7 +178,7 @@ namespace Library
 						MemberToEdit.Age = byte.Parse(TBAge.Text);
 						MemberToEdit.Adress = MTBAdress.Text;
 						MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
-						MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image!);//null not possible?
+						MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);
 						MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
 
 						int result = await db.SaveChangesAsync();
@@ -195,9 +196,10 @@ namespace Library
 									// Reset tracking of the member and reload the original data
 									db.Entry(MemberToEdit).State = EntityState.Detached;  // Detach the entity from the context
 									MemberToEdit = await db.Members.FirstOrDefaultAsync(m => m.IIN == MemberToEdit.IIN); // Reload original data
-									if (MemberToEdit == null) { MessageBox.Show("Member from data base is null"); return; }
+									if (MemberToEdit == null) { MessageBox.Show("Member from data base is null"); return; } //TODO log
 									// Reset fields with the original data
 									FillMemberData(MemberToEdit);
+									if (MemberToEdit.Photo == null) return; //TODO message and log
 									pbPhoto.Image = PictureController.ConvertByteToImage(MemberToEdit.Photo);
 									//Focus on first field
 									TBName.Focus();
