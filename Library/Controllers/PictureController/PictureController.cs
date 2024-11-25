@@ -12,14 +12,12 @@ namespace Library.Controllers.PictureController
 		{
 			try
 			{
-				byte[] byteArray = new byte[0];
-				using (MemoryStream ms = new MemoryStream())
-				{
-					using (Bitmap bitmap = new Bitmap(img)) { bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png); }
-					return ms.ToArray();
-				}
+				using MemoryStream ms = new();
+				using Bitmap bitmap = new(img);
+				bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+				return ms.ToArray();
 			}
-			catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); return new byte[0]; }
+			catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); return Array.Empty<byte>(); }
 		}
 		internal static Image ConvertByteToImage(byte[]? imageByte)
 		{
@@ -30,15 +28,13 @@ namespace Library.Controllers.PictureController
 
 			try
 			{
-				using (MemoryStream ms = new MemoryStream(imageByte))
-				{
-					return Image.FromStream(ms);
-				}
+				using MemoryStream ms = new (imageByte);
+				return Image.FromStream(ms);
 			}
 			catch (ArgumentException ex)
 			{
 				Console.WriteLine($"Ошибка при конвертации изображения: {ex.Message}");
-				return Properties.Resources.NoImage; 
+				return Properties.Resources.NoImage;
 			}
 		}
 		internal static Image? GetImageFromFile()

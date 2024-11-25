@@ -96,7 +96,7 @@
 			dataGridViewForMembers.SelectionMode = DataGridViewSelectionMode.CellSelect;
 			dataGridViewForMembers.Size = new Size(572, 316);
 			dataGridViewForMembers.TabIndex = 2;
-			dataGridViewForMembers.CellMouseClick += view_CellMouseClick;
+			dataGridViewForMembers.CellMouseClick += View_CellMouseClick;
 			// 
 			// cmMember
 			// 

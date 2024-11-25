@@ -21,10 +21,21 @@ namespace Library
 		}
 		internal Member? MemberToEdit { get; set; }
 		private void BSelectPhoto_Click(object sender, EventArgs e)
+
 		{
-			var photo = PictureController.GetImageFromFile(); //opens file dialog and get image if capture success
-			pbPhoto.Image = photo is Image ? photo : Resources.NoImage; //show captured photo if capture was success
-			PhotoAsBytes = photo is Image ? PictureController.ImageToByteConvert(photo) : PictureController.ImageToByteConvert(Resources.NoImage); //convert photo to bytes array for transit to database
+			var photo = PictureController.GetImageFromFile();
+			// Set photo on member's photo in picture box rely on photo or if error default photo
+			// Photo never null, Image or Array.Empty<byte>()
+			if (photo == null || photo is not Image) 
+			{
+				pbPhoto.Image = Resources.NoImage;
+				PhotoAsBytes = PictureController.ImageToByteConvert(Resources.NoImage);
+			}
+			else
+			{
+				pbPhoto.Image = (Image)photo;
+				PhotoAsBytes = PictureController.ImageToByteConvert((Image)photo);
+			}
 		}
 
 		private async void BAddMember_Click(object sender, EventArgs e)
@@ -52,17 +63,15 @@ namespace Library
 					MTBIIN.Enabled = false;
 					try
 					{
-						using (LibraryContextForEFcore db = new())
+						using LibraryContextForEFcore db = new();
+						MemberToEdit = await db.Members.FirstOrDefaultAsync(m => m.IIN == e.IIN);
+						if (MemberToEdit != null)
 						{
-							MemberToEdit = await db.Members.FirstOrDefaultAsync(m => m.IIN == e.IIN);
-							if (MemberToEdit != null)
-							{
-								FillMemberData(MemberToEdit);
-							}
-							else
-							{
-								MessageBox.Show("Cannot load data, probably member was deleted by another employee while you edit, try again please");
-							}
+							FillMemberData(MemberToEdit);
+						}
+						else
+						{
+							MessageBox.Show("Cannot load data, probably member was deleted by another employee while you edit, try again please");
 						}
 					}
 					catch (Exception)
@@ -128,7 +137,7 @@ namespace Library
 							CheckIfHasPatronymic(TBPatronymic.Text)
 						);
 					await db.AddAsync(createdMember);
-					
+
 					try
 					{
 						int answer = await db.SaveChangesAsync();
@@ -197,7 +206,7 @@ namespace Library
 									db.Entry(MemberToEdit).State = EntityState.Detached;  // Detach the entity from the context
 									MemberToEdit = await db.Members.FirstOrDefaultAsync(m => m.IIN == MemberToEdit.IIN); // Reload original data
 									if (MemberToEdit == null) { MessageBox.Show("Member from data base is null"); return; } //TODO log
-									// Reset fields with the original data
+																															// Reset fields with the original data
 									FillMemberData(MemberToEdit);
 									if (MemberToEdit.Photo == null) return; //TODO message and log
 									pbPhoto.Image = PictureController.ConvertByteToImage(MemberToEdit.Photo);
@@ -224,7 +233,7 @@ namespace Library
 					break;
 			}
 		}
-		private bool CheckAndMarkChanges(DbContext db, Member member, string name, string surname, string patronymic, DateTime birthDay, byte age, string address, string phoneNumber, byte[] photo)
+		private static bool CheckAndMarkChanges(DbContext db, Member member, string name, string surname, string patronymic, DateTime birthDay, byte age, string address, string phoneNumber, byte[] photo)
 		{
 			bool hasChanged = false;
 

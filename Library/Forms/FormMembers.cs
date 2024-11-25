@@ -32,7 +32,7 @@ namespace Library
 		internal delegate void MemberCreateOrUpdateDelegate(MemberEventArgs e);
 		static internal event MemberCreateOrUpdateDelegate? MemberCreateOrUpdateEvent;
 
-		ControlsController controlsController = new();
+		readonly ControlsController controlsController = new();
 		private async void AddMemberToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			//Transfer data to FaddEdit_prop form, subscribed to MemberCreateOrUpdateEvent on FaddEdit_prop constructor
@@ -46,7 +46,7 @@ namespace Library
 		}
 		private async void EditToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			(bool b, long i) = IsIIN_Clicked(IIN);
+			(bool b, long i) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
 			if (b)
 			{
 				MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("EDIT", i));
@@ -57,7 +57,7 @@ namespace Library
 
 		private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			(bool b, long i) = IsIIN_Clicked(IIN);
+			(bool b, long i) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
 			if (b)
 			{
 				Task deleteMember = new TaskFactory().StartNew(new Action(async () =>
@@ -82,7 +82,7 @@ namespace Library
 			}
 		}
 
-		private void view_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+		private void View_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
 		{
 			if (e.Button == MouseButtons.Right && e.RowIndex > -1 && e.ColumnIndex == 0)
 			{
@@ -95,7 +95,7 @@ namespace Library
 
 		private void TbIINSearch_TextChanged(object sender, EventArgs e)
 		{
-			using LibraryContextForEFcore db = new();
+			/*using LibraryContextForEFcore db = new();
 			if (TbIINSearch.Text.Length > 3)
 			{
 				_ = long.TryParse(TbIINSearch.Text, out long IIN);
@@ -116,54 +116,98 @@ namespace Library
 					m.Age
 				}).ToList();
 				dataGridViewForMembers.DataSource = users;
-			}
+			}*/
 		}
-		private async Task RefreshDataGridForMembers() //TODO think about transactions when remove or update entities
+
+		private async Task RefreshDataGridForMembers()
 		{
-			int totalMembersCount;
-			//TODO maybe better use AsNotTracking
-			await controlsController.SetControlsEnableFlag(this, this.Controls, false); //while data from db is loading all controls enabled set to false
+			// Disable controls while data from DB is loading
+			await SetControlsEnabledAsync(false);
+
 			CancellationToken = CancellationTokenSource.Token;
-			Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(async () => //TODO async+await instead of Task and CancelationToken
+
+			Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(async () =>
+			{
+				using (LibraryContextForEFcore db = new())
 				{
-					using (LibraryContextForEFcore db = new())
-					{
+					int totalMembersCount = await GetTotalMembersCountAsync(db);
 
-						totalMembersCount = db.Members.Count(); //recieve members count //TODO for correct progress bar refresh in future
+					if (CancellationToken.IsCancellationRequested) return;
 
-						if (CancellationToken.IsCancellationRequested) { return; }
-						await ProgressBarController.pbProgressCgange(this, pbMembers, 0, 25);
+					await UpdateProgressBarAsync(0, 25);
 
-						//this.Invoke(ProgressBarController.pbProgressCgange, this, pbMembers, 0, 25); //TODO check if searched by IIN
-						var users = db.Members.Include(m => m.Books).Select(m => new //TODO handle exception of select and login to db or db not create
-						{
-							m.IIN,
-							m.Name,
-							m.Surname,
-							m.Age,
-							m.RegistrationDate,
-							Books = string.Join(", ", m.Books.Select(b => b.Title)),
-						}).OrderByDescending(m => m.RegistrationDate).ToList();
-						if (pbMembers.IsDisposed) { return; }
-						if (CancellationToken.IsCancellationRequested) { return; }
-						await ProgressBarController.pbProgressCgange(this, pbMembers, 25, 50);
-						this.Invoke(new Action(() =>
-						{
-							dataGridViewForMembers.DataSource = users; //TODO error catch or logic to avoid/ avoid what? null?
-							DataGridViewController.CustomizeDataGridView(dataGridViewForMembers);
-						}));
-						if (pbMembers.IsDisposed) { return; }
-						if (CancellationToken.IsCancellationRequested) { return; }
-						await ProgressBarController.pbProgressCgange(this, pbMembers, 50, 100);
-					}
-					Thread.Sleep(500);
+					var users = await GetMembersFromDbAsync(db);
 
-					if (CancellationToken.IsCancellationRequested) { return; }
-					if (pbMembers.IsDisposed) { return; } //TOOD sometimes don't return and below section is invoked
+					if (CancellationToken.IsCancellationRequested) return;
 
-					this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
-					await controlsController.SetControlsEnableFlag(this, this.Controls, true); // after data load from db set all controls enabled true
-				}), CancellationToken);
+					await UpdateProgressBarAsync(25, 50);
+
+					await UpdateDataGridViewAsync(users);
+
+					if (CancellationToken.IsCancellationRequested) return;
+
+					await UpdateProgressBarAsync(50, 100);
+				}
+
+				Thread.Sleep(500);
+
+				if (CancellationToken.IsCancellationRequested) return;
+
+				if (pbMembers.IsDisposed) return;
+
+				// Reset the progress bar and enable controls
+				await ResetProgressBarAsync();
+				await SetControlsEnabledAsync(true);
+
+			}), CancellationToken);
+		}
+
+		private async Task SetControlsEnabledAsync(bool isEnabled)
+		{
+			await controlsController.SetControlsEnableFlag(this, this.Controls, isEnabled);
+		}
+
+		private async Task<int> GetTotalMembersCountAsync(LibraryContextForEFcore db)
+		{
+			return await Task.Run(() => db.Members.Count());
+		}
+
+		private async Task<List<dynamic>> GetMembersFromDbAsync(LibraryContextForEFcore db)
+		{
+			var members = await db.Members.Include(m => m.Books)
+				.Select(m => new
+				{
+					m.IIN,
+					m.Name,
+					m.Surname,
+					m.Age,
+					m.RegistrationDate,
+					Books = string.Join(", ", m.Books.Select(b => b.Title)),
+				})
+				.OrderByDescending(m => m.RegistrationDate)
+				.ToListAsync();
+
+			// Преобразуем анонимный тип в dynamic
+			return members.Cast<dynamic>().ToList();
+		}
+
+		private async Task UpdateProgressBarAsync(int minValue, int maxValue)
+		{
+			await ProgressBarController.pbProgressCgange(this, pbMembers, minValue, maxValue);
+		}
+
+		private async Task UpdateDataGridViewAsync(List<dynamic> users)
+		{
+			this.Invoke(new Action(() =>
+			{
+				dataGridViewForMembers.DataSource = users;
+				DataGridViewController.CustomizeDataGridView(dataGridViewForMembers);
+			}));
+		}
+
+		private async Task ResetProgressBarAsync()
+		{
+			this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
 		}
 
 		private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -181,7 +225,7 @@ namespace Library
 
 		private async void LeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			(bool b, long i) = IsIIN_Clicked(IIN);
+			(bool b, long i) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
 			if (b)
 			{
 				MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("BORROW", i));
@@ -193,7 +237,7 @@ namespace Library
 		private async void SeeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)//borrowed books*
 		{
 			//this method checked selected member for borrowed books and if true sends data to another form
-			(bool b, long i) = IsIIN_Clicked(IIN);
+			(bool b, long i) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
 			if (b)
 			{
 				using LibraryContextForEFcore db = new();
@@ -221,16 +265,5 @@ namespace Library
 				}
 			}
 		}//borrowed books
-		(bool, long) IsIIN_Clicked(long IIN) //check data grid first column for IIN value and if true return tuple 
-											 //TODO check for null 
-											 //TODO refactor via index(click on row not only IIN cell for edit)
-		{
-			if (dataGridViewForMembers.CurrentCell.Value != null && dataGridViewForMembers.CurrentCell.ColumnIndex == 0
-				&& long.TryParse(dataGridViewForMembers.CurrentCell.Value.ToString(), out IIN))
-			{
-				return (true, IIN);
-			}
-			else return (false, 0);
-		}
 	}
 }
