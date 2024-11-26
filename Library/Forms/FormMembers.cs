@@ -1,6 +1,5 @@
 ﻿using Library.Controllers;
 using Library.Models;
-using Library.Services.Repository;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 
@@ -34,69 +33,83 @@ namespace Library
 		static internal event MemberCreateOrUpdateDelegate? MemberCreateOrUpdateEvent;
 
 		readonly ControlsController controlsController = new();
+		/// <summary>
+		/// Handles the click event for the "Add Member" menu item in the context menu.
+		/// Triggers the "CREATE" action, opens the member creation form, and refreshes the data grid.
+		/// </summary>
 		private async void AddMemberToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			//Transfer data to FaddEdit_prop form, subscribed to MemberCreateOrUpdateEvent on FaddEdit_prop constructor
-			MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("CREATE"));
-			FaddEdit_prop.ShowDialog();
-			await RefreshDataGridForMembers();
+			try
+			{
+				// Transfer data to the FaddEdit_prop form by invoking the MemberCreateOrUpdateEvent.
+				// The FaddEdit_prop form is subscribed to this event in its constructor.
+				MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("CREATE"));
+
+				// Show the form dialog for adding a new member
+				FaddEdit_prop.ShowDialog();
+
+				// Refresh the data grid asynchronously after the form is closed
+				await RefreshDataGridForMembers();
+			}
+			catch (Exception ex)
+			{
+				// Handle any exceptions that may occur during the process
+				MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
 		}
+
 		private async void FMembers_Load(object sender, EventArgs e)
 		{
 			await RefreshDataGridForMembers();
 		}
+		/// <summary>
+		/// Handles the click event for the "Edit" menu item in the context menu.
+		/// If the row contains a valid IIN, triggers the edit action and refreshes the data grid.
+		/// </summary>
 		private async void EditToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			(bool b, long i) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
-			if (b)
+			// Attempt to retrieve a valid IIN from the selected row in the DataGridView
+			(bool isValid, long IIN) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
+
+			if (isValid)
 			{
-				MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("EDIT", i));
+				// Trigger the edit event with the IIN as an argument
+				MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("EDIT", IIN));
+
+				// Show the edit form dialog
 				FaddEdit_prop.ShowDialog();
+
+				// Refresh the data grid asynchronously
 				await RefreshDataGridForMembers();
 			}
 		}
 
+
 		/// <summary>
 		/// Handles the click event of the "Delete" menu item, removing a member from the database.
 		/// </summary>
-		/// <param name="sender">The object that triggered the event (typically the menu item itself).</param>
-		/// <param name="e">The event arguments containing information about the click event.</param>
 		private async void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			// Retrieve data from the selected row in the DataGridView
-			(bool b, long i) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
+			(bool IsValid, long IIN) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
 
-			// If IIN was successfully extracted
-			if (b)
+			// If IIN was successfully checked 
+			if (IsValid)
 			{
-				// Open the database context asynchronously
 				await using LibraryContextForEFcore db = new();
-
-				// Search for the member by IIN
-				Member? memberToDelete = await db.Members.FirstOrDefaultAsync(m => m.IIN == i);
-
-				// If the member is not found, display an error message
-				if (memberToDelete == null)
-				{
-					MessageBox.Show($"Cannot find member with IIN: {i}");
-					return;
-				}
-
+				var repos = new Repository<Member>(db);
 				// Show a confirmation dialog to the user
 				DialogResult result = MessageBox.Show("Are you sure to remove?", "Removing member", MessageBoxButtons.YesNo);
 
 				// If the user confirms the deletion
 				if (result == DialogResult.Yes)
 				{
-					// Remove the member from the database
-					db.Members.Remove(memberToDelete);
 
-					// Save changes to the database and check if any rows were affected
-					if (await db.SaveChangesAsync() > 0)
+					// Remove the member from the database
+					if (await repos.DeleteAsync(IIN) == true)
 					{
 						// Inform the user that the member was successfully removed
 						MessageBox.Show("Member successfully removed");
-
 						// Refresh the DataGridView with updated data
 						await RefreshDataGridForMembers();
 					}
@@ -109,19 +122,29 @@ namespace Library
 			}
 		}
 
+		/// <summary>
+		/// Handles the cell mouse click event for the DataGridView.
+		/// Displays the context menu when right-clicking on any cell, excluding the headers.
+		/// </summary>
 		private void View_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
 		{
-			if (e.Button == MouseButtons.Right && e.RowIndex > -1 && e.ColumnIndex == 0)
+			// Check if the right mouse button was clicked and the click is on a valid cell (not a header)
+			if (e.Button == MouseButtons.Right && e.RowIndex >= 0 && e.ColumnIndex >= 0)
 			{
+				// Set the current cell to the one that was clicked
 				dataGridViewForMembers.CurrentCell = dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
+
+				// Get the cursor position relative to the DataGridView
 				Point relativeCursorPosition = dataGridViewForMembers.PointToClient(Cursor.Position);
+
+				// Show the context menu at the cursor position
 				cmMember.Show(dataGridViewForMembers, relativeCursorPosition);
-				//if clicked by right button cell is IIN then popup menu executes
 			}
 		}
-		private void TbIINSearch_TextChanged(object sender, EventArgs e)
+
+		private void TbIINSearch_TextChanged(object sender, EventArgs e) //TODO Refactor, before and after serch data grid have different rows
 		{
-			/*using LibraryContextForEFcore db = new();
+			using LibraryContextForEFcore db = new();
 			if (TbIINSearch.Text.Length > 3)
 			{
 				_ = long.TryParse(TbIINSearch.Text, out long IIN);
@@ -129,7 +152,7 @@ namespace Library
 				{
 					var MatchedMembers = db.Members.Where(m => EF.Functions.Like(m.IIN.ToString(), $"%{IIN}%")).
 						Select(m => new { m.IIN, m.Name, m.Surname, m.Age }).ToList();
-					dataGridViewForMembers.DataSource = MatchedMembers; //TODO something //???
+					dataGridViewForMembers.DataSource = MatchedMembers; 
 				}
 			}
 			else
@@ -142,7 +165,7 @@ namespace Library
 					m.Age
 				}).ToList();
 				dataGridViewForMembers.DataSource = users;
-			}*/
+			}
 		}
 		/// <summary>
 		/// Refreshes the DataGrid with member data from the database asynchronously.
@@ -209,12 +232,19 @@ namespace Library
 			await controlsController.SetControlsEnableFlag(this, this.Controls, isEnabled);
 		}
 
+		/// <summary>
+		/// Asynchronously retrieves the total count of members from the database.
+		/// </summary>
+		/// <param name="db">The database context for Entity Framework Core.</param>
+		/// <returns>The total number of members in the database.</returns>
 		private async Task<int> GetTotalMembersCountAsync(LibraryContextForEFcore db)
 		{
+			// Use Task.Run to execute the database query asynchronously on a separate thread
 			return await Task.Run(() => db.Members.Count());
 		}
 
-		private async Task<List<dynamic>> GetMembersFromDbAsync(LibraryContextForEFcore db)
+
+		private async Task<List<dynamic>> GetMembersFromDbAsync(LibraryContextForEFcore db) //TODO use Repository
 		{
 			var members = await db.Members.Include(m => m.Books)
 				.Select(m => new
@@ -232,32 +262,53 @@ namespace Library
 			return members.Cast<dynamic>().ToList();
 		}
 
+		/// <summary>
+		/// Asynchronously updates the progress bar with the specified minimum and maximum values.
+		/// </summary>
+		/// <param name="minValue">The minimum value of the progress bar.</param>
+		/// <param name="maxValue">The maximum value of the progress bar.</param>
 		private async Task UpdateProgressBarAsync(int minValue, int maxValue)
 		{
+			// Call the ProgressBarController to update the progress bar asynchronously
 			await ProgressBarController.pbProgressCgange(this, pbMembers, minValue, maxValue);
 		}
 
+		/// <summary>
+		/// Asynchronously updates the DataGridView with a list of users.
+		/// Invokes the necessary UI updates on the main thread to modify the DataGridView's DataSource and customize it.
+		/// </summary>
+		/// <param name="users">The list of users to display in the DataGridView.</param>
 		private async Task UpdateDataGridViewAsync(List<dynamic> users)
 		{
+			// Invoke the update on the UI thread to modify the DataGridView safely
 			this.Invoke(new Action(() =>
 			{
-				dataGridViewForMembers.DataSource = users;
-				DataGridViewController.CustomizeDataGridView(dataGridViewForMembers);
+				dataGridViewForMembers.DataSource = users; // Set the new data source for the grid
+				DataGridViewController.CustomizeDataGridView(dataGridViewForMembers); // Customize the grid appearance
 			}));
 		}
 
+		/// <summary>
+		/// Asynchronously resets the progress bar to its initial state.
+		/// </summary>
 		private async Task ResetProgressBarAsync()
 		{
+			// Invoke the reset on the UI thread
 			this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
 		}
 
+		/// <summary>
+		/// Handles the click event for the "Exit" menu item. Closes the form.
+		/// </summary>
 		private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
 		{
+			// Close the current form
 			this.Close();
 		}
+
 		private void FMembers_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			CancellationTokenSource!.Cancel(); //most likely bad arhitecture but allow to avoid error(this.invoke after this closed)
+			CancellationTokenSource!.Cancel(); //TODO most likely bad arhitecture but allow to avoid error(this.invoke after this closed)
 		}
 		/// <summary>
 		/// Clears IIN textbox when clicked on it
@@ -295,7 +346,7 @@ namespace Library
 		/// Handles the click event of the "See Lended Books for This Member" menu item.
 		/// Checks if a member has borrowed any books and, if so, displays their information in another form.
 		/// </summary>
-		private async void SeeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)
+		private async void SeeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e) //TODO use Repository
 		{
 			// Check if a valid member is selected and retrieve their IIN
 			(bool b, long i) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
