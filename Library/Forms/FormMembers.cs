@@ -1,5 +1,6 @@
 ﻿using Library.Controllers;
 using Library.Models;
+using Library.Services.Repository;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 
@@ -55,30 +56,56 @@ namespace Library
 			}
 		}
 
-		private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
+		/// <summary>
+		/// Handles the click event of the "Delete" menu item, removing a member from the database.
+		/// </summary>
+		/// <param name="sender">The object that triggered the event (typically the menu item itself).</param>
+		/// <param name="e">The event arguments containing information about the click event.</param>
+		private async void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
 		{
+			// Retrieve data from the selected row in the DataGridView
 			(bool b, long i) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
+
+			// If IIN was successfully extracted
 			if (b)
 			{
-				Task deleteMember = new TaskFactory().StartNew(new Action(async () =>
-			   {
-				   using LibraryContextForEFcore db = new();
-				   Member? memberToDelete = db.Members.FirstOrDefault(m => m.IIN == i);
-				   db.Members.Remove(memberToDelete!);
-				   DialogResult result = MessageBox.Show("Are you sure to remove?", "Removing member", MessageBoxButtons.YesNo);
-				   if (result == DialogResult.Yes)
-				   {
-					   if (db.SaveChanges() > 0)
-					   {
-						   await RefreshDataGridForMembers();
-						   MessageBox.Show("Member succesfully removed");
-					   }
-				   }
-			   }));
+				// Open the database context asynchronously
+				await using LibraryContextForEFcore db = new();
+
+				// Search for the member by IIN
+				Member? memberToDelete = await db.Members.FirstOrDefaultAsync(m => m.IIN == i);
+
+				// If the member is not found, display an error message
+				if (memberToDelete == null)
+				{
+					MessageBox.Show($"Cannot find member with IIN: {i}");
+					return;
+				}
+
+				// Show a confirmation dialog to the user
+				DialogResult result = MessageBox.Show("Are you sure to remove?", "Removing member", MessageBoxButtons.YesNo);
+
+				// If the user confirms the deletion
+				if (result == DialogResult.Yes)
+				{
+					// Remove the member from the database
+					db.Members.Remove(memberToDelete);
+
+					// Save changes to the database and check if any rows were affected
+					if (await db.SaveChangesAsync() > 0)
+					{
+						// Inform the user that the member was successfully removed
+						MessageBox.Show("Member successfully removed");
+
+						// Refresh the DataGridView with updated data
+						await RefreshDataGridForMembers();
+					}
+				}
 			}
 			else
 			{
-				MessageBox.Show("Cannot delete this member, try later or communicate your system admin");
+				// If the IIN could not be extracted from the DataGridView row
+				MessageBox.Show("Cannot delete this member, try later or contact your system administrator");
 			}
 		}
 
@@ -92,7 +119,6 @@ namespace Library
 				//if clicked by right button cell is IIN then popup menu executes
 			}
 		}
-
 		private void TbIINSearch_TextChanged(object sender, EventArgs e)
 		{
 			/*using LibraryContextForEFcore db = new();
@@ -118,7 +144,10 @@ namespace Library
 				dataGridViewForMembers.DataSource = users;
 			}*/
 		}
-
+		/// <summary>
+		/// Refreshes the DataGrid with member data from the database asynchronously.
+		/// Disables controls while data is loading and updates progress as data is being fetched.
+		/// </summary>
 		private async Task RefreshDataGridForMembers()
 		{
 			// Disable controls while data from DB is loading
@@ -130,37 +159,50 @@ namespace Library
 			{
 				using (LibraryContextForEFcore db = new())
 				{
+					// Get the total count of members
 					int totalMembersCount = await GetTotalMembersCountAsync(db);
 
+					// Check if the operation was cancelled
 					if (CancellationToken.IsCancellationRequested) return;
 
+					// Update the progress bar as data is being loaded
 					await UpdateProgressBarAsync(0, 25);
 
+					// Retrieve members from the database
 					var users = await GetMembersFromDbAsync(db);
 
+					// Check if the operation was cancelled
 					if (CancellationToken.IsCancellationRequested) return;
 
+					// Update the progress bar after retrieving data
 					await UpdateProgressBarAsync(25, 50);
 
+					// Update the DataGridView with the retrieved data
 					await UpdateDataGridViewAsync(users);
 
+					// Check if the operation was cancelled
 					if (CancellationToken.IsCancellationRequested) return;
 
+					// Final progress bar update
 					await UpdateProgressBarAsync(50, 100);
 				}
 
+				// Sleep for a short period before resetting progress
 				Thread.Sleep(500);
 
+				// Check if the operation was cancelled
 				if (CancellationToken.IsCancellationRequested) return;
 
+				// If the progress bar is disposed, do not continue
 				if (pbMembers.IsDisposed) return;
 
-				// Reset the progress bar and enable controls
+				// Reset the progress bar and enable controls after data is loaded
 				await ResetProgressBarAsync();
 				await SetControlsEnabledAsync(true);
 
 			}), CancellationToken);
 		}
+
 
 		private async Task SetControlsEnabledAsync(bool isEnabled)
 		{
@@ -187,7 +229,6 @@ namespace Library
 				.OrderByDescending(m => m.RegistrationDate)
 				.ToListAsync();
 
-			// Преобразуем анонимный тип в dynamic
 			return members.Cast<dynamic>().ToList();
 		}
 
@@ -218,52 +259,97 @@ namespace Library
 		{
 			CancellationTokenSource!.Cancel(); //most likely bad arhitecture but allow to avoid error(this.invoke after this closed)
 		}
+		/// <summary>
+		/// Clears IIN textbox when clicked on it
+		/// </summary>
 		private void TbIINSearch_Click(object sender, EventArgs e)
 		{
 			TbIINSearch.Text = "";
 		}
-
+		/// <summary>
+		/// Handles the click event of the "Le" menu item, which processes the borrowing action for a selected member.
+		/// If the selected member has a valid IIN, it invokes an event to initiate the borrowing process and shows the borrowing form.
+		/// </summary>
 		private async void LeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			(bool b, long i) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
 			if (b)
 			{
+				// If a valid member is selected, invoke the borrowing event
 				MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("BORROW", i));
+
+				// Display the borrowing form as a dialog
 				FlendOrRecieveBook.ShowDialog();
+
+				// Refresh the data grid to reflect any changes made after borrowing
 				await RefreshDataGridForMembers();
+			}
+			else
+			{
+				// If no valid member is selected, show an error message
+				MessageBox.Show("Please select a member to proceed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 			}
 		}
 
-		private async void SeeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)//borrowed books*
+		/// <summary>
+		/// Handles the click event of the "See Lended Books for This Member" menu item.
+		/// Checks if a member has borrowed any books and, if so, displays their information in another form.
+		/// </summary>
+		private async void SeeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			//this method checked selected member for borrowed books and if true sends data to another form
+			// Check if a valid member is selected and retrieve their IIN
 			(bool b, long i) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
+
 			if (b)
 			{
-				using LibraryContextForEFcore db = new();
-				Member? selectedMemberName = db.Members.Where(m => m.IIN == i).Select(m => new Member()
+				try
 				{
-					Name = m.Name,
-					Surname = m.Surname
-				}).FirstOrDefault();
-				var selectedBooks = await db.Members.Where(m => m.IIN == i)
-					.Include(m => m.Books).SelectMany(m => m.Books.Select(b => new
+					using LibraryContextForEFcore db = new();
+
+					// Combine the member details and borrowed books into one query to optimize DB calls
+					var memberData = await db.Members
+						.Where(m => m.IIN == i)
+						.Select(m => new
+						{
+							m.Name,
+							m.Surname,
+							Books = m.Books.Select(b => new
+							{
+								b.Id,
+								b.Title,
+								b.Genre
+							}).ToList()
+						})
+						.FirstOrDefaultAsync();
+
+					if (memberData == null)
 					{
-						b.Id,
-						b.Title,
-						b.Genre
-					})).ToListAsync();
-				if (selectedBooks.Count > 0)
-				{
-					MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("RETURN", i));
-					FlendOrRecieveBook.ShowDialog();
-					await RefreshDataGridForMembers();
+						MessageBox.Show($"Member with IIN: {i} not found.");
+						return;
+					}
+
+					// Check if the member has borrowed books
+					if (memberData.Books.Any())
+					{
+						// If the member has borrowed books, trigger the event and show the form
+						MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("RETURN", i));
+						FlendOrRecieveBook.ShowDialog();
+
+						// Refresh the data grid after the operation
+						await RefreshDataGridForMembers();
+					}
+					else
+					{
+						MessageBox.Show($"{memberData.Name} {memberData.Surname} has not borrowed any books yet.");
+					}
 				}
-				else
+				catch (Exception ex)
 				{
-					MessageBox.Show($"{selectedMemberName!.Name} {selectedMemberName!.Surname} don't borrowed yet");
+					// Handle any exceptions that might occur during database access or other operations
+					MessageBox.Show($"An error occurred: {ex.Message}");
 				}
 			}
-		}//borrowed books
+		}
+
 	}
 }
