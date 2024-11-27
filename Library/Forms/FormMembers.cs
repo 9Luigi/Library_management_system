@@ -7,12 +7,15 @@ namespace Library
 {
 	public partial class FormMembers : Form
 	{
+		Repository<Member> _memberRepository;
 		public FormMembers()
 		{
 			InitializeComponent();
 			CancellationTokenSource = new CancellationTokenSource();
 			FlendOrRecieveBook = new FormBorrowOrRecieveBook();
 			FaddEdit_prop = new FaddEdit_prop();
+			var dbContext = new LibraryContextForEFcore();
+			_memberRepository = new(dbContext);
 		}
 		internal class MemberEventArgs : EventArgs //for transfer IIN and Action to other forms via event
 		{
@@ -180,10 +183,8 @@ namespace Library
 
 			Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(async () =>
 			{
-				using (LibraryContextForEFcore db = new())
-				{
 					// Get the total count of members
-					int totalMembersCount = await GetTotalMembersCountAsync(db);
+					int totalMembersCount = await GetTotalMembersCountAsync();
 
 					// Check if the operation was cancelled
 					if (CancellationToken.IsCancellationRequested) return;
@@ -192,7 +193,7 @@ namespace Library
 					await UpdateProgressBarAsync(0, 25);
 
 					// Retrieve members from the database
-					var users = await GetMembersFromDbAsync(db);
+					var users = await GetMembersFromDbAsync();
 
 					// Check if the operation was cancelled
 					if (CancellationToken.IsCancellationRequested) return;
@@ -208,8 +209,6 @@ namespace Library
 
 					// Final progress bar update
 					await UpdateProgressBarAsync(50, 100);
-				}
-
 				// Sleep for a short period before resetting progress
 				Thread.Sleep(500);
 
@@ -235,18 +234,17 @@ namespace Library
 		/// <summary>
 		/// Asynchronously retrieves the total count of members from the database.
 		/// </summary>
-		/// <param name="db">The database context for Entity Framework Core.</param>
 		/// <returns>The total number of members in the database.</returns>
-		private async Task<int> GetTotalMembersCountAsync(LibraryContextForEFcore db)
+		private async Task<int> GetTotalMembersCountAsync()
 		{
 			// Use Task.Run to execute the database query asynchronously on a separate thread
-			return await Task.Run(() => db.Members.Count());
+			return await Task.Run(() => _memberRepository._dbContext.Members.Count());
 		}
 
 
-		private async Task<List<dynamic>> GetMembersFromDbAsync(LibraryContextForEFcore db) //TODO use Repository
+		private async Task<List<dynamic>> GetMembersFromDbAsync() //TODO use Repository
 		{
-			var members = await db.Members.Include(m => m.Books)
+			var members = await _memberRepository._dbContext.Members.Include(m => m.Books)
 				.Select(m => new
 				{
 					m.IIN,

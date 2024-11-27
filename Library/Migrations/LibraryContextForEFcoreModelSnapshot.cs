@@ -42,12 +42,12 @@ namespace Library.Migrations
                     b.Property<int>("BooksId")
                         .HasColumnType("int");
 
-                    b.Property<int>("MembersId")
-                        .HasColumnType("int");
+                    b.Property<long>("MembersIIN")
+                        .HasColumnType("BIGINT");
 
-                    b.HasKey("BooksId", "MembersId");
+                    b.HasKey("BooksId", "MembersIIN");
 
-                    b.HasIndex("MembersId");
+                    b.HasIndex("MembersIIN");
 
                     b.ToTable("BookMember");
                 });
@@ -151,11 +151,12 @@ namespace Library.Migrations
 
             modelBuilder.Entity("Library.Models.Member", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("IIN")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("BIGINT")
+                        .HasColumnName("IIN");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("IIN"));
 
                     b.Property<string>("Adress")
                         .IsRequired()
@@ -170,9 +171,8 @@ namespace Library.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("BirthDay");
 
-                    b.Property<long>("IIN")
-                        .HasColumnType("BIGINT")
-                        .HasColumnName("IIN");
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
 
                     b.Property<byte[]>("MemberVersion")
                         .IsConcurrencyToken()
@@ -216,7 +216,7 @@ namespace Library.Migrations
                         .HasColumnType("nvarchar(75)")
                         .HasColumnName("Surname");
 
-                    b.HasKey("Id");
+                    b.HasKey("IIN");
 
                     b.HasIndex("IIN")
                         .IsUnique();
@@ -252,7 +252,7 @@ namespace Library.Migrations
 
                     b.HasOne("Library.Models.Member", null)
                         .WithMany()
-                        .HasForeignKey("MembersId")
+                        .HasForeignKey("MembersIIN")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

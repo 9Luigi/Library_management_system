@@ -3,6 +3,7 @@ using Library.Controllers.PictureController;
 using Library.Models;
 using Library.Properties;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System.Globalization;
 using static Library.FormMembers;
 
@@ -17,7 +18,11 @@ namespace Library
 		/// A byte array that holds the photo of the member in the form of image bytes.
 		/// </summary>
 		byte[]? PhotoAsBytes { get; set; }
-
+		/// <summary>
+		/// A property to store the member object being edited, if any.
+		/// </summary>
+		internal Member? MemberToEdit { get; set; }
+		private readonly Repository<Member> _memberRepository;
 		/// <summary>
 		/// Constructor that initializes the form and subscribes to the MemberCreateOrUpdateEvent event.
 		/// Sets the default photo image.
@@ -27,12 +32,12 @@ namespace Library
 			MemberCreateOrUpdateEvent += ActionRequested; // Subscribe to event, event is invoked on update/create calls
 			InitializeComponent();
 			pbPhoto.Image = Properties.Resources.NoImage;
+
+			var dbContext = new LibraryContextForEFcore();
+			_memberRepository = new(dbContext);
+
 		}
 
-		/// <summary>
-		/// A property to store the member object being edited, if any.
-		/// </summary>
-		internal Member? MemberToEdit { get; set; }
 
 		/// <summary>
 		/// Handles the event triggered when a photo is selected by the user.
@@ -94,8 +99,7 @@ namespace Library
 					MTBIIN.Enabled = false;
 					try
 					{
-						using LibraryContextForEFcore db = new();
-						MemberToEdit = await db.Members.FirstOrDefaultAsync(m => m.IIN == e.IIN);
+						MemberToEdit = await _memberRepository.GetByIdAsync(e.IIN);
 						if (MemberToEdit != null)
 						{
 							FillMemberData(MemberToEdit);
@@ -168,7 +172,6 @@ namespace Library
 		/// <param name="operation">The operation type (CREATE or UPDATE).</param>
 		private async Task ActionWithMember(string operation)
 		{
-			using LibraryContextForEFcore db = new();
 			switch (operation)
 			{
 				case "CREATE":
@@ -183,12 +186,9 @@ namespace Library
 							PhotoAsBytes!,
 							CheckIfHasPatronymic(TBPatronymic.Text)
 						);
-					await db.AddAsync(createdMember);
-
 					try
 					{
-						int answer = await db.SaveChangesAsync();
-						if (answer == 1)
+						if (await _memberRepository.AddAsync(createdMember))
 						{
 							DialogResult result = MessageBox.Show
 								(
@@ -205,7 +205,7 @@ namespace Library
 								this.Close();
 							}
 						}
-						else MessageBox.Show($"Cannot add {createdMember.Name} {createdMember.Surname} try again later");
+						else MessageBox.Show($"Cannot add {createdMember.Name} {createdMember.Surname} try again later. Inner exception: {{ex.InnerException?.Message ?? \"None\"}}\"");
 					}
 					catch (DbUpdateException ex)
 					{
@@ -213,141 +213,59 @@ namespace Library
 					}
 					catch (Exception ex)
 					{
-						MessageBox.Show($"An unexpected error occurred: {ex.Message}. Please contact support.");
+						MessageBox.Show($"An unexpected error occurred: {ex.Message}. Please contact support. Inner exception: {{ex.InnerException?.Message ?? \"None\"}}\"");
 					}
 					break;
 
 				case "UPDATE":
-					if (!CheckAndMarkChanges(db, MemberToEdit!, TBName.Text, TBSurname.Text, CheckIfHasPatronymic(TBPatronymic.Text),
-					  DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture), byte.Parse(TBAge.Text), MTBAdress.Text, MTBPhoneNumber.Text,
-					  PictureController.ImageToByteConvert(pbPhoto.Image)))
+					MemberToEdit!.Name = TBName.Text;
+					MemberToEdit.Surname = TBSurname.Text;
+					MemberToEdit.BirthDay = DateTime.Parse(MTBBirthday.Text);
+					MemberToEdit.Age = byte.Parse(TBAge.Text);
+					MemberToEdit.Adress = MTBAdress.Text;
+					MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
+					MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);
+					MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
+
+					var updatedValues = new Dictionary<string, object>
 					{
-						if (MemberToEdit == null) return;
-						db.Entry(MemberToEdit).State = EntityState.Unchanged;
+					{ nameof(MemberToEdit.Name), TBName.Text},
+					{ nameof(MemberToEdit.Surname), TBSurname.Text},
+					{ nameof(MemberToEdit.Patronymic), CheckIfHasPatronymic(TBPatronymic.Text)},
+					{ nameof(MemberToEdit.BirthDay), DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture)},
+					{ nameof(MemberToEdit.Age), byte.Parse(TBAge.Text)},
+					{ nameof(MemberToEdit.Adress), MTBAdress.Text},
+					{ nameof(MemberToEdit.PhoneNumber), MTBPhoneNumber.Text},
+					{ nameof(MemberToEdit.Photo),  PictureController.ImageToByteConvert(pbPhoto.Image)},
+					};
+					bool isUpdated = await _memberRepository.UpdateAttachedAsync(MemberToEdit, updatedValues);
+					if (!isUpdated)
+					{
 						MessageBox.Show("You didn't change member's fields");
 						return;
 					}
-					try
-					{
-						MemberToEdit!.Name = TBName.Text;
-						MemberToEdit.Surname = TBSurname.Text;
-						MemberToEdit.BirthDay = DateTime.Parse(MTBBirthday.Text);
-						MemberToEdit.Age = byte.Parse(TBAge.Text);
-						MemberToEdit.Adress = MTBAdress.Text;
-						MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
-						MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);
-						MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
 
-						int result = await db.SaveChangesAsync();
-
-						if (result == 1)
-						{
-							var closeDialog = MessageBox.Show($"{MemberToEdit.Name} {MemberToEdit.Surname} updated successfully. Close the form?", "Update Successful", MessageBoxButtons.YesNo);
-							if (closeDialog == DialogResult.Yes)
-							{
-								Close();
-							}
-							else
-							{
-								// Reset tracking of the member and reload the original data
-								db.Entry(MemberToEdit).State = EntityState.Detached;  // Detach the entity from the context
-								MemberToEdit = await db.Members.FirstOrDefaultAsync(m => m.IIN == MemberToEdit.IIN); // Reload original data
-								if (MemberToEdit == null) { MessageBox.Show("Member from data base is null"); return; } //TODO log
-																														// Reset fields with the original data
-								FillMemberData(MemberToEdit);
-								if (MemberToEdit.Photo == null) return; //TODO message and log
-								pbPhoto.Image = PictureController.ConvertByteToImage(MemberToEdit.Photo);
-								// Focus on the first field
-								TBName.Focus();
-							}
-						}
-						else
-						{
-							MessageBox.Show("You didn't change any data, change or cancel please");
-						}
-					}
-					catch (DbUpdateException ex)
+					var closeDialog = MessageBox.Show($"{MemberToEdit.Name} {MemberToEdit.Surname} updated successfully. Close the form?", "Update Successful", MessageBoxButtons.YesNo);
+					if (closeDialog == DialogResult.Yes)
 					{
-						MessageBox.Show($"Database update error: {ex.Message}");
-						if (MemberToEdit == null) return;
-						db.Entry(MemberToEdit).Reload();
+						Close();
 					}
-					catch (Exception ex)
+					else
 					{
-						MessageBox.Show($"An error occurred: {ex.Message}");
+						// Reset tracking of the member and reload the original data
+						_memberRepository._dbContext.Entry(MemberToEdit).State = EntityState.Detached;  // Detach the entity from the context
+						MemberToEdit = await _memberRepository.GetByIdAsync(MemberToEdit.IIN); // Reload original data
+						if (MemberToEdit == null) { MessageBox.Show("Member from data base is null"); return; } //TODO log
+																												// Reset fields with the original data
+						FillMemberData(MemberToEdit);
+						if (MemberToEdit.Photo == null) return; //TODO message and log
+						pbPhoto.Image = PictureController.ConvertByteToImage(MemberToEdit.Photo);
+						// Focus on the first field
+						TBName.Focus();
 					}
 					break;
 			}
 		}
-
-		/// <summary>
-		/// Checks if there were any changes in the member's fields and marks the entity as modified if necessary.
-		/// </summary>
-		/// <param name="db">The database context.</param>
-		/// <param name="member">The member to check for changes.</param>
-		/// <param name="name">The new name to check.</param>
-		/// <param name="surname">The new surname to check.</param>
-		/// <param name="patronymic">The new patronymic to check.</param>
-		/// <param name="birthDay">The new birth date to check.</param>
-		/// <param name="age">The new age to check.</param>
-		/// <param name="address">The new address to check.</param>
-		/// <param name="phoneNumber">The new phone number to check.</param>
-		/// <param name="photo">The new photo in byte array to check.</param>
-		/// <returns>True if there were changes, otherwise false.</returns>
-		private static bool CheckAndMarkChanges(DbContext db, Member member, string name, string surname, string patronymic, DateTime birthDay, byte age, string address, string phoneNumber, byte[] photo)
-		{
-			bool hasChanged = false;
-
-			if (!string.Equals(member.Name?.Trim(), name?.Trim(), StringComparison.OrdinalIgnoreCase))
-			{
-				db.Entry(member).State = EntityState.Modified;
-				hasChanged = true;
-			}
-
-			if (!string.Equals(member.Surname?.Trim(), surname?.Trim(), StringComparison.OrdinalIgnoreCase))
-			{
-				db.Entry(member).State = EntityState.Modified;
-				hasChanged = true;
-			}
-
-			if (!string.Equals(member.Patronymic?.Trim(), patronymic?.Trim(), StringComparison.OrdinalIgnoreCase))
-			{
-				db.Entry(member).State = EntityState.Modified;
-				hasChanged = true;
-			}
-
-			if (member.BirthDay.Date != birthDay.Date)
-			{
-				db.Entry(member).State = EntityState.Modified;
-				hasChanged = true;
-			}
-
-			if (member.Age != age)
-			{
-				db.Entry(member).State = EntityState.Modified;
-				hasChanged = true;
-			}
-
-			if (!string.Equals(member.Adress?.Trim(), address?.Trim(), StringComparison.OrdinalIgnoreCase))
-			{
-				db.Entry(member).State = EntityState.Modified;
-				hasChanged = true;
-			}
-
-			if (!string.Equals(member.PhoneNumber?.Trim(), phoneNumber?.Trim(), StringComparison.OrdinalIgnoreCase))
-			{
-				db.Entry(member).State = EntityState.Modified;
-				hasChanged = true;
-			}
-			if ((member.Photo == null && photo != null) || (member.Photo != null && !member.Photo.SequenceEqual(photo!))) // photo==null can't be cause parameter type byte[], not byte[]?
-			{
-				db.Entry(member).State = EntityState.Modified;
-				hasChanged = true;
-			}
-
-			return hasChanged;
-		}
-
 		/// <summary>
 		/// Handles the event when the Update Member button is clicked.
 		/// Performs validation and calls the action to update the member.

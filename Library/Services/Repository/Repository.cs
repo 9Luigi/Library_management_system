@@ -1,71 +1,195 @@
 ﻿using Library;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using System.Text;
 
-public class Repository<T> where T: class
+public class Repository<T> where T : class
 {
-	private readonly LibraryContextForEFcore _dbContext;
+	internal readonly LibraryContextForEFcore _dbContext;
 
 	/// <summary>
-	/// Инициализация нового экземпляра репозитория.
+	/// Initializes a new instance of the <see cref="Repository{T}"/> class.
 	/// </summary>
-	/// <param name="dbContext">Контекст базы данных для работы с сущностями.</param>
+	/// <param name="dbContext">The database context used for interacting with the entities.</param>
 	internal Repository(LibraryContextForEFcore dbContext)
 	{
 		_dbContext = dbContext;
 	}
 
 	/// <summary>
-	/// Получение сущности по идентификатору.
+	/// Retrieves an entity by its identifier.
 	/// </summary>
-	/// <param name="id">Идентификатор сущности.</param>
-	/// <returns>Асинхронная задача, которая возвращает сущность, если она найдена, или <c>null</c>, если сущности не существует.</returns>
-	public async Task<T> GetByIdAsync(long id)
+	/// <param name="id">The identifier of the entity.</param>
+	/// <returns>A task that returns the entity if found, or <c>null</c> if not found.</returns>
+	internal async Task<T> GetByIdAsync(long id)
 	{
-		return await _dbContext.Set<T>().FindAsync(id);
+		try
+		{
+			return await _dbContext.Set<T>().FindAsync(id);
+		}
+		catch (Exception ex)
+		{
+			// Log or handle the exception as needed
+			MessageBox.Show($"An error occurred while fetching the entity: {ex.Message}");
+			return null;
+		}
 	}
 
 	/// <summary>
-	/// Получение всех сущностей.
+	/// Retrieves all entities of type <typeparamref name="T"/>.
 	/// </summary>
-	/// <returns>Асинхронная задача, которая возвращает коллекцию всех сущностей.</returns>
-	public async Task<IEnumerable<T>> GetAllAsync()
+	/// <returns>A task that returns a collection of all entities.</returns>
+	internal async Task<IEnumerable<T>> GetAllAsync()
 	{
-		return await _dbContext.Set<T>().ToListAsync();
+		try
+		{
+			return await _dbContext.Set<T>().ToListAsync();
+		}
+		catch (Exception ex)
+		{
+			// Log or handle the exception as needed
+			MessageBox.Show($"An error occurred while fetching all entities: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
+			return Enumerable.Empty<T>();
+		}
 	}
 
 	/// <summary>
-	/// Добавление новой сущности.
+	/// Adds a new entity to the database.
 	/// </summary>
-	/// <param name="entity">Сущность для добавления.</param>
-	/// <returns>Асинхронная задача, которая возвращает <c>true</c>, если сущность успешно добавлена, иначе <c>false</c>.</returns>
-	public async Task<bool> AddAsync(T entity)
+	/// <param name="entity">The entity to add.</param>
+	/// <returns>A task that returns <c>true</c> if the entity was successfully added, otherwise <c>false</c>.</returns>
+	internal async Task<bool> AddAsync(T entity)
 	{
-		await _dbContext.Set<T>().AddAsync(entity);
-		return await _dbContext.SaveChangesAsync() > 0;
+		using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+		{
+			try
+			{
+				// Temporarily allow inserting explicit values for the identity column
+				await _dbContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Members ON");
+				await _dbContext.Set<T>().AddAsync(entity);
+
+				var result = await _dbContext.SaveChangesAsync() > 0;
+
+				// Disable the identity insert after the operation
+				await _dbContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Members OFF");
+				await transaction.CommitAsync();
+
+				return result;
+			}
+			catch (DbUpdateException ex)
+			{
+				// Log or handle the exception as needed
+				MessageBox.Show($"Database update error while adding the entity: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
+				return false;
+			}
+			catch (Exception ex)
+			{
+				// Rollback the transaction if an error occurs
+				await transaction.RollbackAsync();
+
+				// Log or handle the exception as needed
+				MessageBox.Show($"An error occurred while adding the entity: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
+				return false;
+			}
+		}
 	}
 
 	/// <summary>
-	/// Обновление существующей сущности.
+	/// Updates an existing entity in the database.
 	/// </summary>
-	/// <param name="entity">Сущность с обновленными данными.</param>
-	/// <returns>Асинхронная задача, которая возвращает <c>true</c>, если сущность успешно обновлена, иначе <c>false</c>.</returns>
-	public async Task<bool> UpdateAsync(T entity)
+	/// <param name="entity">The entity with updated data.</param>
+	/// <returns>A task that returns <c>true</c> if the entity was successfully updated, otherwise <c>false</c>.</returns>
+	internal async Task<bool> UpdateAsync(T entity)
 	{
-		_dbContext.Set<T>().Update(entity);
-		return await _dbContext.SaveChangesAsync() > 0;
+		try
+		{
+			_dbContext.Set<T>().Update(entity);
+			return await _dbContext.SaveChangesAsync() > 0;
+		}
+		catch (DbUpdateException ex)
+		{
+			// Log or handle the exception as needed
+			MessageBox.Show($"Database update error while updating the entity: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
+			return false;
+		}
+		catch (Exception ex)
+		{
+			// Log or handle the exception as needed
+			MessageBox.Show($"An error occurred while updating the entity: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
+			return false;
+		}
 	}
 
 	/// <summary>
-	/// Удаление сущности по идентификатору.
+	/// Updates specific properties of an existing entity that are attached to the context.
 	/// </summary>
-	/// <param name="id">Идентификатор сущности для удаления.</param>
-	/// <returns>Асинхронная задача, которая возвращает <c>true</c>, если сущность успешно удалена, иначе <c>false</c>.</returns>
-	public async Task<bool> DeleteAsync(long id)
+	/// <param name="entity">The entity with updated values.</param>
+	/// <param name="updatedValues">A dictionary containing the property names and their updated values.</param>
+	/// <returns>A task that returns <c>true</c> if the entity was successfully updated, otherwise <c>false</c>.</returns>
+	internal async Task<bool> UpdateAttachedAsync(T entity, Dictionary<string, object> updatedValues)
 	{
-		var entity = await GetByIdAsync(id);
-		if (entity == null) return false;
+		try
+		{
+			if (entity == null) return false;
 
-		_dbContext.Set<T>().Remove(entity);
-		return await _dbContext.SaveChangesAsync() > 0;
+			var entry = _dbContext.Entry(entity);
+
+			foreach (var updatedValue in updatedValues)
+			{
+				var propertyName = updatedValue.Key;
+				var newValue = updatedValue.Value;
+
+				var property = entry.Property(propertyName);
+
+				if (property.CurrentValue != newValue)
+				{
+					property.IsModified = true;
+				}
+			}
+
+			var result = await _dbContext.SaveChangesAsync();
+			return result > 0;
+		}
+		catch (DbUpdateException ex)
+		{
+			// Log or handle the exception as needed
+			MessageBox.Show($"Database update error while updating attached entity: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
+			return false;
+		}
+		catch (Exception ex)
+		{
+			// Log or handle the exception as needed
+			MessageBox.Show($"An error occurred while updating attached entity: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
+			return false;
+		}
+	}
+
+	/// <summary>
+	/// Deletes an entity by its identifier.
+	/// </summary>
+	/// <param name="id">The identifier of the entity to delete.</param>
+	/// <returns>A task that returns <c>true</c> if the entity was successfully deleted, otherwise <c>false</c>.</returns>
+	internal async Task<bool> DeleteAsync(long id)
+	{
+		try
+		{
+			var entity = await GetByIdAsync(id);
+			if (entity == null) return false;
+
+			_dbContext.Set<T>().Remove(entity);
+			return await _dbContext.SaveChangesAsync() > 0;
+		}
+		catch (DbUpdateException ex)
+		{
+			// Log or handle the exception as needed
+			MessageBox.Show($"Database update error while deleting the entity: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
+			return false;
+		}
+		catch (Exception ex)
+		{
+			// Log or handle the exception as needed
+			MessageBox.Show($"An error occurred while deleting the entity: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
+			return false;
+		}
 	}
 }

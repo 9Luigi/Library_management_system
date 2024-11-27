@@ -14,7 +14,7 @@ namespace Library.EFConfigurations
     {
         public void Configure(EntityTypeBuilder<Member> builder)
         {
-            builder.HasKey(m => m.Id);
+            builder.HasKey(m => m.IIN);
             builder.HasIndex(m => m.Id).IsUnique();
             builder.HasIndex(m => m.IIN).IsUnique();
             builder.HasMany(m => m.Books).WithMany(b => b.Members);
