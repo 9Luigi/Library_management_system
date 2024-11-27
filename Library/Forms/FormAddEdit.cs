@@ -218,15 +218,7 @@ namespace Library
 					break;
 
 				case "UPDATE":
-					MemberToEdit!.Name = TBName.Text;
-					MemberToEdit.Surname = TBSurname.Text;
-					MemberToEdit.BirthDay = DateTime.Parse(MTBBirthday.Text);
-					MemberToEdit.Age = byte.Parse(TBAge.Text);
-					MemberToEdit.Adress = MTBAdress.Text;
-					MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
-					MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);
-					MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
-
+					
 					var updatedValues = new Dictionary<string, object>
 					{
 					{ nameof(MemberToEdit.Name), TBName.Text},
