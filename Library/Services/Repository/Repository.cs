@@ -126,43 +126,75 @@ public class Repository<T> where T : class
 	/// <param name="entity">The entity with updated values.</param>
 	/// <param name="updatedValues">A dictionary containing the property names and their updated values.</param>
 	/// <returns>A task that returns <c>true</c> if the entity was successfully updated, otherwise <c>false</c>.</returns>
-	internal async Task<bool> UpdateAttachedAsync(T entity, Dictionary<string, object> updatedValues)
+	internal async Task<bool> UpdateAttachedAsync(T entity)
 	{
 		try
 		{
 			if (entity == null) return false;
 
+			// Attach entity if it's detached
+			if (_dbContext.Entry(entity).State == EntityState.Detached)
+			{
+				_dbContext.Attach(entity);
+			}
+
+			// Get the entry for the entity
 			var entry = _dbContext.Entry(entity);
 
-			foreach (var updatedValue in updatedValues)
+			// Loop through each property of the entity
+			foreach (var property in entry.OriginalValues.Properties)
 			{
-				var propertyName = updatedValue.Key;
-				var newValue = updatedValue.Value;
+				// Get the original and current values
+				var originalValue = entry.OriginalValues[property];
+				var currentValue = entry.CurrentValues[property];
 
-				var property = entry.Property(propertyName);
-
-				if (property.CurrentValue != newValue)
+				// Compare the values
+				if (originalValue == null && currentValue == null)
 				{
-					property.IsModified = true;
+					continue; // Skip if both values are null
+				}
+
+				if (originalValue is byte[] originalBytes && currentValue is byte[] currentBytes)
+				{
+					// Compare byte arrays
+					if (!originalBytes.SequenceEqual(currentBytes))
+					{
+						entry.Property(property.Name).IsModified = true;
+					}
+				}
+				else if (originalValue is DateTime originalDateTime && currentValue is DateTime currentDateTime)
+				{
+					// Compare DateTime values
+					if (DateTime.Compare(originalDateTime, currentDateTime) != 0)
+					{
+						entry.Property(property.Name).IsModified = true;
+					}
+				}
+				else if (!object.Equals(originalValue, currentValue))
+				{
+					// Compare other values (primitives, etc.)
+					entry.Property(property.Name).IsModified = true;
 				}
 			}
 
+			// Save changes and check if any records were updated
 			var result = await _dbContext.SaveChangesAsync();
 			return result > 0;
 		}
 		catch (DbUpdateException ex)
 		{
 			// Log or handle the exception as needed
-			MessageBox.Show($"Database update error while updating attached entity: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
+			MessageBox.Show($"Database update error while updating attached entity: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
 			return false;
 		}
 		catch (Exception ex)
 		{
 			// Log or handle the exception as needed
-			MessageBox.Show($"An error occurred while updating attached entity: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
+			MessageBox.Show($"An error occurred while updating attached entity: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
 			return false;
 		}
 	}
+
 
 	/// <summary>
 	/// Deletes an entity by its identifier.

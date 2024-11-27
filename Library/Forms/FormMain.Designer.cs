@@ -40,6 +40,7 @@
 			// bCatalog
 			// 
 			bCatalog.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			bCatalog.Enabled = false;
 			bCatalog.Location = new Point(12, 394);
 			bCatalog.Name = "bCatalog";
 			bCatalog.Size = new Size(280, 35);
@@ -73,7 +74,7 @@
 			// pbMembers
 			// 
 			pbMembers.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
-			pbMembers.Image = (Image)resources.GetObject("pbMembers.Image");
+			pbMembers.Image = Properties.Resources.Member;
 			pbMembers.Location = new Point(332, 12);
 			pbMembers.Name = "pbMembers";
 			pbMembers.Size = new Size(280, 376);
@@ -81,7 +82,7 @@
 			pbMembers.TabIndex = 6;
 			pbMembers.TabStop = false;
 			// 
-			// FMain
+			// FormMain
 			// 
 			AutoScaleDimensions = new SizeF(9F, 19F);
 			AutoScaleMode = AutoScaleMode.Font;
@@ -92,7 +93,7 @@
 			Controls.Add(bCatalog);
 			Font = new Font("Times New Roman", 12F, FontStyle.Regular, GraphicsUnit.Point);
 			Margin = new Padding(4);
-			Name = "FMain";
+			Name = "FormMain";
 			Text = "Library";
 			Load += FMain_Load;
 			((System.ComponentModel.ISupportInitialize)pbCatalog).EndInit();

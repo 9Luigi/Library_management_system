@@ -100,6 +100,7 @@ namespace Library
 					try
 					{
 						MemberToEdit = await _memberRepository.GetByIdAsync(e.IIN);
+						_memberRepository._dbContext.Attach(MemberToEdit);
 						if (MemberToEdit != null)
 						{
 							FillMemberData(MemberToEdit);
@@ -218,23 +219,28 @@ namespace Library
 					break;
 
 				case "UPDATE":
-					
-					var updatedValues = new Dictionary<string, object>
-					{
-					{ nameof(MemberToEdit.Name), TBName.Text},
-					{ nameof(MemberToEdit.Surname), TBSurname.Text},
-					{ nameof(MemberToEdit.Patronymic), CheckIfHasPatronymic(TBPatronymic.Text)},
-					{ nameof(MemberToEdit.BirthDay), DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture)},
-					{ nameof(MemberToEdit.Age), byte.Parse(TBAge.Text)},
-					{ nameof(MemberToEdit.Adress), MTBAdress.Text},
-					{ nameof(MemberToEdit.PhoneNumber), MTBPhoneNumber.Text},
-					{ nameof(MemberToEdit.Photo),  PictureController.ImageToByteConvert(pbPhoto.Image)},
-					};
-					bool isUpdated = await _memberRepository.UpdateAttachedAsync(MemberToEdit, updatedValues);
+					// Directly update the object's properties
+					MemberToEdit.Name = TBName.Text;
+					MemberToEdit.Surname = TBSurname.Text;
+					MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
+					MemberToEdit.BirthDay = DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture);
+					MemberToEdit.Age = byte.Parse(TBAge.Text);
+					MemberToEdit.Adress = MTBAdress.Text;
+					MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
+					MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);
+
+					// Save the changes to the database
+					bool isUpdated = await _memberRepository._dbContext.SaveChangesAsync() > 0;///////////////////////
+
+					MessageBox.Show(_memberRepository._dbContext.Entry(MemberToEdit).State.ToString()); // check the entity's state
 					if (!isUpdated)
 					{
 						MessageBox.Show("You didn't change member's fields");
 						return;
+					}
+					else
+					{
+						MessageBox.Show("Member's fields updated successfully");
 					}
 
 					var closeDialog = MessageBox.Show($"{MemberToEdit.Name} {MemberToEdit.Surname} updated successfully. Close the form?", "Update Successful", MessageBoxButtons.YesNo);
@@ -244,11 +250,7 @@ namespace Library
 					}
 					else
 					{
-						// Reset tracking of the member and reload the original data
-						_memberRepository._dbContext.Entry(MemberToEdit).State = EntityState.Detached;  // Detach the entity from the context
-						MemberToEdit = await _memberRepository.GetByIdAsync(MemberToEdit.IIN); // Reload original data
-						if (MemberToEdit == null) { MessageBox.Show("Member from data base is null"); return; } //TODO log
-																												// Reset fields with the original data
+
 						FillMemberData(MemberToEdit);
 						if (MemberToEdit.Photo == null) return; //TODO message and log
 						pbPhoto.Image = PictureController.ConvertByteToImage(MemberToEdit.Photo);

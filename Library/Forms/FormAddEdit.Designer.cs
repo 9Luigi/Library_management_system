@@ -193,7 +193,7 @@
 			// MTBBirthday
 			// 
 			MTBBirthday.Location = new Point(12, 224);
-			MTBBirthday.Mask = "00/00/0000";
+			MTBBirthday.Mask = "00.00.0000";
 			MTBBirthday.Name = "MTBBirthday";
 			MTBBirthday.Size = new Size(100, 23);
 			MTBBirthday.TabIndex = 5;
