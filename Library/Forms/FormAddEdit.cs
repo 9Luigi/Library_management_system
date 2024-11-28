@@ -230,7 +230,7 @@ namespace Library
 					MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);
 
 					// Save the changes to the database
-					bool isUpdated = await _memberRepository._dbContext.SaveChangesAsync() > 0;///////////////////////
+					bool isUpdated = await _memberRepository.UpdateAttachedAsync(MemberToEdit);///////////////////////
 
 					MessageBox.Show(_memberRepository._dbContext.Entry(MemberToEdit).State.ToString()); // check the entity's state
 					if (!isUpdated)
