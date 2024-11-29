@@ -16,24 +16,30 @@ public class Repository<T> where T : class
 		_dbContext = dbContext;
 	}
 
+	/// <exception cref="Exception">Thrown if an unexpected error occurs while fetching the entity.</exception>
 	/// <summary>
 	/// Retrieves an entity by its identifier.
 	/// </summary>
 	/// <param name="id">The identifier of the entity.</param>
 	/// <returns>A task that returns the entity if found, or <c>null</c> if not found.</returns>
+	/// <exception cref="KeyNotFoundException">Thrown when the entity with the specified identifier is not found in the database.</exception>
+	/// <exception cref="Exception">Thrown if an unexpected error occurs while fetching the entity.</exception>
 	internal async Task<T> GetByIdAsync(long id)
 	{
 		try
 		{
-			return await _dbContext.Set<T>().FindAsync(id);
+			var entity = await _dbContext.Set<T>().FindAsync(id);
+			if (entity == null)
+				throw new KeyNotFoundException($"Entity with {id} not found");
+			return entity;
 		}
 		catch (Exception ex)
 		{
-			// Log or handle the exception as needed
 			MessageBox.Show($"An error occurred while fetching the entity: {ex.Message}");
-			return null;
+			throw;
 		}
 	}
+
 
 	/// <summary>
 	/// Retrieves all entities of type <typeparamref name="T"/>.
