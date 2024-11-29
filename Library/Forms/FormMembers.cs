@@ -202,7 +202,7 @@ namespace Library
 					await UpdateProgressBarAsync(25, 50);
 
 					// Update the DataGridView with the retrieved data
-					await UpdateDataGridViewAsync(users);
+					UpdateDataGridViewAsync(users);
 
 					// Check if the operation was cancelled
 					if (CancellationToken.IsCancellationRequested) return;
@@ -276,7 +276,7 @@ namespace Library
 		/// Invokes the necessary UI updates on the main thread to modify the DataGridView's DataSource and customize it.
 		/// </summary>
 		/// <param name="users">The list of users to display in the DataGridView.</param>
-		private async Task UpdateDataGridViewAsync(List<dynamic> users)
+		private void UpdateDataGridViewAsync(List<dynamic> users)
 		{
 			// Invoke the update on the UI thread to modify the DataGridView safely
 			this.Invoke(new Action(() =>
@@ -291,8 +291,14 @@ namespace Library
 		/// </summary>
 		private async Task ResetProgressBarAsync()
 		{
-			// Invoke the reset on the UI thread
-			this.Invoke(ProgressBarController.pbProgressReset, pbMembers);
+			if (pbMembers.IsDisposed) return;
+			await Task.Run(() =>
+			{
+				this.BeginInvoke(async () =>
+				{
+					await ProgressBarController.pbProgressReset(pbMembers);
+				});
+			});
 		}
 
 		/// <summary>
