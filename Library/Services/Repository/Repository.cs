@@ -1,9 +1,10 @@
 ﻿using Library;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-public class Repository<T> where T : class
+public class Repository<T> where T : class //TODO logs
 {
 	internal readonly LibraryContextForEFcore _dbContext;
 
@@ -16,7 +17,6 @@ public class Repository<T> where T : class
 		_dbContext = dbContext;
 	}
 
-	/// <exception cref="Exception">Thrown if an unexpected error occurs while fetching the entity.</exception>
 	/// <summary>
 	/// Retrieves an entity by its identifier.
 	/// </summary>
@@ -58,7 +58,92 @@ public class Repository<T> where T : class
 			return Enumerable.Empty<T>();
 		}
 	}
+	#region GetWithProjectionAsync
+	/// <summary>
+	/// Asynchronously retrieves a projected list of entities of type <typeparamref name="T"/> from the database.
+	/// </summary>
+	/// <typeparam name="TResult">The type of the projected result.</typeparam>
+	/// <param name="selector">
+	/// An expression defining the projection, specifying which properties of the entity to include in the result.
+	/// </param>
+	/// <param name="includes">
+	/// Optional expressions defining related entities to include (e.g., navigation properties).
+	/// </param>
+	/// <returns>
+	/// A task that represents the asynchronous operation. The task result is a list of projected entities of type <typeparamref name="TResult"/>.
+	/// </returns>
+	/// <example>
+	/// Example usage:
+	/// <code>
+	/// var entity = await repository.GetWithProjectionAsync(
+	///     m => new { m.Property1, m.Property2, IncludesCount = m.Includes.Count },
+	///     m => m.Includes);
+	/// </code>
+	/// </example>
+	/// <remarks>
+	/// - This method allows fetching only the required properties of entities to improve performance.
+	/// - Includes are optional and can be used to eagerly load related entities.
+	/// </remarks>
+	/// <exception cref="ArgumentNullException">
+	/// Thrown if <paramref name="selector"/> is null.
+	/// </exception>
+	/// <exception cref="InvalidOperationException">
+	/// Thrown if the query cannot be executed (e.g., invalid entity state or EF configuration).
+	/// </exception>
+	public async Task<List<TResult>> GetWithProjectionAsync<TResult>(
+		Expression<Func<T, TResult>> selector,
+		params Expression<Func<T, object>>[] includes)
+	{
+		IQueryable<T> query = _dbContext.Set<T>();
 
+		foreach (var include in includes)
+		{
+			query = query.Include(include);
+		}
+		return await query.Select(selector).ToListAsync();
+	}
+	/// <summary>
+	/// Asynchronously retrieves a list of projections from the database, applying a filter with a specified field and search value.
+	/// </summary>
+	/// <typeparam name="TResult">The type of the projection result.</typeparam>
+	/// <param name="selector">The projection expression that defines what data to return.</param>
+	/// <param name="searchValue">The value to search for in the specified field.</param>
+	/// <param name="searchField">The field to apply the filter to (using LIKE).</param>
+	/// <param name="includes">An optional array of expressions representing the related entities to include in the query.</param>
+	/// <returns>A list of projected results of type <typeparamref name="TResult"/> that match the filter.</returns>
+	public async Task<List<TResult>> GetWithProjectionAsync<TResult>(
+		Expression<Func<T, TResult>> selector,
+		long searchValue, // Search value
+		Expression<Func<T, object>> searchField, // Field to filter by
+		params Expression<Func<T, object>>[] includes)
+	{
+		IQueryable<T> query = _dbContext.Set<T>();
+
+		// Add includes for related entities
+		foreach (var include in includes)
+		{
+			query = query.Include(include);
+		}
+
+		// Apply filtering using EF.Functions.Like
+		query = query.Where(m => EF.Functions.Like(
+			EF.Property<string>(m, GetPropertyName(searchField)),
+			$"%{searchValue}%"));
+
+		// Perform projection and return the result
+		return await query.Select(selector).ToListAsync();
+	}
+	/// <summary>
+	/// Helper method to extract the property name from a lambda expression.
+	/// </summary>
+	/// <param name="expression">The lambda expression representing the field to extract the property name from.</param>
+	/// <returns>The name of the property represented by the lambda expression.</returns>
+	private string GetPropertyName(Expression<Func<T, object>> expression)
+	{
+		var body = expression.Body as MemberExpression;
+		return body?.Member.Name ?? string.Empty;
+	}
+	#endregion
 	/// <summary>
 	/// Adds a new entity to the database.
 	/// </summary>
@@ -66,40 +151,38 @@ public class Repository<T> where T : class
 	/// <returns>A task that returns <c>true</c> if the entity was successfully added, otherwise <c>false</c>.</returns>
 	internal async Task<bool> AddAsync(T entity)
 	{
-		using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+		using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+		try
 		{
-			try
-			{
-				// Temporarily allow inserting explicit values for the identity column
-				await _dbContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Members ON");
-				await _dbContext.Set<T>().AddAsync(entity);
+			// Temporarily allow inserting explicit values for the identity column
+			await _dbContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Members ON");
+			await _dbContext.Set<T>().AddAsync(entity);
 
-				var result = await _dbContext.SaveChangesAsync() > 0;
+			var result = await _dbContext.SaveChangesAsync() > 0;
 
-				// Disable the identity insert after the operation
-				await _dbContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Members OFF");
-				await transaction.CommitAsync();
+			// Disable the identity insert after the operation
+			await _dbContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Members OFF");
+			await transaction.CommitAsync();
 
-				return result;
-			}
-			catch (DbUpdateException ex)
-			{
-				// Log or handle the exception as needed
-				MessageBox.Show($"Database update error while adding the entity: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
-				return false;
-			}
-			catch (Exception ex)
-			{
-				// Rollback the transaction if an error occurs
-				await transaction.RollbackAsync();
+			return result;
+		}
+		catch (DbUpdateException ex)
+		{
+			// Log or handle the exception as needed
+			MessageBox.Show($"Database update error while adding the entity: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
+			return false;
+		}
+		catch (Exception ex)
+		{
+			// Rollback the transaction if an error occurs
+			await transaction.RollbackAsync();
 
-				// Log or handle the exception as needed
-				MessageBox.Show($"An error occurred while adding the entity: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
-				return false;
-			}
+			// Log or handle the exception as needed
+			MessageBox.Show($"An error occurred while adding the entity: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
+			return false;
 		}
 	}
-
 	/// <summary>
 	/// Updates an existing entity in the database.
 	/// </summary>

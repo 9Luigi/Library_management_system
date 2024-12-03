@@ -145,31 +145,55 @@ namespace Library
 			}
 		}
 
-		private void TbIINSearch_TextChanged(object sender, EventArgs e) //TODO Refactor, before and after serch data grid have different rows
+		private async void TbIINSearch_TextChanged(object sender, EventArgs e)
 		{
-			using LibraryContextForEFcore db = new();
 			if (TbIINSearch.Text.Length > 3)
 			{
-				_ = long.TryParse(TbIINSearch.Text, out long IIN);
-				if (IIN != 0)
+				if (long.TryParse(TbIINSearch.Text, out long IIN) && IIN != 0)
 				{
-					var MatchedMembers = db.Members.Where(m => EF.Functions.Like(m.IIN.ToString(), $"%{IIN}%")).
-						Select(m => new { m.IIN, m.Name, m.Surname, m.Age }).ToList();
-					dataGridViewForMembers.DataSource = MatchedMembers; 
+					var matchedMembers = await _memberRepository.GetWithProjectionAsync( //TODO create class or structure for projected Member
+						m => new
+						{
+							m.IIN,
+							m.Name,
+							m.Surname,
+							m.Age,
+							m.RegistrationDate,
+							Books = string.Join(", ", m.Books.Select(b => b.Title))
+						},
+						Convert.ToInt64(TbIINSearch.Text),
+						m => m.IIN,
+						m => m.Books
+					);
+
+					dataGridViewForMembers.DataSource = matchedMembers;
+				}
+				else
+				{
+					// Если введен некорректный IIN, можно очистить DataGrid или показать сообщение
+					dataGridViewForMembers.DataSource = null; // Очистить DataGrid
 				}
 			}
 			else
 			{
-				var users = db.Members.Select(m => new
-				{
-					m.IIN,
-					m.Name,
-					m.Surname,
-					m.Age
-				}).ToList();
-				dataGridViewForMembers.DataSource = users;
+				// Если введено слишком короткое значение, загружаем всех членов
+				var members = await _memberRepository.GetWithProjectionAsync(
+					m => new
+					{
+						m.IIN,
+						m.Name,
+						m.Surname,
+						m.Age,
+						m.RegistrationDate,
+						Books = string.Join(", ", m.Books.Select(b => b.Title))
+					},
+					m => m.Books
+				);
+
+				dataGridViewForMembers.DataSource = members;
 			}
 		}
+
 		/// <summary>
 		/// Refreshes the DataGrid with member data from the database asynchronously.
 		/// Disables controls while data is loading and updates progress as data is being fetched.
@@ -183,32 +207,32 @@ namespace Library
 
 			Task fillGridWithAllMembers = new TaskFactory().StartNew(new Action(async () =>
 			{
-					// Get the total count of members
-					int totalMembersCount = await GetTotalMembersCountAsync();
+				// Get the total count of members
+				int totalMembersCount = await GetTotalMembersCountAsync();
 
-					// Check if the operation was cancelled
-					if (CancellationToken.IsCancellationRequested) return;
+				// Check if the operation was cancelled
+				if (CancellationToken.IsCancellationRequested) return;
 
-					// Update the progress bar as data is being loaded
-					await UpdateProgressBarAsync(0, 25);
+				// Update the progress bar as data is being loaded
+				await UpdateProgressBarAsync(0, 25);
 
-					// Retrieve members from the database
-					var users = await GetMembersFromDbAsync();
+				// Retrieve members from the database
+				var users = await GetMembersFromDbAsync();
 
-					// Check if the operation was cancelled
-					if (CancellationToken.IsCancellationRequested) return;
+				// Check if the operation was cancelled
+				if (CancellationToken.IsCancellationRequested) return;
 
-					// Update the progress bar after retrieving data
-					await UpdateProgressBarAsync(25, 50);
+				// Update the progress bar after retrieving data
+				await UpdateProgressBarAsync(25, 50);
 
-					// Update the DataGridView with the retrieved data
-					UpdateDataGridViewAsync(users);
+				// Update the DataGridView with the retrieved data
+				UpdateDataGridViewAsync(users);
 
-					// Check if the operation was cancelled
-					if (CancellationToken.IsCancellationRequested) return;
+				// Check if the operation was cancelled
+				if (CancellationToken.IsCancellationRequested) return;
 
-					// Final progress bar update
-					await UpdateProgressBarAsync(50, 100);
+				// Final progress bar update
+				await UpdateProgressBarAsync(50, 100);
 				// Sleep for a short period before resetting progress
 				Thread.Sleep(500);
 
@@ -242,23 +266,24 @@ namespace Library
 		}
 
 
-		private async Task<List<dynamic>> GetMembersFromDbAsync() //TODO use Repository
+		private async Task<List<dynamic>> GetMembersFromDbAsync()
 		{
-			var members = await _memberRepository._dbContext.Members.Include(m => m.Books)
-				.Select(m => new
+
+			var members = await _memberRepository.GetWithProjectionAsync(
+				m => new
 				{
 					m.IIN,
 					m.Name,
 					m.Surname,
 					m.Age,
 					m.RegistrationDate,
-					Books = string.Join(", ", m.Books.Select(b => b.Title)),
-				})
-				.OrderByDescending(m => m.RegistrationDate)
-				.ToListAsync();
-
+					Books = string.Join(", ", m.Books.Select(b => b.Title))
+				},
+				m => m.Books
+			);
 			return members.Cast<dynamic>().ToList();
 		}
+
 
 		/// <summary>
 		/// Asynchronously updates the progress bar with the specified minimum and maximum values.
