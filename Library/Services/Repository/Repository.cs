@@ -112,26 +112,45 @@ public class Repository<T> where T : class //TODO logs
 	/// <param name="includes">An optional array of expressions representing the related entities to include in the query.</param>
 	/// <returns>A list of projected results of type <typeparamref name="TResult"/> that match the filter.</returns>
 	public async Task<List<TResult>> GetWithProjectionAsync<TResult>(
-		Expression<Func<T, TResult>> selector,
-		long searchValue, // Search value
-		Expression<Func<T, object>> searchField, // Field to filter by
-		params Expression<Func<T, object>>[] includes)
+	Expression<Func<T, TResult>> selector,
+	long searchValue, // The value to filter by
+	Expression<Func<T, object>> searchField, // Field to apply the filter on
+	params Expression<Func<T, object>>[] includes) // Related entities to include
 	{
-		IQueryable<T> query = _dbContext.Set<T>();
-
-		// Add includes for related entities
-		foreach (var include in includes)
+		try
 		{
-			query = query.Include(include);
+			// Initialize the query from the DbSet
+			IQueryable<T> query = _dbContext.Set<T>();
+
+			// Include related entities
+			foreach (var include in includes)
+			{
+				query = query.Include(include);
+			}
+			query = query.Where(m => EF.Functions.Like(
+				EF.Property<string>(m, GetPropertyName(searchField)).ToString(),
+				$"%{searchValue}%"));
+			// Perform projection and return results
+			return await query.Select(selector).ToListAsync();
 		}
-
-		// Apply filtering using EF.Functions.Like
-		query = query.Where(m => EF.Functions.Like(
-			EF.Property<string>(m, GetPropertyName(searchField)),
-			$"%{searchValue}%"));
-
-		// Perform projection and return the result
-		return await query.Select(selector).ToListAsync();
+		catch (ArgumentException ex)
+		{
+			// Handle invalid property name or expression issues
+			MessageBox.Show($"Invalid argument: {ex.Message}");
+			throw; // Re-throw the exception to the caller
+		}
+		catch (DbUpdateException ex)
+		{
+			// Handle database-related exceptions
+			MessageBox.Show($"Database error: {ex.Message}");
+			throw; // Re-throw the exception to the caller
+		}
+		catch (Exception ex)
+		{
+			// Handle any other unexpected exceptions
+			MessageBox.Show($"An error occurred: {ex.Message}");
+			throw; // Re-throw the exception to the caller
+		}
 	}
 	/// <summary>
 	/// Helper method to extract the property name from a lambda expression.
@@ -140,9 +159,20 @@ public class Repository<T> where T : class //TODO logs
 	/// <returns>The name of the property represented by the lambda expression.</returns>
 	private string GetPropertyName(Expression<Func<T, object>> expression)
 	{
-		var body = expression.Body as MemberExpression;
-		return body?.Member.Name ?? string.Empty;
+		if (expression.Body is MemberExpression memberExpression)
+		{
+			return memberExpression.Member.Name;
+		}
+
+		if (expression.Body is UnaryExpression unaryExpression &&
+			unaryExpression.Operand is MemberExpression operandMemberExpression)
+		{
+			return operandMemberExpression.Member.Name;
+		}
+
+		throw new ArgumentException("The expression does not refer to a valid property.", nameof(expression));
 	}
+
 	#endregion
 	/// <summary>
 	/// Adds a new entity to the database.

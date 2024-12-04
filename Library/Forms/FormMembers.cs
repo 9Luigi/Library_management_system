@@ -149,7 +149,8 @@ namespace Library
 		{
 			if (TbIINSearch.Text.Length > 3)
 			{
-				if (long.TryParse(TbIINSearch.Text, out long IIN) && IIN != 0)
+				string input = TbIINSearch.Text.Trim();
+				if (long.TryParse(input, out long IIN) && IIN != 0)
 				{
 					var matchedMembers = await _memberRepository.GetWithProjectionAsync( //TODO create class or structure for projected Member
 						m => new
@@ -161,7 +162,7 @@ namespace Library
 							m.RegistrationDate,
 							Books = string.Join(", ", m.Books.Select(b => b.Title))
 						},
-						Convert.ToInt64(TbIINSearch.Text),
+						IIN,
 						m => m.IIN,
 						m => m.Books
 					);
@@ -170,13 +171,11 @@ namespace Library
 				}
 				else
 				{
-					// Если введен некорректный IIN, можно очистить DataGrid или показать сообщение
-					dataGridViewForMembers.DataSource = null; // Очистить DataGrid
+					dataGridViewForMembers.DataSource = null;
 				}
 			}
 			else
 			{
-				// Если введено слишком короткое значение, загружаем всех членов
 				var members = await _memberRepository.GetWithProjectionAsync(
 					m => new
 					{
