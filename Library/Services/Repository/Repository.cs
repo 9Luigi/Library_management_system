@@ -1,20 +1,21 @@
 ﻿using Library;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 
 public class Repository<T> where T : class //TODO logs
 {
 	internal readonly LibraryContextForEFcore _dbContext;
+	private readonly ILogger<Repository<T>> _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="Repository{T}"/> class.
 	/// </summary>
 	/// <param name="dbContext">The database context used for interacting with the entities.</param>
-	internal Repository(LibraryContextForEFcore dbContext)
+	internal Repository(LibraryContextForEFcore dbContext, ILogger<Repository<T>> logger)
 	{
 		_dbContext = dbContext;
+		_logger = logger;
 	}
 
 	/// <summary>
@@ -35,7 +36,7 @@ public class Repository<T> where T : class //TODO logs
 		}
 		catch (Exception ex)
 		{
-			MessageBox.Show($"An error occurred while fetching the entity: {ex.Message}");
+			_logger.LogError($"An error occurred while fetching the entity: {ex.Message}");
 			throw;
 		}
 	}
@@ -54,7 +55,7 @@ public class Repository<T> where T : class //TODO logs
 		catch (Exception ex)
 		{
 			// Log or handle the exception as needed
-			MessageBox.Show($"An error occurred while fetching all entities: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
+			_logger.LogError(ex, "Error occurred while fetching all entities of type {EntityType}", typeof(T).Name);
 			return Enumerable.Empty<T>();
 		}
 	}
@@ -185,7 +186,7 @@ public class Repository<T> where T : class //TODO logs
 
 		try
 		{
-			// Temporarily allow inserting explicit values for the identity column
+			// Temporarily allow inserting explicit values for the identity column cause Primary Key is not auto increment but IIN
 			await _dbContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Members ON");
 			await _dbContext.Set<T>().AddAsync(entity);
 

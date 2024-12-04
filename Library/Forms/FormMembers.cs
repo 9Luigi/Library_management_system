@@ -1,6 +1,7 @@
 ﻿using Library.Controllers;
 using Library.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Data;
 
 namespace Library
@@ -14,8 +15,9 @@ namespace Library
 			CancellationTokenSource = new CancellationTokenSource();
 			FlendOrRecieveBook = new FormBorrowOrRecieveBook();
 			FaddEdit_prop = new FaddEdit_prop();
-			var dbContext = new LibraryContextForEFcore();
-			_memberRepository = new(dbContext);
+			var _dbContext = new LibraryContextForEFcore();
+			var _logger = LoggerService.CreateLogger<Repository<Member>>();
+			_memberRepository = new(_dbContext, _logger);
 		}
 		internal class MemberEventArgs : EventArgs //for transfer IIN and Action to other forms via event
 		{
@@ -99,8 +101,6 @@ namespace Library
 			// If IIN was successfully checked 
 			if (IsValid)
 			{
-				await using LibraryContextForEFcore db = new();
-				var repos = new Repository<Member>(db);
 				// Show a confirmation dialog to the user
 				DialogResult result = MessageBox.Show("Are you sure to remove?", "Removing member", MessageBoxButtons.YesNo);
 
@@ -109,7 +109,7 @@ namespace Library
 				{
 
 					// Remove the member from the database
-					if (await repos.DeleteAsync(IIN) == true)
+					if (await _memberRepository.DeleteAsync(IIN) == true)
 					{
 						// Inform the user that the member was successfully removed
 						MessageBox.Show("Member successfully removed");

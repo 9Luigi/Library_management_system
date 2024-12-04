@@ -33,8 +33,9 @@ namespace Library
 			InitializeComponent();
 			pbPhoto.Image = Properties.Resources.NoImage;
 
-			var dbContext = new LibraryContextForEFcore();
-			_memberRepository = new(dbContext);
+			var _dbContext = new LibraryContextForEFcore();
+			var _logger = LoggerService.CreateLogger<Repository<Member>>();
+			_memberRepository = new(_dbContext, _logger);
 
 		}
 
@@ -232,7 +233,6 @@ namespace Library
 					// Save the changes to the database
 					bool isUpdated = await _memberRepository.UpdateAttachedAsync(MemberToEdit);///////////////////////
 
-					MessageBox.Show(_memberRepository._dbContext.Entry(MemberToEdit).State.ToString()); // check the entity's state
 					if (!isUpdated)
 					{
 						MessageBox.Show("You didn't change member's fields");
