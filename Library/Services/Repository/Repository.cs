@@ -6,16 +6,14 @@ using System.Linq.Expressions;
 public class Repository<T> where T : class //TODO logs
 {
 	internal readonly LibraryContextForEFcore _dbContext;
-	private readonly ILogger<Repository<T>> _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="Repository{T}"/> class.
 	/// </summary>
 	/// <param name="dbContext">The database context used for interacting with the entities.</param>
-	internal Repository(LibraryContextForEFcore dbContext, ILogger<Repository<T>> logger)
+	internal Repository(LibraryContextForEFcore dbContext)
 	{
 		_dbContext = dbContext;
-		_logger = logger;
 	}
 
 	/// <summary>
@@ -34,9 +32,8 @@ public class Repository<T> where T : class //TODO logs
 				throw new KeyNotFoundException($"Entity with {id} not found");
 			return entity;
 		}
-		catch (Exception ex)
+		catch (Exception)
 		{
-			_logger.LogError($"An error occurred while fetching the entity: {ex.Message}");
 			throw;
 		}
 	}
@@ -52,11 +49,9 @@ public class Repository<T> where T : class //TODO logs
 		{
 			return await _dbContext.Set<T>().ToListAsync();
 		}
-		catch (Exception ex)
+		catch (Exception)
 		{
-			// Log or handle the exception as needed
-			_logger.LogError(ex, "Error occurred while fetching all entities of type {EntityType}", typeof(T).Name);
-			return Enumerable.Empty<T>();
+			throw;
 		}
 	}
 	#region GetWithProjectionAsync
@@ -95,13 +90,20 @@ public class Repository<T> where T : class //TODO logs
 		Expression<Func<T, TResult>> selector,
 		params Expression<Func<T, object>>[] includes)
 	{
-		IQueryable<T> query = _dbContext.Set<T>();
-
-		foreach (var include in includes)
+		try
 		{
-			query = query.Include(include);
+			IQueryable<T> query = _dbContext.Set<T>();
+
+			foreach (var include in includes)
+			{
+				query = query.Include(include);
+			}
+			return await query.Select(selector).ToListAsync();
 		}
-		return await query.Select(selector).ToListAsync();
+		catch (Exception)
+		{
+			throw;
+		}
 	}
 	/// <summary>
 	/// Asynchronously retrieves a list of projections from the database, applying a filter with a specified field and search value.
@@ -134,23 +136,9 @@ public class Repository<T> where T : class //TODO logs
 			// Perform projection and return results
 			return await query.Select(selector).ToListAsync();
 		}
-		catch (ArgumentException ex)
+		catch (Exception)
 		{
-			// Handle invalid property name or expression issues
-			MessageBox.Show($"Invalid argument: {ex.Message}");
-			throw; // Re-throw the exception to the caller
-		}
-		catch (DbUpdateException ex)
-		{
-			// Handle database-related exceptions
-			MessageBox.Show($"Database error: {ex.Message}");
-			throw; // Re-throw the exception to the caller
-		}
-		catch (Exception ex)
-		{
-			// Handle any other unexpected exceptions
-			MessageBox.Show($"An error occurred: {ex.Message}");
-			throw; // Re-throw the exception to the caller
+			throw;
 		}
 	}
 	/// <summary>
@@ -182,36 +170,16 @@ public class Repository<T> where T : class //TODO logs
 	/// <returns>A task that returns <c>true</c> if the entity was successfully added, otherwise <c>false</c>.</returns>
 	internal async Task<bool> AddAsync(T entity)
 	{
-		using var transaction = await _dbContext.Database.BeginTransactionAsync();
-
 		try
 		{
-			// Temporarily allow inserting explicit values for the identity column cause Primary Key is not auto increment but IIN
-			await _dbContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Members ON");
 			await _dbContext.Set<T>().AddAsync(entity);
-
 			var result = await _dbContext.SaveChangesAsync() > 0;
-
-			// Disable the identity insert after the operation
-			await _dbContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Members OFF");
-			await transaction.CommitAsync();
 
 			return result;
 		}
-		catch (DbUpdateException ex)
+		catch (Exception)
 		{
-			// Log or handle the exception as needed
-			MessageBox.Show($"Database update error while adding the entity: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
-			return false;
-		}
-		catch (Exception ex)
-		{
-			// Rollback the transaction if an error occurs
-			await transaction.RollbackAsync();
-
-			// Log or handle the exception as needed
-			MessageBox.Show($"An error occurred while adding the entity: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
-			return false;
+			throw;
 		}
 	}
 	/// <summary>
@@ -226,17 +194,9 @@ public class Repository<T> where T : class //TODO logs
 			_dbContext.Set<T>().Update(entity);
 			return await _dbContext.SaveChangesAsync() > 0;
 		}
-		catch (DbUpdateException ex)
+		catch (Exception)
 		{
-			// Log or handle the exception as needed
-			MessageBox.Show($"Database update error while updating the entity: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
-			return false;
-		}
-		catch (Exception ex)
-		{
-			// Log or handle the exception as needed
-			MessageBox.Show($"An error occurred while updating the entity: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
-			return false;
+			throw;
 		}
 	}
 
@@ -246,7 +206,7 @@ public class Repository<T> where T : class //TODO logs
 	/// <param name="entity">The entity with updated values.</param>
 	/// <param name="updatedValues">A dictionary containing the property names and their updated values.</param>
 	/// <returns>A task that returns <c>true</c> if the entity was successfully updated, otherwise <c>false</c>.</returns>
-	internal async Task<bool> UpdateAttachedAsync(T entity)
+	internal async Task<bool> UpdateAttachedFieldsAsync(T entity)
 	{
 		try
 		{
@@ -301,17 +261,9 @@ public class Repository<T> where T : class //TODO logs
 			var result = await _dbContext.SaveChangesAsync();
 			return result > 0;
 		}
-		catch (DbUpdateException ex)
+		catch (Exception)
 		{
-			// Log or handle the exception as needed
-			MessageBox.Show($"Database update error while updating attached entity: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
-			return false;
-		}
-		catch (Exception ex)
-		{
-			// Log or handle the exception as needed
-			MessageBox.Show($"An error occurred while updating attached entity: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
-			return false;
+			throw;
 		}
 	}
 
@@ -325,23 +277,18 @@ public class Repository<T> where T : class //TODO logs
 	{
 		try
 		{
+			// Search fo entiry
 			var entity = await GetByIdAsync(id);
+			// If cannot find return false
 			if (entity == null) return false;
-
+			// Try to remove if entity found 
 			_dbContext.Set<T>().Remove(entity);
+			// return 1 if record were deleted from db or 0 if not
 			return await _dbContext.SaveChangesAsync() > 0;
 		}
-		catch (DbUpdateException ex)
+		catch (Exception)
 		{
-			// Log or handle the exception as needed
-			MessageBox.Show($"Database update error while deleting the entity: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
-			return false;
-		}
-		catch (Exception ex)
-		{
-			// Log or handle the exception as needed
-			MessageBox.Show($"An error occurred while deleting the entity: {ex.Message}. Inner exception:  {ex.InnerException?.Message ?? "None"}");
-			return false;
+			throw;
 		}
 	}
 }

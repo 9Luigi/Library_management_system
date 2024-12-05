@@ -8,8 +8,9 @@ namespace Library.Controllers.PictureController
 {
 	public static class AspectRatioRequirement
 	{
-		public static double ThreeToFour = 3.0 / 4; 
-		public static double FourToFive = 4.0 / 5; 
-		public static double TenToTwelve = 10.0 / 12;
+		public static double ThreeToFour = 3.0 / 4;   // Common portrait aspect ratio
+		public static double TwoToThree = 2.0 / 3;     // Common photographic portrait
+		public static double FiveToFour = 5.0 / 4;     // Slightly taller, used for portrait display
+		public static double NineToSixteen = 9.0 / 16; // Portrait mode used in phone screens and vertical videos
 	}
 }

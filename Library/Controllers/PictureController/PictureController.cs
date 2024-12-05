@@ -28,7 +28,7 @@ namespace Library.Controllers.PictureController
 
 			try
 			{
-				using MemoryStream ms = new (imageByte);
+				using MemoryStream ms = new(imageByte);
 				return Image.FromStream(ms);
 			}
 			catch (ArgumentException ex)
@@ -51,9 +51,10 @@ namespace Library.Controllers.PictureController
 				double aspectRatio = (double)photo.Width / photo.Height;
 				photo = CorrectImageOrientation(photo); //restrict photo rotation
 
-				if (Math.Abs(aspectRatio - AspectRatioRequirement.ThreeToFour) > 0.01 //check photo aspect ratio
-					&& Math.Abs(aspectRatio - AspectRatioRequirement.FourToFive) > 0.01
-					&& Math.Abs(aspectRatio - AspectRatioRequirement.TenToTwelve) > 0.01)
+				if (Math.Abs(aspectRatio - AspectRatioRequirement.ThreeToFour) > 0.01 // Check photo aspect ratio
+					&& Math.Abs(aspectRatio - AspectRatioRequirement.TwoToThree) > 0.01
+					&& Math.Abs(aspectRatio - AspectRatioRequirement.FiveToFour) > 0.01
+					&& Math.Abs(aspectRatio - AspectRatioRequirement.NineToSixteen) > 0.01)
 				{
 					MessageBox.Show("Photo might be 3:4 / 6:8 / 4:5"); //3:4 == 6:8
 					return null;

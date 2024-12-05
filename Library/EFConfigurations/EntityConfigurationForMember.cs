@@ -14,11 +14,12 @@ namespace Library.EFConfigurations
     {
         public void Configure(EntityTypeBuilder<Member> builder)
         {
-            builder.HasKey(m => m.IIN);
+            builder.HasKey(m => m.Id);
             builder.HasIndex(m => m.Id).IsUnique();
             builder.HasIndex(m => m.IIN).IsUnique();
             builder.HasMany(m => m.Books).WithMany(b => b.Members);
 
+            builder.Property(m => m.Id).ValueGeneratedOnAdd();
             builder.Property(m => m.Name).HasColumnName("Name").IsRequired().HasMaxLength(75);
             builder.Property(m => m.Surname).HasColumnName("Surname").IsRequired().HasMaxLength(75);
             builder.Property(m => m.Patronymic).HasColumnName("Patronymic").HasMaxLength(75);

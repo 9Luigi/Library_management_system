@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Migrations
 {
     [DbContext(typeof(LibraryContextForEFcore))]
-    [Migration("20241127144224_INIT")]
+    [Migration("20241205152231_INIT")]
     partial class INIT
     {
         /// <inheritdoc />
@@ -45,12 +45,12 @@ namespace Library.Migrations
                     b.Property<int>("BooksId")
                         .HasColumnType("int");
 
-                    b.Property<long>("MembersIIN")
-                        .HasColumnType("BIGINT");
+                    b.Property<int>("MembersId")
+                        .HasColumnType("int");
 
-                    b.HasKey("BooksId", "MembersIIN");
+                    b.HasKey("BooksId", "MembersId");
 
-                    b.HasIndex("MembersIIN");
+                    b.HasIndex("MembersId");
 
                     b.ToTable("BookMember");
                 });
@@ -154,12 +154,11 @@ namespace Library.Migrations
 
             modelBuilder.Entity("Library.Models.Member", b =>
                 {
-                    b.Property<long>("IIN")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("BIGINT")
-                        .HasColumnName("IIN");
+                        .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("IIN"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Adress")
                         .IsRequired()
@@ -174,8 +173,9 @@ namespace Library.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("BirthDay");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
+                    b.Property<long>("IIN")
+                        .HasColumnType("BIGINT")
+                        .HasColumnName("IIN");
 
                     b.Property<byte[]>("MemberVersion")
                         .IsConcurrencyToken()
@@ -219,7 +219,7 @@ namespace Library.Migrations
                         .HasColumnType("nvarchar(75)")
                         .HasColumnName("Surname");
 
-                    b.HasKey("IIN");
+                    b.HasKey("Id");
 
                     b.HasIndex("IIN")
                         .IsUnique();
@@ -255,7 +255,7 @@ namespace Library.Migrations
 
                     b.HasOne("Library.Models.Member", null)
                         .WithMany()
-                        .HasForeignKey("MembersIIN")
+                        .HasForeignKey("MembersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

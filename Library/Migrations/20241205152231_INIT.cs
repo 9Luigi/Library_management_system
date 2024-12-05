@@ -52,9 +52,8 @@ namespace Library.Migrations
                 name: "Members",
                 columns: table => new
                 {
-                    IIN = table.Column<long>(type: "BIGINT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Id = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(75)", maxLength: 75, nullable: false),
                     Surname = table.Column<string>(type: "nvarchar(75)", maxLength: 75, nullable: false),
                     Patronymic = table.Column<string>(type: "nvarchar(75)", maxLength: 75, nullable: false),
@@ -62,13 +61,14 @@ namespace Library.Migrations
                     BirthDay = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Adress = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(75)", maxLength: 75, nullable: false),
+                    IIN = table.Column<long>(type: "BIGINT", nullable: false),
                     RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Photo = table.Column<byte[]>(type: "varbinary(max)", nullable: false, defaultValue: new byte[] { 0 }),
                     Version = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Members", x => x.IIN);
+                    table.PrimaryKey("PK_Members", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -100,11 +100,11 @@ namespace Library.Migrations
                 columns: table => new
                 {
                     BooksId = table.Column<int>(type: "int", nullable: false),
-                    MembersIIN = table.Column<long>(type: "BIGINT", nullable: false)
+                    MembersId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BookMember", x => new { x.BooksId, x.MembersIIN });
+                    table.PrimaryKey("PK_BookMember", x => new { x.BooksId, x.MembersId });
                     table.ForeignKey(
                         name: "FK_BookMember_Books_BooksId",
                         column: x => x.BooksId,
@@ -112,10 +112,10 @@ namespace Library.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BookMember_Members_MembersIIN",
-                        column: x => x.MembersIIN,
+                        name: "FK_BookMember_Members_MembersId",
+                        column: x => x.MembersId,
                         principalTable: "Members",
-                        principalColumn: "IIN",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -125,9 +125,9 @@ namespace Library.Migrations
                 column: "BooksId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BookMember_MembersIIN",
+                name: "IX_BookMember_MembersId",
                 table: "BookMember",
-                column: "MembersIIN");
+                column: "MembersId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Members_Id",

@@ -35,7 +35,7 @@ namespace Library
 
 			var _dbContext = new LibraryContextForEFcore();
 			var _logger = LoggerService.CreateLogger<Repository<Member>>();
-			_memberRepository = new(_dbContext, _logger);
+			_memberRepository = new(_dbContext);
 
 		}
 
@@ -231,7 +231,7 @@ namespace Library
 					MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);
 
 					// Save the changes to the database
-					bool isUpdated = await _memberRepository.UpdateAttachedAsync(MemberToEdit);///////////////////////
+					bool isUpdated = await _memberRepository.UpdateAttachedFieldsAsync(MemberToEdit);
 
 					if (!isUpdated)
 					{
