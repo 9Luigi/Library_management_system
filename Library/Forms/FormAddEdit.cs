@@ -100,7 +100,7 @@ namespace Library
 					MTBIIN.Enabled = false;
 					try
 					{
-						MemberToEdit = await _memberRepository.GetByIdAsync(e.IIN);
+						MemberToEdit = await _memberRepository.GetByIndexAsync(e.IIN);
 						_memberRepository._dbContext.Attach(MemberToEdit);
 						if (MemberToEdit != null)
 						{
@@ -111,9 +111,9 @@ namespace Library
 							MessageBox.Show("Cannot load data, probably member was deleted by another employee while you edit, try again please");
 						}
 					}
-					catch (Exception)
+					catch (Exception ex)
 					{
-						MessageBox.Show("An error occurred while loading member data.");
+						MessageBox.Show("An error occurred while loading member data.", ex.Message);
 					}
 					break;
 				case "CREATE":

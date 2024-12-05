@@ -23,6 +23,20 @@ public class Repository<T> where T : class //TODO logs
 	/// <returns>A task that returns the entity if found, or <c>null</c> if not found.</returns>
 	/// <exception cref="KeyNotFoundException">Thrown when the entity with the specified identifier is not found in the database.</exception>
 	/// <exception cref="Exception">Thrown if an unexpected error occurs while fetching the entity.</exception>
+	internal async Task<T> GetByIndexAsync(long IIN)
+	{
+		try
+		{
+			var entity = await _dbContext.Set<T>().FirstOrDefaultAsync(e => EF.Property<long>(e, "IIN") == IIN); ;
+			if (entity == null)
+				throw new KeyNotFoundException($"Entity with {IIN} not found");
+			return entity;
+		}
+		catch (Exception)
+		{
+			throw;
+		}
+	}
 	internal async Task<T> GetByIdAsync(long id)
 	{
 		try
@@ -37,7 +51,6 @@ public class Repository<T> where T : class //TODO logs
 			throw;
 		}
 	}
-
 
 	/// <summary>
 	/// Retrieves all entities of type <typeparamref name="T"/>.
@@ -273,12 +286,12 @@ public class Repository<T> where T : class //TODO logs
 	/// </summary>
 	/// <param name="id">The identifier of the entity to delete.</param>
 	/// <returns>A task that returns <c>true</c> if the entity was successfully deleted, otherwise <c>false</c>.</returns>
-	internal async Task<bool> DeleteAsync(long id)
+	internal async Task<bool> DeleteAsync(long IIN)
 	{
 		try
 		{
 			// Search fo entiry
-			var entity = await GetByIdAsync(id);
+			var entity = await GetByIndexAsync(IIN);
 			// If cannot find return false
 			if (entity == null) return false;
 			// Try to remove if entity found 
