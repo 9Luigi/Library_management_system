@@ -11,7 +11,7 @@ namespace Library
 		#region FieldsAndProperties
 		readonly Repository<Member> _memberRepository;
 		readonly ILogger _logger;
-		internal FormBorrowOrRecieveBook FlendOrRecieveBook { get; private set; }
+		internal FormBorrowOrRecieveBook FlendOrRecieveBook { get; private set; } //TODO:CRITICAL logic of borrow and return book is broken
 		internal FaddEdit_prop FaddEdit_prop { get; private set; }
 		internal CancellationTokenSource CancellationTokenSource { get; set; }
 		internal CancellationToken CancellationToken { get; set; }
@@ -39,7 +39,6 @@ namespace Library
 			}
 		}
 		#endregion
-		//TODO Create Repositoty<Member> class and transfer all repository method to that
 		/// <summary>
 		/// Handles the click event for the "Add Member" menu item in the context menu.
 		/// Triggers the "CREATE" action, opens the member creation form, and refreshes the data grid.
@@ -632,7 +631,7 @@ namespace Library
 		/// Checks if a member has borrowed any books and, if so, displays their information in another form.
 		/// Logs actions and handles errors during the process.
 		/// </summary>
-		private async void SeeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e) //TODO use Repository
+		private async void SeeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			// Check if a valid member is selected and retrieve their IIN
 			(bool isValid, long IIN) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
