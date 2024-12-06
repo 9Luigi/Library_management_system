@@ -95,6 +95,7 @@ namespace Library.Controllers.PictureController
 					&& Math.Abs(aspectRatio - AspectRatioRequirement.NineToSixteen) > 0.01)
 				{
 					MessageBox.Show("Photo might not be 3:4 / 6:8 / 4:5");
+					photo.Dispose();
 					return null;
 				}
 				else
@@ -144,7 +145,6 @@ namespace Library.Controllers.PictureController
 						break;
 				}
 			}
-
 			return image;
 		}
 

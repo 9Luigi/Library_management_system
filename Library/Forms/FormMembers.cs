@@ -1,4 +1,5 @@
 ﻿using Library.Controllers;
+using Library.Controllers.PictureController;
 using Library.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -18,15 +19,15 @@ namespace Library
 		internal delegate void MemberCreateOrUpdateDelegate(MemberEventArgs e);
 		static internal event MemberCreateOrUpdateDelegate? MemberCreateOrUpdateEvent;
 		readonly ControlsController controlsController = new();
+
 		public FormMembers()
 		{
 			InitializeComponent();
 			CancellationTokenSource = new CancellationTokenSource();
 			FlendOrRecieveBook = new FormBorrowOrRecieveBook();
 			FaddEdit_prop = new FaddEdit_prop();
-			var _dbContext = new LibraryContextForEFcore();
 			_logger = LoggerService.CreateLogger<Repository<Member>>();
-			_memberRepository = new(_dbContext);
+			_memberRepository = new();
 		}
 		internal class MemberEventArgs : EventArgs //for transfer IIN and Action to other forms via event
 		{
@@ -341,9 +342,6 @@ namespace Library
 				MessageBox.Show($"An error with message:{ex.Message}, occurred while preparing data for display. Please try again later.");
 			}
 		}
-
-
-
 
 		private async Task SetControlsEnabledAsync(bool isEnabled)
 		{
@@ -787,6 +785,126 @@ namespace Library
 				// Log the exception with relevant details
 				_logger.LogError(ex, "An error occurred while fetching member data and borrowed books for IIN: {IIN}", IIN);
 				throw; // Re-throw the exception after logging it
+			}
+		}
+		/// <summary>
+		/// Handles the double-click event on a cell in the DataGridView for members.
+		/// </summary>
+		/// <param name="sender">The source of the event, typically the DataGridView.</param>
+		/// <param name="e">Provides data for the <see cref="DataGridViewCellMouseEventArgs"/> event.</param>
+		/// <remarks>
+		/// This method:
+		/// - Checks if the left mouse button was double-clicked on a valid cell (not a header).
+		/// - Retrieves the IIN (Individual Identification Number) from the clicked row.
+		/// - Invokes the <see cref="MemberCreateOrUpdateEvent"/> for editing the member.
+		/// - Displays a dialog for editing the member's details.
+		/// </remarks>
+		/// <exception cref="Exception">
+		/// Logs any exceptions that occur while displaying the edit dialog.
+		/// </exception>
+		private void dataGridViewForMembers_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+		{
+			_logger.LogInformation("Entered dataGridViewForMembers_CellMouseDoubleClick method");
+
+			// Check if the left mouse button was double-clicked on a valid cell (not a header)
+			if (e.Button == MouseButtons.Left && e.RowIndex >= 0 && e.ColumnIndex >= 0)
+			{
+				_logger.LogInformation("Left mouse button double-clicked on valid cell at row {RowIndex}, column {ColumnIndex}", e.RowIndex, e.ColumnIndex);
+
+				// Set the current cell to the clicked one
+				dataGridViewForMembers.CurrentCell = dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
+
+				// Attempt to retrieve the IIN from the selected row
+				var (isValid, IIN) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
+
+				if (isValid)
+				{
+					_logger.LogInformation("Valid IIN ({IIN}) retrieved from row {RowIndex}", IIN, e.RowIndex);
+
+					// Check if the event has subscribers
+					if (MemberCreateOrUpdateEvent != null)
+					{
+						// Invoke the edit event with the IIN
+						MemberCreateOrUpdateEvent.Invoke(new MemberEventArgs("EDIT", IIN));
+						_logger.LogInformation("MemberCreateOrUpdateEvent invoked for IIN: {IIN}", IIN);
+
+						try
+						{
+							// Show the edit form dialog
+							FaddEdit_prop.ShowDialog();
+							_logger.LogInformation("FaddEdit_prop dialog closed successfully");
+						}
+						catch (Exception ex)
+						{
+							_logger.LogError(ex, "Error occurred while displaying FaddEdit_prop dialog");
+						}
+					}
+					else
+					{
+						_logger.LogWarning("MemberCreateOrUpdateEvent has no subscribers");
+					}
+				}
+				else
+				{
+					_logger.LogWarning("Failed to retrieve a valid IIN from row {RowIndex}", e.RowIndex);
+				}
+			}
+			else
+			{
+				_logger.LogWarning("Mouse double-click occurred outside a valid cell (row: {RowIndex}, column: {ColumnIndex})", e.RowIndex, e.ColumnIndex);
+			}
+		}
+
+		/// <summary>
+		/// Handles the event when the current cell in the DataGridView for members changes.
+		/// </summary>
+		/// <param name="sender">The source of the event, typically the DataGridView.</param>
+		/// <param name="e">Provides data for the event.</param>
+		/// <remarks>
+		/// This method:
+		/// - Validates if the selected cell is not null.
+		/// - Attempts to retrieve the IIN (Individual Identification Number) from the selected row.
+		/// - Uses the IIN to find the corresponding member from the repository.
+		/// - Displays the member's photo in a PictureBox.
+		/// </remarks>
+		/// <exception cref="Exception">
+		/// Catches and logs any exceptions that occur while fetching the member's data or photo.
+		/// </exception>
+		private async void dataGridViewForMembers_CurrentCellChanged(object sender, EventArgs e)
+		{
+			// Ensure the current cell is not null
+			if (dataGridViewForMembers.CurrentCell == null) return;
+
+			try
+			{
+				// Attempt to retrieve the IIN from the current row
+				var (isValid, IIN) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
+
+				if (isValid)
+				{
+					// Fetch the member data asynchronously
+					var findedMember = await _memberRepository.GetByIndexAsync(IIN);
+
+					if (findedMember != null)
+					{
+						// Convert the member's photo byte array to an Image and display it
+						pictureBoxMember.Image = PictureController.ConvertByteToImage(findedMember.Photo);
+					}
+					else
+					{
+						MessageBox.Show($"Member with IIN {IIN} was not found.", "Member Not Found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+					}
+				}
+				else
+				{
+					MessageBox.Show("Invalid or missing IIN in the selected row.", "Invalid Data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				}
+			}
+			catch (Exception ex)
+			{
+				// Log the exception and show an error message to the user
+				_logger.LogError(ex, "An error occurred while fetching the member's data or displaying the photo.");
+				//MessageBox.Show($"An error occurred while retrieving the member's data. Error message: {ex.Message}. Please try again later.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 	}

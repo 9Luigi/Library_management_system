@@ -11,9 +11,9 @@ public class Repository<T> where T : class //TODO logs
 	/// Initializes a new instance of the <see cref="Repository{T}"/> class.
 	/// </summary>
 	/// <param name="dbContext">The database context used for interacting with the entities.</param>
-	internal Repository(LibraryContextForEFcore dbContext)
+	internal Repository()
 	{
-		_dbContext = dbContext;
+		_dbContext = new LibraryContextForEFcore();
 	}
 
 	/// <summary>

@@ -35,8 +35,7 @@ namespace Library
 
 			var _dbContext = new LibraryContextForEFcore();
 			var _logger = LoggerService.CreateLogger<Repository<Member>>();
-			_memberRepository = new(_dbContext);
-
+			_memberRepository = new();
 		}
 
 
