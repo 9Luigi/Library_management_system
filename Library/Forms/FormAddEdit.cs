@@ -3,12 +3,13 @@ using Library.Controllers.PictureController;
 using Library.Models;
 using Library.Properties;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
 using System.Globalization;
 using static Library.FormMembers;
 
 namespace Library
 {
+	//TODO XML comments
+	//TODO logs via ILogger to XML
 	/// <summary>
 	/// Form for adding or editing member properties in the library system.
 	/// </summary>
@@ -34,7 +35,7 @@ namespace Library
 			pbPhoto.Image = Properties.Resources.NoImage;
 
 			var _dbContext = new LibraryContextForEFcore();
-			var _logger = LoggerService.CreateLogger<Repository<Member>>();
+			var _logger = LoggerService.CreateLogger<FaddEdit_prop>();
 			_memberRepository = new();
 		}
 
@@ -97,10 +98,11 @@ namespace Library
 					BUpdateMember.Enabled = true;
 					BAddMember.Enabled = false;
 					MTBIIN.Enabled = false;
+					var _context = new LibraryContextForEFcore();
 					try
 					{
-						MemberToEdit = await _memberRepository.GetByIndexAsync(e.IIN);
-						_memberRepository._dbContext.Attach(MemberToEdit);
+						MemberToEdit = await _memberRepository.GetByIndexAsync(_context, e.IIN);
+						_context.Attach(MemberToEdit);
 						if (MemberToEdit != null)
 						{
 							FillMemberData(MemberToEdit);
@@ -189,7 +191,7 @@ namespace Library
 						);
 					try
 					{
-						if (await _memberRepository.AddAsync(createdMember))
+						if (await _memberRepository.AddAsync(new LibraryContextForEFcore(), createdMember))
 						{
 							DialogResult result = MessageBox.Show
 								(
@@ -230,7 +232,7 @@ namespace Library
 					MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);
 
 					// Save the changes to the database
-					bool isUpdated = await _memberRepository.UpdateAttachedFieldsAsync(MemberToEdit);
+					bool isUpdated = await _memberRepository.UpdateAttachedFieldsAsync(new LibraryContextForEFcore(), MemberToEdit);
 
 					if (!isUpdated)
 					{

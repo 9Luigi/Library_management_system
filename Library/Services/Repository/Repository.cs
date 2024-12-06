@@ -1,20 +1,11 @@
 ﻿using Library;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 
 public class Repository<T> where T : class //TODO logs
 {
-	internal readonly LibraryContextForEFcore _dbContext;
 
-	/// <summary>
-	/// Initializes a new instance of the <see cref="Repository{T}"/> class.
-	/// </summary>
-	/// <param name="dbContext">The database context used for interacting with the entities.</param>
-	internal Repository()
-	{
-		_dbContext = new LibraryContextForEFcore();
-	}
+	public Repository(){}
 
 	/// <summary>
 	/// Retrieves an entity by its identifier.
@@ -23,7 +14,7 @@ public class Repository<T> where T : class //TODO logs
 	/// <returns>A task that returns the entity if found, or <c>null</c> if not found.</returns>
 	/// <exception cref="KeyNotFoundException">Thrown when the entity with the specified identifier is not found in the database.</exception>
 	/// <exception cref="Exception">Thrown if an unexpected error occurs while fetching the entity.</exception>
-	internal async Task<T> GetByIndexAsync(long IIN)
+	internal async Task<T> GetByIndexAsync(DbContext _dbContext, long IIN)
 	{
 		try
 		{
@@ -37,7 +28,7 @@ public class Repository<T> where T : class //TODO logs
 			throw;
 		}
 	}
-	internal async Task<T> GetByIdAsync(long id)
+	internal async Task<T> GetByIdAsync(DbContext _dbContext, long id)
 	{
 		try
 		{
@@ -56,7 +47,7 @@ public class Repository<T> where T : class //TODO logs
 	/// Retrieves all entities of type <typeparamref name="T"/>.
 	/// </summary>
 	/// <returns>A task that returns a collection of all entities.</returns>
-	internal async Task<IEnumerable<T>> GetAllAsync()
+	internal async Task<IEnumerable<T>> GetAllAsync(DbContext _dbContext)
 	{
 		try
 		{
@@ -105,7 +96,7 @@ public class Repository<T> where T : class //TODO logs
 	{
 		try
 		{
-			IQueryable<T> query = _dbContext.Set<T>();
+			IQueryable<T> query = new LibraryContextForEFcore().Set<T>();
 
 			foreach (var include in includes)
 			{
@@ -136,7 +127,7 @@ public class Repository<T> where T : class //TODO logs
 		try
 		{
 			// Initialize the query from the DbSet
-			IQueryable<T> query = _dbContext.Set<T>();
+			IQueryable<T> query = new LibraryContextForEFcore().Set<T>();
 
 			// Include related entities
 			foreach (var include in includes)
@@ -181,7 +172,7 @@ public class Repository<T> where T : class //TODO logs
 	/// </summary>
 	/// <param name="entity">The entity to add.</param>
 	/// <returns>A task that returns <c>true</c> if the entity was successfully added, otherwise <c>false</c>.</returns>
-	internal async Task<bool> AddAsync(T entity)
+	internal async Task<bool> AddAsync(DbContext _dbContext, T entity)
 	{
 		try
 		{
@@ -200,7 +191,7 @@ public class Repository<T> where T : class //TODO logs
 	/// </summary>
 	/// <param name="entity">The entity with updated data.</param>
 	/// <returns>A task that returns <c>true</c> if the entity was successfully updated, otherwise <c>false</c>.</returns>
-	internal async Task<bool> UpdateAsync(T entity)
+	internal async Task<bool> UpdateAsync(DbContext _dbContext, T entity)
 	{
 		try
 		{
@@ -219,7 +210,7 @@ public class Repository<T> where T : class //TODO logs
 	/// <param name="entity">The entity with updated values.</param>
 	/// <param name="updatedValues">A dictionary containing the property names and their updated values.</param>
 	/// <returns>A task that returns <c>true</c> if the entity was successfully updated, otherwise <c>false</c>.</returns>
-	internal async Task<bool> UpdateAttachedFieldsAsync(T entity)
+	internal async Task<bool> UpdateAttachedFieldsAsync(DbContext _dbContext, T entity)
 	{
 		try
 		{
@@ -286,12 +277,12 @@ public class Repository<T> where T : class //TODO logs
 	/// </summary>
 	/// <param name="id">The identifier of the entity to delete.</param>
 	/// <returns>A task that returns <c>true</c> if the entity was successfully deleted, otherwise <c>false</c>.</returns>
-	internal async Task<bool> DeleteAsync(long IIN)
+	internal async Task<bool> DeleteAsync(DbContext _dbContext, long IIN)
 	{
 		try
 		{
 			// Search fo entiry
-			var entity = await GetByIndexAsync(IIN);
+			var entity = await GetByIndexAsync(_dbContext, IIN);
 			// If cannot find return false
 			if (entity == null) return false;
 			// Try to remove if entity found 

@@ -1,7 +1,6 @@
 ﻿using Library.Controllers;
 using Library.Controllers.PictureController;
 using Library.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
 
@@ -26,7 +25,7 @@ namespace Library
 			CancellationTokenSource = new CancellationTokenSource();
 			FlendOrRecieveBook = new FormBorrowOrRecieveBook();
 			FaddEdit_prop = new FaddEdit_prop();
-			_logger = LoggerService.CreateLogger<Repository<Member>>();
+			_logger = LoggerService.CreateLogger<FormMembers>();
 			_memberRepository = new();
 		}
 		internal class MemberEventArgs : EventArgs //for transfer IIN and Action to other forms via event
@@ -138,7 +137,7 @@ namespace Library
 					_logger.LogInformation("User confirmed deletion with YES.");
 
 					// Remove the member from the database
-					if (await _memberRepository.DeleteAsync(IIN) == true)
+					if (await _memberRepository.DeleteAsync(new LibraryContextForEFcore(), IIN) == true)
 					{
 						_logger.LogInformation("Member successfully removed from the database.");
 
@@ -280,6 +279,8 @@ namespace Library
 				{
 					try
 					{
+						
+						var memberService = new MemberService(_logger, _memberRepository);
 						// Get the total count of members
 						int totalMembersCount = await GetTotalMembersCountAsync();
 						_logger.LogInformation("Total members count retrieved: {TotalCount}", totalMembersCount);
@@ -292,7 +293,7 @@ namespace Library
 						_logger.LogInformation("Progress bar updated to 25%.");
 
 						// Retrieve members from the database
-						var users = await GetMembersFromDbAsync();
+						var users = await memberService.GetMembersAsync();
 						_logger.LogInformation("Members data retrieved from database.");
 
 						// Check if the operation was cancelled
@@ -312,9 +313,6 @@ namespace Library
 						// Final progress bar update
 						await UpdateProgressBarAsync(50, 100);
 						_logger.LogInformation("Progress bar updated to 100%.");
-
-						// Sleep for a short period before resetting progress
-						Thread.Sleep(500);
 
 						// Check if the operation was cancelled
 						if (CancellationToken.IsCancellationRequested) return;
@@ -364,7 +362,7 @@ namespace Library
 				_logger.LogInformation("GetTotalMembersCountAsync started.");
 
 				// Execute the database query asynchronously
-				int totalMembersCount = await Task.Run(() => _memberRepository._dbContext.Members.Count());
+				int totalMembersCount = await Task.Run(() => new LibraryContextForEFcore().Members.Count());
 
 				_logger.LogInformation("Total members count retrieved: {Count}", totalMembersCount);
 
@@ -379,51 +377,6 @@ namespace Library
 			}
 		}
 
-
-
-		/// <summary>
-		/// Asynchronously retrieves a list of members from the database with specific projections (IIN, Name, Surname, Age, Registration Date, and Books).
-		/// </summary>
-		/// <returns>A list of dynamic objects representing the members retrieved from the database. If an error occurs, returns an empty list.</returns>
-		/// <exception cref="Exception">Thrown when an error occurs while querying the database.</exception>
-		private async Task<List<dynamic>> GetMembersFromDbAsync()
-		{
-			try
-			{
-				_logger.LogInformation("GetMembersFromDbAsync started.");
-
-				// Retrieve members with projection from the database
-				var members = await _memberRepository.GetWithProjectionAsync(
-					m => new
-					{
-						m.IIN,
-						m.Name,
-						m.Surname,
-						m.Age,
-						m.RegistrationDate,
-						Books = string.Join(", ", m.Books.Select(b => b.Title))
-					},
-					m => m.Books
-				);
-
-				// Log the number of members retrieved
-				_logger.LogInformation("Retrieved {Count} members from the database.", members.Count());
-
-				// Return the members as a list of dynamic objects
-				return members.Cast<dynamic>().ToList();
-			}
-			catch (Exception ex)
-			{
-				// Log any errors that occur during the database operation
-				_logger.LogError(ex, "An error occurred while retrieving members from the database.");
-				MessageBox.Show("An error occurred while retrieving the members. Please try again.");
-				return new List<dynamic>(); // Return an empty list in case of error
-			}
-		}
-
-
-
-
 		/// <summary>
 		/// Asynchronously updates the progress bar's value from a minimum value to a maximum value.
 		/// </summary>
@@ -437,7 +390,7 @@ namespace Library
 				_logger.LogInformation("Updating progress bar from {MinValue} to {MaxValue}.", minValue, maxValue);
 
 				// Call the ProgressBarController to update the progress bar asynchronously
-				await ProgressBarController.pbProgressCgange(this, pbMembers, minValue, maxValue);
+				await ProgressBarController.pbProgressChange(this, pbMembers, minValue, maxValue);
 
 				_logger.LogInformation("Progress bar updated successfully.");
 			}
@@ -588,12 +541,6 @@ namespace Library
 				// Log the attempt to close the form
 				_logger.LogInformation("FMembers form is closing.");
 
-				// Cancel any ongoing tasks (such as data loading or long-running operations)
-				CancellationTokenSource?.Cancel();
-
-				// Log the cancellation of tasks (if applicable)
-				_logger.LogInformation("CancellationTokenSource has been canceled to stop ongoing tasks.");
-
 				if (e.CloseReason == CloseReason.UserClosing)
 				{
 					var result = MessageBox.Show("Are you sure you want to exit?", "Confirm Exit", MessageBoxButtons.YesNo);
@@ -696,8 +643,9 @@ namespace Library
 				{
 					_logger.LogInformation("Valid member selected with IIN: {IIN}. Fetching borrowed books information.", IIN);
 
+					var MemberService = new MemberService(_logger,_memberRepository);
 					// Using the repository instead of directly querying the database
-					var memberData = await GetMemberWithBorrowedBooksAsync(IIN);
+					var memberData = await MemberService.GetMemberWithBorrowedBooksAsync(IIN);
 
 					if (memberData == null)
 					{
@@ -738,55 +686,7 @@ namespace Library
 				MessageBox.Show("Please select a valid member to proceed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 			}
 		}
-		public async Task<dynamic> GetMemberWithBorrowedBooksAsync(long IIN)
-		{
-			try
-			{
-				// Log entry into the method
-				_logger.LogInformation("Attempting to retrieve member data and borrowed books for IIN: {IIN}", IIN);
-
-				// Define the projection to retrieve member data along with their borrowed books
-				var result = await _memberRepository.GetWithProjectionAsync(
-					m => new
-					{
-						m.IIN,
-						m.Name,
-						m.Surname,
-						Books = m.Books.Select(b => new
-						{
-							b.Id,
-							b.Title,
-							b.Genre
-						}).ToList()
-					},
-					m => m.Books // Include the Books navigation property
-				);
-
-				// Log the success of data retrieval
-				_logger.LogInformation("Successfully retrieved member data and borrowed books for IIN: {IIN}", IIN);
-
-				// Filter the result to match the specific IIN
-				var member = result.FirstOrDefault(m => m.IIN == IIN);
-
-				// Log the result of the filtering
-				if (member != null)
-				{
-					_logger.LogInformation("Member found for IIN: {IIN}", IIN);
-				}
-				else
-				{
-					_logger.LogWarning("No member found for IIN: {IIN}", IIN);
-				}
-
-				return member;
-			}
-			catch (Exception ex)
-			{
-				// Log the exception with relevant details
-				_logger.LogError(ex, "An error occurred while fetching member data and borrowed books for IIN: {IIN}", IIN);
-				throw; // Re-throw the exception after logging it
-			}
-		}
+		
 		/// <summary>
 		/// Handles the double-click event on a cell in the DataGridView for members.
 		/// </summary>
@@ -883,7 +783,7 @@ namespace Library
 				if (isValid)
 				{
 					// Fetch the member data asynchronously
-					var findedMember = await _memberRepository.GetByIndexAsync(IIN);
+					var findedMember = await _memberRepository.GetByIndexAsync(new LibraryContextForEFcore(), IIN);
 
 					if (findedMember != null)
 					{
@@ -904,7 +804,7 @@ namespace Library
 			{
 				// Log the exception and show an error message to the user
 				_logger.LogError(ex, "An error occurred while fetching the member's data or displaying the photo.");
-				//MessageBox.Show($"An error occurred while retrieving the member's data. Error message: {ex.Message}. Please try again later.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show($"An error occurred while retrieving the member's data. Error message: {ex.Message}. Please try again later.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 	}

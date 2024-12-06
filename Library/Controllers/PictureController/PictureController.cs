@@ -1,13 +1,8 @@
-﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Security.Policy;
-using System.Windows.Forms;
+﻿using System.Drawing.Imaging;
 
 namespace Library.Controllers.PictureController
 {
+	//TODO add logs?
 	/// <summary>
 	/// A controller class for handling image-related operations such as conversion, compression, and file selection.
 	/// </summary>
