@@ -1,68 +1,65 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using static Library.FormMembers;
 
 namespace Library
 {
 	public partial class FormBorrowOrRecieveBook : Form
 	{
+		private enum GridCriterion
+		{
+			AllBooks,
+			BooksByMember
+		}
 		public FormBorrowOrRecieveBook()
 		{
 			MemberCreateOrUpdateEvent += SelectBooksByIIN;
 			InitializeComponent();
 		}
 		internal long IIN { get; private set; }
-		private void FillGridWith(string criterion) //TODO change criterion type to enum 
+		private async void FillGridWith(GridCriterion criterion)
 		{
 			using LibraryContextForEFcore db = new();
-			if (criterion == "ALL")
+			switch (criterion)
 			{
-				var selectedBooks = db.Books
-					.Select(b => new
-					{
-						b.Id,
-						b.Title,
-						b.Genre,
-						b.Description,
-						b.PublicationDate,
-						b.Amount
-					})
-					.ToList();
-				DataGridViewForLendBook.DataSource = selectedBooks;
-			}
-			else
-			{
-				var selectedBooks = db.Members
-					.Where(m => m.IIN == IIN)
-					.Include(m => m.Books)
-					.SelectMany(m => m.Books.Select(b => new
-					{
-						b.Id,
-						b.Title,
-						b.Genre
-					}))
-					.ToList();
+				case GridCriterion.AllBooks:
+					DataGridViewForLendBook.DataSource = await GetAllBooksAsync(db);
+					break;
 
-				if (selectedBooks.Any()) // Null check
-				{
-					DataGridViewForLendBook.DataSource = selectedBooks;
-				}
-				else
-				{
-					MessageBox.Show("No books found for this member.");
-					Close();
-				}
+				case GridCriterion.BooksByMember:
+					DataGridViewForLendBook.DataSource = await GetBooksByMemberAsync(db, IIN);
+					break;
 			}
 		}
+
+		private async Task<List<dynamic>> GetAllBooksAsync(LibraryContextForEFcore db)
+		{
+			return await db.Books
+				.Select(b => new
+				{
+					b.Id,
+					b.Title,
+					b.Genre,
+					b.Description,
+					b.PublicationDate,
+					b.Amount
+				}).Cast<dynamic>()
+				.ToListAsync();
+		}
+
+		private async Task<List<dynamic>> GetBooksByMemberAsync(LibraryContextForEFcore db, long memberIIN)
+		{
+			return await db.Members
+				.Where(m => m.IIN == memberIIN)
+				.SelectMany(m => m.Books.Select(b => new
+				{
+					b.Id,
+					b.Title,
+					b.Genre
+				})).Cast<dynamic>()
+				.ToListAsync();
+		}
+
 		//TODO make toolstrip enabled false or something like that than to example deny acces to return strip when action is borrow
 		private void SelectBooksByIIN(MemberEventArgs e)
 		{
@@ -70,10 +67,10 @@ namespace Library
 			switch (e.Action)
 			{
 				case "BORROW":
-					FillGridWith("ALL");
+					FillGridWith(GridCriterion.AllBooks);
 					break;
 				case "RETURN":
-					FillGridWith(IIN.ToString());
+					FillGridWith(GridCriterion.BooksByMember);
 					break;
 				default:
 					break;
@@ -82,7 +79,7 @@ namespace Library
 
 		private void DataGridViewForLendBook_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
 		{
-			if (e.Button == MouseButtons.Right && e.RowIndex >= 0) // Check than cell is not header
+			if (e.Button == MouseButtons.Right && e.RowIndex >= 0 && e.ColumnIndex >= 0) // Check than cell is not header
 			{
 				DataGridViewForLendBook.CurrentCell = DataGridViewForLendBook.Rows[e.RowIndex].Cells[e.ColumnIndex];
 				Point relativeCursorPosition = DataGridViewForLendBook.PointToClient(Cursor.Position);
@@ -90,66 +87,43 @@ namespace Library
 			}
 		}
 
-
-		private void LendABookToolStripMenuItem_Click(object sender, EventArgs e)
+		private async void LendABookToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			if (DataGridViewForLendBook.CurrentCell?.Value != null && DataGridViewForLendBook.CurrentCell.ColumnIndex == 0)
+			try
 			{
-				if (long.TryParse(DataGridViewForLendBook.CurrentCell.Value.ToString(), out long bookId))
+				//TODO Handle click on any cell except headers
+				if (DataGridViewForLendBook.CurrentCell?.Value != null && DataGridViewForLendBook.CurrentCell.ColumnIndex == 0)
 				{
-					using LibraryContextForEFcore db = new();
-					var selectedBook = db.Books.FirstOrDefault(b => b.Id == bookId);
-					var selectedMember = db.Members.FirstOrDefault(m => m.IIN == IIN);
-
-					// check if book and member exist
-					if (selectedBook != null && selectedMember != null)
+					if (int.TryParse(DataGridViewForLendBook.CurrentCell.Value.ToString(), out int bookId))
 					{
-						if (selectedBook.Amount > 0)
-						{
-							// Add book to member
-							selectedBook.Amount -= 1;
-							selectedMember.Books.Add(selectedBook);
-							FillGridWith("All");  //FillGrid seems than be called only when ivent from fmembers is triggered
-												  //TODO Update DataGridView binding by updating the data source for amount cell only
-							var selectedBooks = db.Books
-								.Select(b => new
-								{
-									b.Id,
-									b.Title,
-									b.Genre,
-									b.Description,
-									b.PublicationDate,
-									b.Amount
-								}).ToList();
-							DataGridViewForLendBook.DataSource = selectedBooks;
+						using LibraryContextForEFcore db = new();
+						var selectedBook = await db.Books.FirstOrDefaultAsync(b => b.Id == bookId);
+						var selectedMemberBooks = await db.Members.Where(m=>m.IIN == IIN).SelectMany(m=>m.Books).ToListAsync();
 
-							try
-							{
-								if (db.SaveChanges() > 0)
-								{
-									MessageBox.Show("Book successfully borrowed");
-								}
-							}
-							catch (DbUpdateException)
-							{
-								MessageBox.Show("This book has already been borrowed by this member");
-							}
-						}
-						else
+						// check if book and member exist
+						if (selectedBook == null) { MessageBox.Show("Selected book does not exist"); return; }
+						if (selectedMemberBooks == null) { MessageBox.Show("Selected member does not exist"); return; }
+						if (selectedBook.Amount <= 0) { MessageBox.Show($"{selectedBook.Title} has zero amount in store"); return; }
+						if (selectedMemberBooks.Any(b => b.Id == bookId))
 						{
-							MessageBox.Show("Cannot borrow the book when its amount is 0");
+							MessageBox.Show("This member has already borrowed this book.");
+							return;
+						}
+
+						// Add book to member
+						selectedMemberBooks.Add(selectedBook);
+						// Decrease book amount
+						selectedBook.Amount -= 1;
+
+						if (await db.SaveChangesAsync() > 0)
+						{
+							MessageBox.Show("Book successfully borrowed");
+							FillGridWith(GridCriterion.AllBooks);
 						}
 					}
-					else
-					{
-						MessageBox.Show("Selected book or member not found");
-					}
-				}
-				else
-				{
-					MessageBox.Show("Invalid book ID");
 				}
 			}
+			catch(Exception ex) { MessageBox.Show($"An error occurred: {ex.Message}"); }
 		}
 
 		private void UnlendABookToolStripMenuItem_Click(object sender, EventArgs e)
@@ -168,8 +142,8 @@ namespace Library
 						// Remove book from member
 						selectedMember.Books.Remove(selectedBook);
 						selectedBook.Amount += 1; //TODO refresh grid after borrow a book
-						FillGridWith(IIN.ToString()); //FillGrid seems than be called only when ivent from fmembers is triggered
-						// Update DataGridView binding by updating the data source
+						FillGridWith(GridCriterion.BooksByMember); //FillGrid seems than be called only when ivent from fmembers is triggered
+													  // Update DataGridView binding by updating the data source
 						var selectedBooks = db.Members
 								   .Where(m => m.IIN == IIN)
 								   .Include(m => m.Books)

@@ -20,83 +20,80 @@
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
+		#region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
-        {
-            this.components = new System.ComponentModel.Container();
-            this.DataGridViewForLendBook = new System.Windows.Forms.DataGridView();
-            this.CMSLendBook = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.lendABookToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.unlendABookToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.PBBorrowOrReturn = new System.Windows.Forms.ProgressBar();
-            ((System.ComponentModel.ISupportInitialize)(this.DataGridViewForLendBook)).BeginInit();
-            this.CMSLendBook.SuspendLayout();
-            this.SuspendLayout();
-            // 
-            // DataGridViewForLendBook
-            // 
-            this.DataGridViewForLendBook.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.DataGridViewForLendBook.Location = new System.Drawing.Point(12, 12);
-            this.DataGridViewForLendBook.Name = "DataGridViewForLendBook";
-            this.DataGridViewForLendBook.RowTemplate.Height = 25;
-            this.DataGridViewForLendBook.Size = new System.Drawing.Size(776, 368);
-            this.DataGridViewForLendBook.TabIndex = 0;
-            this.DataGridViewForLendBook.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DataGridViewForLendBook_CellMouseClick);
-            // 
-            // CMSLendBook
-            // 
-            this.CMSLendBook.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lendABookToolStripMenuItem,
-            this.unlendABookToolStripMenuItem});
-            this.CMSLendBook.Name = "cmsLendBook";
-            this.CMSLendBook.Size = new System.Drawing.Size(152, 48);
-            // 
-            // lendABookToolStripMenuItem
-            // 
-            this.lendABookToolStripMenuItem.Name = "lendABookToolStripMenuItem";
-            this.lendABookToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
-            this.lendABookToolStripMenuItem.Text = "Borrow a book";
-            this.lendABookToolStripMenuItem.Click += new System.EventHandler(this.LendABookToolStripMenuItem_Click);
-            // 
-            // unlendABookToolStripMenuItem
-            // 
-            this.unlendABookToolStripMenuItem.Name = "unlendABookToolStripMenuItem";
-            this.unlendABookToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
-            this.unlendABookToolStripMenuItem.Text = "Return a book";
-            this.unlendABookToolStripMenuItem.Click += new System.EventHandler(this.UnlendABookToolStripMenuItem_Click);
-            // 
-            // PBBorrowOrReturn
-            // 
-            this.PBBorrowOrReturn.Location = new System.Drawing.Point(12, 386);
-            this.PBBorrowOrReturn.Name = "PBBorrowOrReturn";
-            this.PBBorrowOrReturn.Size = new System.Drawing.Size(776, 23);
-            this.PBBorrowOrReturn.TabIndex = 1;
-            // 
-            // FlendOrRecieveBook
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.PBBorrowOrReturn);
-            this.Controls.Add(this.DataGridViewForLendBook);
-            this.Name = "FlendOrRecieveBook";
-            ((System.ComponentModel.ISupportInitialize)(this.DataGridViewForLendBook)).EndInit();
-            this.CMSLendBook.ResumeLayout(false);
-            this.ResumeLayout(false);
+		/// <summary>
+		/// Required method for Designer support - do not modify
+		/// the contents of this method with the code editor.
+		/// </summary>
+		private void InitializeComponent()
+		{
+			components = new System.ComponentModel.Container();
+			DataGridViewForLendBook = new DataGridView();
+			CMSLendBook = new ContextMenuStrip(components);
+			lendABookToolStripMenuItem = new ToolStripMenuItem();
+			PBBorrowOrReturn = new ProgressBar();
+			unlendABookToolStripMenuItem = new ToolStripMenuItem();
+			((System.ComponentModel.ISupportInitialize)DataGridViewForLendBook).BeginInit();
+			CMSLendBook.SuspendLayout();
+			SuspendLayout();
+			// 
+			// DataGridViewForLendBook
+			// 
+			DataGridViewForLendBook.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			DataGridViewForLendBook.Location = new Point(12, 12);
+			DataGridViewForLendBook.Name = "DataGridViewForLendBook";
+			DataGridViewForLendBook.RowTemplate.Height = 25;
+			DataGridViewForLendBook.Size = new Size(776, 368);
+			DataGridViewForLendBook.TabIndex = 0;
+			DataGridViewForLendBook.CellMouseClick += DataGridViewForLendBook_CellMouseClick;
+			// 
+			// CMSLendBook
+			// 
+			CMSLendBook.Items.AddRange(new ToolStripItem[] { lendABookToolStripMenuItem });
+			CMSLendBook.Name = "cmsLendBook";
+			CMSLendBook.Size = new Size(152, 26);
+			// 
+			// lendABookToolStripMenuItem
+			// 
+			lendABookToolStripMenuItem.Name = "lendABookToolStripMenuItem";
+			lendABookToolStripMenuItem.Size = new Size(180, 22);
+			lendABookToolStripMenuItem.Text = "Borrow a book";
+			lendABookToolStripMenuItem.Click += LendABookToolStripMenuItem_Click;
+			// 
+			// PBBorrowOrReturn
+			// 
+			PBBorrowOrReturn.Location = new Point(12, 386);
+			PBBorrowOrReturn.Name = "PBBorrowOrReturn";
+			PBBorrowOrReturn.Size = new Size(776, 23);
+			PBBorrowOrReturn.TabIndex = 1;
+			// 
+			// unlendABookToolStripMenuItem
+			// 
+			unlendABookToolStripMenuItem.Name = "unlendABookToolStripMenuItem";
+			unlendABookToolStripMenuItem.Size = new Size(180, 22);
+			unlendABookToolStripMenuItem.Text = "Return a book";
+			unlendABookToolStripMenuItem.Click += UnlendABookToolStripMenuItem_Click;
+			// 
+			// FormBorrowOrRecieveBook
+			// 
+			AutoScaleDimensions = new SizeF(7F, 15F);
+			AutoScaleMode = AutoScaleMode.Font;
+			ClientSize = new Size(800, 450);
+			Controls.Add(PBBorrowOrReturn);
+			Controls.Add(DataGridViewForLendBook);
+			Name = "FormBorrowOrRecieveBook";
+			((System.ComponentModel.ISupportInitialize)DataGridViewForLendBook).EndInit();
+			CMSLendBook.ResumeLayout(false);
+			ResumeLayout(false);
+		}
 
-        }
+		#endregion
 
-        #endregion
-
-        private DataGridView DataGridViewForLendBook;
+		private DataGridView DataGridViewForLendBook;
         private ContextMenuStrip CMSLendBook;
         private ToolStripMenuItem lendABookToolStripMenuItem;
-        private ToolStripMenuItem unlendABookToolStripMenuItem;
         private ProgressBar PBBorrowOrReturn;
-    }
+		private ToolStripMenuItem unlendABookToolStripMenuItem;
+	}
 }
