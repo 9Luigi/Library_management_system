@@ -1,13 +1,5 @@
-﻿using Library.Controllers.PictureController;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml.Linq;
-
-namespace Library.Controllers
+﻿
+namespace Library.Presentation.Controllers
 {
     internal static class TextBoxBaseController
     {
@@ -23,7 +15,7 @@ namespace Library.Controllers
         }
         static internal bool CheckTextBoxBaseTextOnNull(TextBoxBase textBoxBase)
         {//check properties for null and by RegexController
-            
+
             if (string.IsNullOrWhiteSpace(textBoxBase.Text))
             {
                 MessageBox.Show(textBoxBase.Name + " is empty, fill in the empty requiered(*) fields");
@@ -35,6 +27,6 @@ namespace Library.Controllers
                 return false;
             }
             else return true;
-		}
-	}
+        }
+    }
 }

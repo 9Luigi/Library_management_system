@@ -1,15 +1,14 @@
-﻿using Library.Controllers;
-using Library.Controllers.PictureController;
-using Library.Models;
+﻿using Library.Domain.Models;
+using Library.Presentation.Controllers;
+using Library.Presentation.Controllers.PictureController;
 using Microsoft.Extensions.Logging;
 using System.Data;
-
 namespace Library
 {
 	public partial class FormMembers : Form
 	{
 		#region FieldsAndProperties
-		readonly Repository<Member> _memberRepository;
+		readonly GenericRepository<Member> _memberRepository;
 		readonly ILogger _logger;
 		internal FormBorrowOrRecieveBook FlendOrRecieveBook { get; private set; } //TODO:CRITICAL logic of borrow and return book is broken
 		internal FaddEdit_prop FaddEdit_prop { get; private set; }
@@ -217,6 +216,7 @@ namespace Library
 							},
 							IIN,
 							m => m.IIN,
+							new LibraryContextForEFcore(),
 							m => m.Books
 						);
 
@@ -242,6 +242,7 @@ namespace Library
 							m.RegistrationDate,
 							Books = string.Join(", ", m.Books.Select(b => b.Title))
 						},
+						new LibraryContextForEFcore(),
 						m => m.Books
 					);
 
@@ -278,7 +279,7 @@ namespace Library
 				{
 					try
 					{
-						
+
 						var memberService = new MemberService(_logger, _memberRepository);
 						// Get the total count of members
 						int totalMembersCount = await GetTotalMembersCountAsync();
@@ -642,7 +643,7 @@ namespace Library
 				{
 					_logger.LogInformation("Valid member selected with IIN: {IIN}. Fetching borrowed books information.", IIN);
 
-					var MemberService = new MemberService(_logger,_memberRepository);
+					var MemberService = new MemberService(_logger, _memberRepository);
 					// Using the repository instead of directly querying the database
 					var memberData = await MemberService.GetMemberWithBorrowedBooksAsync(IIN);
 
@@ -685,7 +686,7 @@ namespace Library
 				MessageBox.Show("Please select a valid member to proceed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 			}
 		}
-		
+
 		/// <summary>
 		/// Handles the double-click event on a cell in the DataGridView for members.
 		/// </summary>
@@ -701,7 +702,7 @@ namespace Library
 		/// <exception cref="Exception">
 		/// Logs any exceptions that occur while displaying the edit dialog.
 		/// </exception>
-		private void dataGridViewForMembers_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+		private void DataGridViewForMembers_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
 		{
 			_logger.LogInformation("Entered dataGridViewForMembers_CellMouseDoubleClick method");
 
@@ -769,7 +770,7 @@ namespace Library
 		/// <exception cref="Exception">
 		/// Catches and logs any exceptions that occur while fetching the member's data or photo.
 		/// </exception>
-		private async void dataGridViewForMembers_CurrentCellChanged(object sender, EventArgs e)
+		private async void DataGridViewForMembers_CurrentCellChanged(object sender, EventArgs e)
 		{
 			// Ensure the current cell is not null
 			if (dataGridViewForMembers.CurrentCell == null) return;
@@ -782,7 +783,7 @@ namespace Library
 				if (isValid)
 				{
 					// Fetch the member data asynchronously
-					var findedMember = await _memberRepository.GetByIndexAsync(new LibraryContextForEFcore(), IIN);
+					var findedMember = await _memberRepository.GetByIndexIINAsync(new LibraryContextForEFcore(), IIN);
 
 					if (findedMember != null)
 					{

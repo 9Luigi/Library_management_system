@@ -1,17 +1,19 @@
-﻿using Library.Models;
+﻿using Library;
+using Library.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 public class MemberService
 {
 	internal readonly ILogger _logger;
-	internal readonly Repository<Member> _memberRepository;
+	internal readonly GenericRepository<Member> _memberRepository;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="MemberService"/> class.
 	/// </summary>
 	/// <param name="logger">The logger to log messages related to member operations.</param>
 	/// <param name="memberRepository">The repository used to access member data in the database.</param>
-	internal MemberService(ILogger logger, Repository<Member> memberRepository)
+	internal MemberService(ILogger logger, GenericRepository<Member> memberRepository)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_memberRepository = memberRepository ?? throw new ArgumentNullException(nameof(memberRepository));
@@ -38,6 +40,7 @@ public class MemberService
 					m.RegistrationDate,
 					Books = string.Join(", ", m.Books.Select(b => b.Title))
 				},
+				new LibraryContextForEFcore(),
 				m => m.Books
 			);
 
@@ -79,6 +82,7 @@ public class MemberService
 						b.Genre
 					}).ToList()
 				},
+				new LibraryContextForEFcore(),
 				m => m.Books // Include the Books navigation property
 			);
 
@@ -96,6 +100,7 @@ public class MemberService
 			else
 			{
 				_logger.LogWarning("No member found for IIN: {IIN}", IIN);
+				throw new KeyNotFoundException($"Entity with IIN: {IIN} not found");
 			}
 
 			return member;
@@ -105,6 +110,39 @@ public class MemberService
 			// Log the exception with relevant details
 			_logger.LogError(ex, "An error occurred while fetching member data and borrowed books for IIN: {IIN}", IIN);
 			throw; // Re-throw the exception after logging it
+		}
+	}
+	/// <summary>
+	/// Retrieves a list of books for the specified member based on their IIN.
+	/// </summary>
+	/// <param name="memberIIN">The IIN of the member for whom books are to be retrieved.</param>
+	/// <returns>A list of books associated with the member as dynamic objects.</returns>
+	/// <exception cref="KeyNotFoundException">Thrown when no books are found for the specified member.</exception>
+	public async Task<List<dynamic>> GetMembersBooksAsync(long memberIIN)
+	{
+		_logger.LogInformation("Start fetching books for member with IIN: {MemberIIN}", memberIIN);
+
+		using (var context = new LibraryContextForEFcore())
+		{
+			var books = await context.Members
+				.Where(m => m.IIN == memberIIN)
+				.SelectMany(m => m.Books.Select(b => new
+				{
+					b.Id,
+					b.Title,
+					b.Genre
+				}))
+				.ToListAsync();
+
+			if (books == null || !books.Any())
+			{
+				_logger.LogWarning("No books found for member with IIN: {MemberIIN}", memberIIN);
+				throw new KeyNotFoundException($"Books for member with IIN {memberIIN} not found.");
+			}
+
+			_logger.LogInformation("Successfully retrieved {BookCount} books for member with IIN: {MemberIIN}", books.Count, memberIIN);
+
+			return books.Cast<dynamic>().ToList();
 		}
 	}
 }

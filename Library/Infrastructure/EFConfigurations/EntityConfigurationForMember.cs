@@ -1,4 +1,4 @@
-﻿using Library.Models;
+﻿using Library.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -8,7 +8,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Library.EFConfigurations
+namespace Library.Infrastructure.EFConfigurations
 {
     internal class EntityConfigurationForMember : IEntityTypeConfiguration<Member>
     {

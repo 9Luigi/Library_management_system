@@ -1,6 +1,6 @@
-﻿using Library.Models;
-using Microsoft.EntityFrameworkCore;
-using Library.EFConfigurations;
+﻿using Microsoft.EntityFrameworkCore;
+using Library.Infrastructure.EFConfigurations;
+using Library.Domain.Models;
 namespace Library
 {
     internal class LibraryContextForEFcore : DbContext

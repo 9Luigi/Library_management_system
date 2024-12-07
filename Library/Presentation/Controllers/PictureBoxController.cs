@@ -1,5 +1,4 @@
-﻿
-namespace Library.Controllers
+﻿namespace Library.Presentation.Controllers
 {
     static internal class pictureBoxController
     {

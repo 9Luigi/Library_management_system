@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Library.Models
+namespace Library.Domain.Models
 {
     internal class Book
     {

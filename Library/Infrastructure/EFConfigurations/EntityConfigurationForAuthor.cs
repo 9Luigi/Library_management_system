@@ -1,8 +1,8 @@
-﻿using Library.Models;
+﻿using Library.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Library.EFConfigurations
+namespace Library.Infrastructure.EFConfigurations
 {
     internal class EntityConfigurationForAuthor : IEntityTypeConfiguration<Author>
     {

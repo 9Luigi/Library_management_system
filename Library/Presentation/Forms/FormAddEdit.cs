@@ -1,6 +1,6 @@
-﻿using Library.Controllers;
-using Library.Controllers.PictureController;
-using Library.Models;
+﻿using Library.Domain.Models;
+using Library.Presentation.Controllers;
+using Library.Presentation.Controllers.PictureController;
 using Library.Properties;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -8,12 +8,12 @@ using static Library.FormMembers;
 
 namespace Library
 {
-	//TODO XML comments
-	//TODO logs via ILogger to XML
-	/// <summary>
-	/// Form for adding or editing member properties in the library system.
-	/// </summary>
-	public partial class FaddEdit_prop : Form
+    //TODO XML comments
+    //TODO logs via ILogger to XML
+    /// <summary>
+    /// Form for adding or editing member properties in the library system.
+    /// </summary>
+    public partial class FaddEdit_prop : Form
 	{
 		/// <summary>
 		/// A byte array that holds the photo of the member in the form of image bytes.
@@ -23,7 +23,7 @@ namespace Library
 		/// A property to store the member object being edited, if any.
 		/// </summary>
 		internal Member? MemberToEdit { get; set; }
-		private readonly Repository<Member> _memberRepository;
+		private readonly GenericRepository<Member> _memberRepository;
 		/// <summary>
 		/// Constructor that initializes the form and subscribes to the MemberCreateOrUpdateEvent event.
 		/// Sets the default photo image.
@@ -101,7 +101,7 @@ namespace Library
 					var _context = new LibraryContextForEFcore();
 					try
 					{
-						MemberToEdit = await _memberRepository.GetByIndexAsync(_context, e.IIN);
+						MemberToEdit = await _memberRepository.GetByIndexIINAsync(_context, e.IIN);
 						_context.Attach(MemberToEdit);
 						if (MemberToEdit != null)
 						{

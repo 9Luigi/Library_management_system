@@ -2,10 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-public class Repository<T> where T : class //TODO logs
+public class GenericRepository<T> where T : class //TODO logs
 {
-
-	public Repository(){}
 
 	/// <summary>
 	/// Retrieves an entity by its identifier.
@@ -14,7 +12,7 @@ public class Repository<T> where T : class //TODO logs
 	/// <returns>A task that returns the entity if found, or <c>null</c> if not found.</returns>
 	/// <exception cref="KeyNotFoundException">Thrown when the entity with the specified identifier is not found in the database.</exception>
 	/// <exception cref="Exception">Thrown if an unexpected error occurs while fetching the entity.</exception>
-	internal async Task<T> GetByIndexAsync(DbContext _dbContext, long IIN)
+	internal async Task<T> GetByIndexIINAsync(DbContext _dbContext, long IIN) //TODO remove cohesion with IIN field 
 	{
 		try
 		{
@@ -47,17 +45,6 @@ public class Repository<T> where T : class //TODO logs
 	/// Retrieves all entities of type <typeparamref name="T"/>.
 	/// </summary>
 	/// <returns>A task that returns a collection of all entities.</returns>
-	internal async Task<IEnumerable<T>> GetAllAsync(DbContext _dbContext)
-	{
-		try
-		{
-			return await _dbContext.Set<T>().ToListAsync();
-		}
-		catch (Exception)
-		{
-			throw;
-		}
-	}
 	#region GetWithProjectionAsync
 	/// <summary>
 	/// Asynchronously retrieves a projected list of entities of type <typeparamref name="T"/> from the database.
@@ -92,11 +79,12 @@ public class Repository<T> where T : class //TODO logs
 	/// </exception>
 	public async Task<List<TResult>> GetWithProjectionAsync<TResult>(
 		Expression<Func<T, TResult>> selector,
+		DbContext _dbContext,
 		params Expression<Func<T, object>>[] includes)
 	{
 		try
 		{
-			IQueryable<T> query = new LibraryContextForEFcore().Set<T>();
+			IQueryable<T> query = _dbContext.Set<T>();
 
 			foreach (var include in includes)
 			{
@@ -122,12 +110,13 @@ public class Repository<T> where T : class //TODO logs
 	Expression<Func<T, TResult>> selector,
 	long searchValue, // The value to filter by
 	Expression<Func<T, object>> searchField, // Field to apply the filter on
+	DbContext _dbContext,
 	params Expression<Func<T, object>>[] includes) // Related entities to include
 	{
 		try
 		{
 			// Initialize the query from the DbSet
-			IQueryable<T> query = new LibraryContextForEFcore().Set<T>();
+			IQueryable<T> query = _dbContext.Set<T>();
 
 			// Include related entities
 			foreach (var include in includes)
@@ -180,23 +169,6 @@ public class Repository<T> where T : class //TODO logs
 			var result = await _dbContext.SaveChangesAsync() > 0;
 
 			return result;
-		}
-		catch (Exception)
-		{
-			throw;
-		}
-	}
-	/// <summary>
-	/// Updates an existing entity in the database.
-	/// </summary>
-	/// <param name="entity">The entity with updated data.</param>
-	/// <returns>A task that returns <c>true</c> if the entity was successfully updated, otherwise <c>false</c>.</returns>
-	internal async Task<bool> UpdateAsync(DbContext _dbContext, T entity)
-	{
-		try
-		{
-			_dbContext.Set<T>().Update(entity);
-			return await _dbContext.SaveChangesAsync() > 0;
 		}
 		catch (Exception)
 		{
@@ -282,7 +254,7 @@ public class Repository<T> where T : class //TODO logs
 		try
 		{
 			// Search fo entiry
-			var entity = await GetByIndexAsync(_dbContext, IIN);
+			var entity = await GetByIndexIINAsync(_dbContext, IIN);
 			// If cannot find return false
 			if (entity == null) return false;
 			// Try to remove if entity found 

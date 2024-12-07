@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Library.Models
+namespace Library.Domain.Models
 {
     internal class Member
     {

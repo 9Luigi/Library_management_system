@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Library.Application.Services.Repository;
+using Library.Domain.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Data;
 using static Library.FormMembers;
 
@@ -6,6 +9,11 @@ namespace Library
 {
 	public partial class FormBorrowOrRecieveBook : Form
 	{
+		ILogger _logger;
+		GenericRepository<Book> _bookRepository;
+		GenericRepository<Member> _memberRepository;
+		BookService _bookService;
+		MemberService _memberService;
 		private enum GridCriterion
 		{
 			AllBooks,
@@ -14,51 +22,29 @@ namespace Library
 		public FormBorrowOrRecieveBook()
 		{
 			MemberCreateOrUpdateEvent += SelectBooksByIIN;
+			_logger = LoggerService.CreateLogger<FormBorrowOrRecieveBook>();
+			_bookRepository = new GenericRepository<Book>();
+			_memberRepository = new GenericRepository<Member>();
+			_bookService = new(_logger, _bookRepository);
+			_memberService = new(_logger, _memberRepository);
 			InitializeComponent();
 		}
 		internal long IIN { get; private set; }
 		private async void FillGridWith(GridCriterion criterion)
 		{
-			using LibraryContextForEFcore db = new();
 			switch (criterion)
 			{
 				case GridCriterion.AllBooks:
-					DataGridViewForLendBook.DataSource = await GetAllBooksAsync(db);
+					DataGridViewForLendBook.DataSource = await _bookService.GetAllBooksAsync();
 					break;
 
 				case GridCriterion.BooksByMember:
-					DataGridViewForLendBook.DataSource = await GetBooksByMemberAsync(db, IIN);
+					DataGridViewForLendBook.DataSource = await _memberService.GetMembersBooksAsync(IIN);
 					break;
 			}
 		}
 
-		private async Task<List<dynamic>> GetAllBooksAsync(LibraryContextForEFcore db)
-		{
-			return await db.Books
-				.Select(b => new
-				{
-					b.Id,
-					b.Title,
-					b.Genre,
-					b.Description,
-					b.PublicationDate,
-					b.Amount
-				}).Cast<dynamic>()
-				.ToListAsync();
-		}
-
-		private async Task<List<dynamic>> GetBooksByMemberAsync(LibraryContextForEFcore db, long memberIIN)
-		{
-			return await db.Members
-				.Where(m => m.IIN == memberIIN)
-				.SelectMany(m => m.Books.Select(b => new
-				{
-					b.Id,
-					b.Title,
-					b.Genre
-				})).Cast<dynamic>()
-				.ToListAsync();
-		}
+		
 
 		//TODO make toolstrip enabled false or something like that than to example deny acces to return strip when action is borrow
 		private void SelectBooksByIIN(MemberEventArgs e)

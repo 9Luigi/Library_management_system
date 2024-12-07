@@ -101,8 +101,8 @@
 			dataGridViewForMembers.Size = new Size(654, 421);
 			dataGridViewForMembers.TabIndex = 2;
 			dataGridViewForMembers.CellMouseClick += View_CellMouseClick;
-			dataGridViewForMembers.CellMouseDoubleClick += dataGridViewForMembers_CellMouseDoubleClick;
-			dataGridViewForMembers.CurrentCellChanged += dataGridViewForMembers_CurrentCellChanged;
+			dataGridViewForMembers.CellMouseDoubleClick += DataGridViewForMembers_CellMouseDoubleClick;
+			dataGridViewForMembers.CurrentCellChanged += DataGridViewForMembers_CurrentCellChanged;
 			// 
 			// cmMember
 			// 
