@@ -44,7 +44,7 @@ namespace Library
 			}
 		}
 
-		
+
 
 		//TODO make toolstrip enabled false or something like that than to example deny acces to return strip when action is borrow
 		private void SelectBooksByIIN(MemberEventArgs e)
@@ -83,21 +83,23 @@ namespace Library
 					if (int.TryParse(DataGridViewForLendBook.CurrentCell.Value.ToString(), out int bookId))
 					{
 						using LibraryContextForEFcore db = new();
-						var selectedBook = await db.Books.FirstOrDefaultAsync(b => b.Id == bookId);
-						var selectedMemberBooks = await db.Members.Where(m=>m.IIN == IIN).SelectMany(m=>m.Books).ToListAsync();
+						var selectedBook = await db.Books.FirstOrDefaultAsync(b => b.Id == bookId); //TODO Use service
+						var memberWithBooks = await db.Members
+						.Include(m => m.Books)
+						.FirstOrDefaultAsync(m => m.IIN == IIN); //TODO Use service
 
 						// check if book and member exist
 						if (selectedBook == null) { MessageBox.Show("Selected book does not exist"); return; }
-						if (selectedMemberBooks == null) { MessageBox.Show("Selected member does not exist"); return; }
+						if (memberWithBooks == null) { MessageBox.Show("Selected member does not exist"); return; }
 						if (selectedBook.Amount <= 0) { MessageBox.Show($"{selectedBook.Title} has zero amount in store"); return; }
-						if (selectedMemberBooks.Any(b => b.Id == bookId))
+						if (memberWithBooks.Books.Any(b => b.Id == bookId))
 						{
 							MessageBox.Show("This member has already borrowed this book.");
 							return;
 						}
 
 						// Add book to member
-						selectedMemberBooks.Add(selectedBook);
+						memberWithBooks.Books.Add(selectedBook);
 						// Decrease book amount
 						selectedBook.Amount -= 1;
 
@@ -109,12 +111,12 @@ namespace Library
 					}
 				}
 			}
-			catch(Exception ex) { MessageBox.Show($"An error occurred: {ex.Message}"); }
+			catch (Exception ex) { MessageBox.Show($"An error occurred: {ex.Message}"); }
 		}
 
 		private void UnlendABookToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			if (DataGridViewForLendBook.CurrentCell?.Value != null && DataGridViewForLendBook.CurrentCell.ColumnIndex == 0)
+			/*if (DataGridViewForLendBook.CurrentCell?.Value != null && DataGridViewForLendBook.CurrentCell.ColumnIndex == 0)
 			{
 				if (long.TryParse(DataGridViewForLendBook.CurrentCell.Value.ToString(), out long bookId))
 				{
@@ -158,6 +160,7 @@ namespace Library
 					MessageBox.Show("Invalid book ID");
 				}
 			}
+		*/
 		}
 	}
 }

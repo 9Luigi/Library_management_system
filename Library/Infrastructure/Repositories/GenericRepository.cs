@@ -1,24 +1,30 @@
-﻿using Library;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-
+namespace Library;
 public class GenericRepository<T> where T : class //TODO logs
 {
 
+
 	/// <summary>
-	/// Retrieves an entity by its identifier.
+	/// Retrieves an entity by a specific field value from the database.
 	/// </summary>
-	/// <param name="id">The identifier of the entity.</param>
-	/// <returns>A task that returns the entity if found, or <c>null</c> if not found.</returns>
-	/// <exception cref="KeyNotFoundException">Thrown when the entity with the specified identifier is not found in the database.</exception>
-	/// <exception cref="Exception">Thrown if an unexpected error occurs while fetching the entity.</exception>
-	internal async Task<T> GetByIndexIINAsync(DbContext _dbContext, long IIN) //TODO remove cohesion with IIN field 
+	/// <typeparam name="TKey">The type of the field used for filtering.</typeparam>
+	/// <param name="_dbContext">The database context used for the query.</param>
+	/// <param name="fieldSelector">An expression to select the field used for filtering.</param>
+	/// <param name="value">The value of the field to search for.</param>
+	/// <returns>The entity that matches the specified field value.</returns>
+	/// <exception cref="KeyNotFoundException">Thrown if no entity with the specified field value is found.</exception>
+	/// <exception cref="ArgumentException">Thrown if the expression does not refer to a valid property.</exception>
+	/// <exception cref="Exception">Thrown for any other errors that occur during execution.</exception>
+	internal async Task<T> GetByFieldAsync<TKey>(DbContext _dbContext, Expression<Func<T, TKey>> fieldSelector, TKey value)
 	{
 		try
 		{
-			var entity = await _dbContext.Set<T>().FirstOrDefaultAsync(e => EF.Property<long>(e, "IIN") == IIN); ;
+			var entity = await _dbContext.Set<T>()
+				.FirstOrDefaultAsync(e => EF.Property<TKey>(e, GetPropertyName(fieldSelector))!.Equals(value));
+
 			if (entity == null)
-				throw new KeyNotFoundException($"Entity with {IIN} not found");
+				throw new KeyNotFoundException($"Entity with field value '{value}' not found.");
 			return entity;
 		}
 		catch (Exception)
@@ -26,6 +32,31 @@ public class GenericRepository<T> where T : class //TODO logs
 			throw;
 		}
 	}
+
+	/// <summary>
+	/// Extracts the property name from an expression that selects a property of the entity.
+	/// </summary>
+	/// <typeparam name="TKey">The type of the selected property.</typeparam>
+	/// <param name="expression">The expression used to select the property.</param>
+	/// <returns>The name of the property selected by the expression.</returns>
+	/// <exception cref="ArgumentException">Thrown if the expression does not refer to a valid property.</exception>
+	private string GetPropertyName<TKey>(Expression<Func<T, TKey>> expression)
+	{
+		if (expression.Body is MemberExpression memberExpression)
+		{
+			return memberExpression.Member.Name;
+		}
+		throw new ArgumentException("The expression does not refer to a valid property.", nameof(expression));
+	}
+
+	/// <summary>
+	/// Retrieves an entity by its primary key value from the database.
+	/// </summary>
+	/// <param name="_dbContext">The database context used for the query.</param>
+	/// <param name="id">The primary key value of the entity to retrieve.</param>
+	/// <returns>The entity that matches the specified primary key value.</returns>
+	/// <exception cref="KeyNotFoundException">Thrown if no entity with the specified ID is found.</exception>
+	/// <exception cref="Exception">Thrown for any other errors that occur during execution.</exception>
 	internal async Task<T> GetByIdAsync(DbContext _dbContext, long id)
 	{
 		try
@@ -40,6 +71,7 @@ public class GenericRepository<T> where T : class //TODO logs
 			throw;
 		}
 	}
+
 
 	/// <summary>
 	/// Retrieves all entities of type <typeparamref name="T"/>.
@@ -249,17 +281,14 @@ public class GenericRepository<T> where T : class //TODO logs
 	/// </summary>
 	/// <param name="id">The identifier of the entity to delete.</param>
 	/// <returns>A task that returns <c>true</c> if the entity was successfully deleted, otherwise <c>false</c>.</returns>
-	internal async Task<bool> DeleteAsync(DbContext _dbContext, long IIN)
+	internal async Task<bool> DeleteAsync<TKey>(DbContext _dbContext, Expression<Func<T, TKey>> fieldSelector, TKey value)
 	{
 		try
 		{
-			// Search fo entiry
-			var entity = await GetByIndexIINAsync(_dbContext, IIN);
-			// If cannot find return false
+			var entity = await GetByFieldAsync(_dbContext, fieldSelector, value);
 			if (entity == null) return false;
-			// Try to remove if entity found 
+
 			_dbContext.Set<T>().Remove(entity);
-			// return 1 if record were deleted from db or 0 if not
 			return await _dbContext.SaveChangesAsync() > 0;
 		}
 		catch (Exception)

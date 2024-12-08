@@ -135,7 +135,7 @@ namespace Library
 					_logger.LogInformation("User confirmed deletion with YES.");
 
 					// Remove the member from the database
-					if (await _memberRepository.DeleteAsync(new LibraryContextForEFcore(), IIN) == true)
+					if (await _memberRepository.DeleteAsync(new LibraryContextForEFcore(), m => m.IIN, IIN) == true)
 					{
 						_logger.LogInformation("Member successfully removed from the database.");
 
@@ -390,7 +390,7 @@ namespace Library
 				_logger.LogInformation("Updating progress bar from {MinValue} to {MaxValue}.", minValue, maxValue);
 
 				// Call the ProgressBarController to update the progress bar asynchronously
-				await ProgressBarController.pbProgressChange(this, pbMembers, minValue, maxValue);
+				await ProgressBarController.UpdateProgressAsync(this, pbMembers, minValue, maxValue);
 
 				_logger.LogInformation("Progress bar updated successfully.");
 			}
@@ -484,7 +484,7 @@ namespace Library
 					this.BeginInvoke(async () =>
 					{
 						// Call the method to reset the progress bar
-						await ProgressBarController.pbProgressReset(pbMembers);
+						await ProgressBarController.ResetProgressAsync(pbMembers);
 					});
 				});
 
@@ -783,8 +783,7 @@ namespace Library
 				if (isValid)
 				{
 					// Fetch the member data asynchronously
-					var findedMember = await _memberRepository.GetByIndexIINAsync(new LibraryContextForEFcore(), IIN);
-
+					var findedMember = await _memberRepository.GetByFieldAsync(new LibraryContextForEFcore(), m => m.IIN, IIN);
 					if (findedMember != null)
 					{
 						// Convert the member's photo byte array to an Image and display it

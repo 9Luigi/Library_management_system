@@ -8,13 +8,14 @@ using static Library.FormMembers;
 
 namespace Library
 {
-    //TODO XML comments
-    //TODO logs via ILogger to XML
-    /// <summary>
-    /// Form for adding or editing member properties in the library system.
-    /// </summary>
-    public partial class FaddEdit_prop : Form
+	//TODO XML comments
+	//TODO logs via ILogger to XML
+	/// <summary>
+	/// Form for adding or editing member properties in the library system.
+	/// </summary>
+	public partial class FaddEdit_prop : Form
 	{
+		LibraryContextForEFcore _updateContext = new LibraryContextForEFcore();
 		/// <summary>
 		/// A byte array that holds the photo of the member in the form of image bytes.
 		/// </summary>
@@ -98,11 +99,10 @@ namespace Library
 					BUpdateMember.Enabled = true;
 					BAddMember.Enabled = false;
 					MTBIIN.Enabled = false;
-					var _context = new LibraryContextForEFcore();
 					try
 					{
-						MemberToEdit = await _memberRepository.GetByIndexIINAsync(_context, e.IIN);
-						_context.Attach(MemberToEdit);
+						MemberToEdit = await _memberRepository.GetByFieldAsync(_updateContext, m => m.IIN, e.IIN);
+						_updateContext.Attach(MemberToEdit);
 						if (MemberToEdit != null)
 						{
 							FillMemberData(MemberToEdit);
@@ -222,7 +222,7 @@ namespace Library
 
 				case "UPDATE":
 					// Directly update the object's properties
-					MemberToEdit.Name = TBName.Text;
+					MemberToEdit!.Name = TBName.Text;
 					MemberToEdit.Surname = TBSurname.Text;
 					MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
 					MemberToEdit.BirthDay = DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture);
@@ -232,7 +232,7 @@ namespace Library
 					MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);
 
 					// Save the changes to the database
-					bool isUpdated = await _memberRepository.UpdateAttachedFieldsAsync(new LibraryContextForEFcore(), MemberToEdit);
+					bool isUpdated = await _memberRepository.UpdateAttachedFieldsAsync(_updateContext, MemberToEdit);
 
 					if (!isUpdated)
 					{

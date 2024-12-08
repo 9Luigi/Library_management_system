@@ -31,7 +31,7 @@ namespace Library.Application.Services.Repository
 				new LibraryContextForEFcore()
 			);
 
-			_logger.LogInformation("Retrieved {Count} members from the database.", members.Count());
+			_logger.LogInformation("Retrieved {Count} members from the database.", members.Count);
 
 			return members.Cast<dynamic>().ToList();
 		}
