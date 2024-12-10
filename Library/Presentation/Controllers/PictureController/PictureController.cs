@@ -73,10 +73,10 @@ namespace Library.Presentation.Controllers.PictureController
                 // Get image size in bytes before any processing
                 byte[] imageBytes = ImageToByteConvert(photo);
                 long imageSize = imageBytes.Length;
-                // Check if image is larger than 10 MB (10 MB = 10 * 1024 * 1024 bytes)
-                if (imageSize > 10 * 1024 * 1024)
+                // Check if image is larger than 1 MB (1 MB = 1024 * 1024 bytes)
+                if (imageSize > 1024 * 1024)
                 {
-                    MessageBox.Show($"Image is {imageSize / 1024 / 1024} MB, compressing image...");
+                    MessageBox.Show($"Image is {imageSize / 1024} MB, compressing image...");
                     photo = ConvertByteToImage(CompressImage(photo)); // Compress the image if it's larger than 10 MB
                 }
                 imageBytes = ImageToByteConvert(photo);
@@ -149,7 +149,7 @@ namespace Library.Presentation.Controllers.PictureController
         /// <param name="image">The image to compress.</param>
         /// <param name="quality">The quality level for the compression (0 to 100).</param>
         /// <returns>A byte array representing the compressed image.</returns>
-        internal static byte[] CompressImage(Image image, long quality = 60)
+        internal static byte[] CompressImage(Image image, long quality = 40)
         {
             try
             {

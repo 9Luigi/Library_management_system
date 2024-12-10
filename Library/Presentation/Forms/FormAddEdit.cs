@@ -97,8 +97,8 @@ namespace Library
 			{
 				case "EDIT":
 					BUpdateMember.Enabled = true;
-					BAddMember.Enabled = false;
-					MTBIIN.Enabled = false;
+					BAddMember.Visible = false;
+					MTBIIN.Visible = false;
 					try
 					{
 						MemberToEdit = await _memberRepository.GetByFieldAsync(_updateContext, m => m.IIN, e.IIN);
@@ -119,8 +119,8 @@ namespace Library
 					break;
 				case "CREATE":
 					MTBIIN.Enabled = true;
-					BUpdateMember.Enabled = false;
-					BAddMember.Enabled = true;
+					BUpdateMember.Visible = false;
+					BAddMember.Visible = true;
 					ResetForm();
 					break;
 				default:

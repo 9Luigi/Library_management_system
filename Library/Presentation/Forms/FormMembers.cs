@@ -6,7 +6,7 @@ using System.Data;
 namespace Library
 {
 	public partial class FormMembers : Form
-	{
+	{//TODO Handle zero members in db via service 
 		#region FieldsAndProperties
 		readonly GenericRepository<Member> _memberRepository;
 		readonly ILogger _logger;

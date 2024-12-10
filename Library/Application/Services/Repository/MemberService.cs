@@ -102,7 +102,7 @@ namespace Library
 		/// Retrieves a list of books for the specified member based on their IIN.
 		/// </summary>
 		/// <param name="memberIIN">The IIN of the member for whom books are to be retrieved.</param>
-		/// <returns>A list of books associated with the member as dynamic objects.</returns>
+		/// <returns>Member with included books</returns>
 		/// <exception cref="KeyNotFoundException">Thrown when no books are found for the specified member.</exception>
 		internal async Task<Member> GetMemberWithHisBooksAsync(long memberIIN)
 		{
