@@ -34,6 +34,7 @@
 			lendABookToolStripMenuItem = new ToolStripMenuItem();
 			PBBorrowOrReturn = new ProgressBar();
 			unlendABookToolStripMenuItem = new ToolStripMenuItem();
+			returnBookToolStripMenuItem = new ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)DataGridViewForLendBook).BeginInit();
 			CMSLendBook.SuspendLayout();
 			SuspendLayout();
@@ -41,31 +42,35 @@
 			// DataGridViewForLendBook
 			// 
 			DataGridViewForLendBook.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			DataGridViewForLendBook.Location = new Point(12, 12);
+			DataGridViewForLendBook.Location = new Point(14, 16);
+			DataGridViewForLendBook.Margin = new Padding(3, 4, 3, 4);
 			DataGridViewForLendBook.Name = "DataGridViewForLendBook";
+			DataGridViewForLendBook.RowHeadersWidth = 51;
 			DataGridViewForLendBook.RowTemplate.Height = 25;
-			DataGridViewForLendBook.Size = new Size(776, 368);
+			DataGridViewForLendBook.Size = new Size(887, 491);
 			DataGridViewForLendBook.TabIndex = 0;
 			DataGridViewForLendBook.CellMouseClick += DataGridViewForLendBook_CellMouseClick;
 			// 
 			// CMSLendBook
 			// 
-			CMSLendBook.Items.AddRange(new ToolStripItem[] { lendABookToolStripMenuItem });
+			CMSLendBook.ImageScalingSize = new Size(20, 20);
+			CMSLendBook.Items.AddRange(new ToolStripItem[] { lendABookToolStripMenuItem, returnBookToolStripMenuItem });
 			CMSLendBook.Name = "cmsLendBook";
-			CMSLendBook.Size = new Size(152, 26);
+			CMSLendBook.Size = new Size(211, 80);
 			// 
 			// lendABookToolStripMenuItem
 			// 
 			lendABookToolStripMenuItem.Name = "lendABookToolStripMenuItem";
-			lendABookToolStripMenuItem.Size = new Size(180, 22);
+			lendABookToolStripMenuItem.Size = new Size(210, 24);
 			lendABookToolStripMenuItem.Text = "Borrow a book";
 			lendABookToolStripMenuItem.Click += LendABookToolStripMenuItem_Click;
 			// 
 			// PBBorrowOrReturn
 			// 
-			PBBorrowOrReturn.Location = new Point(12, 386);
+			PBBorrowOrReturn.Location = new Point(14, 515);
+			PBBorrowOrReturn.Margin = new Padding(3, 4, 3, 4);
 			PBBorrowOrReturn.Name = "PBBorrowOrReturn";
-			PBBorrowOrReturn.Size = new Size(776, 23);
+			PBBorrowOrReturn.Size = new Size(887, 31);
 			PBBorrowOrReturn.TabIndex = 1;
 			// 
 			// unlendABookToolStripMenuItem
@@ -75,13 +80,20 @@
 			unlendABookToolStripMenuItem.Text = "Return a book";
 			unlendABookToolStripMenuItem.Click += UnlendABookToolStripMenuItem_Click;
 			// 
+			// returnBookToolStripMenuItem
+			// 
+			returnBookToolStripMenuItem.Name = "returnBookToolStripMenuItem";
+			returnBookToolStripMenuItem.Size = new Size(210, 24);
+			returnBookToolStripMenuItem.Text = "Return book";
+			// 
 			// FormBorrowOrRecieveBook
 			// 
-			AutoScaleDimensions = new SizeF(7F, 15F);
+			AutoScaleDimensions = new SizeF(8F, 20F);
 			AutoScaleMode = AutoScaleMode.Font;
-			ClientSize = new Size(800, 450);
+			ClientSize = new Size(914, 600);
 			Controls.Add(PBBorrowOrReturn);
 			Controls.Add(DataGridViewForLendBook);
+			Margin = new Padding(3, 4, 3, 4);
 			Name = "FormBorrowOrRecieveBook";
 			((System.ComponentModel.ISupportInitialize)DataGridViewForLendBook).EndInit();
 			CMSLendBook.ResumeLayout(false);
@@ -95,5 +107,6 @@
         private ToolStripMenuItem lendABookToolStripMenuItem;
         private ProgressBar PBBorrowOrReturn;
 		private ToolStripMenuItem unlendABookToolStripMenuItem;
+		private ToolStripMenuItem returnBookToolStripMenuItem;
 	}
 }

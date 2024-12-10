@@ -109,7 +109,7 @@ public class GenericRepository<T> where T : class //TODO logs
 	/// <exception cref="InvalidOperationException">
 	/// Thrown if the query cannot be executed (e.g., invalid entity state or EF configuration).
 	/// </exception>
-	public async Task<List<TResult>> GetWithProjectionAsync<TResult>(
+	public async Task<List<TResult>> GetCollectionWithProjectionAsync<TResult>(
 		Expression<Func<T, TResult>> selector,
 		DbContext _dbContext,
 		params Expression<Func<T, object>>[] includes)
@@ -123,6 +123,26 @@ public class GenericRepository<T> where T : class //TODO logs
 				query = query.Include(include);
 			}
 			return await query.Select(selector).ToListAsync();
+		}
+		catch (Exception)
+		{
+			throw;
+		}
+	}
+	public async Task<TResult> GetOneWithProjectionAsync<TResult>(
+		Expression<Func<T, TResult>> selector,
+		DbContext _dbContext,
+		params Expression<Func<T, object>>[] includes)
+	{
+		try
+		{
+			IQueryable<T> query = _dbContext.Set<T>();
+
+			foreach (var include in includes)
+			{
+				query = query.Include(include);
+			}
+			return await query.Select(selector).FirstAsync();
 		}
 		catch (Exception)
 		{

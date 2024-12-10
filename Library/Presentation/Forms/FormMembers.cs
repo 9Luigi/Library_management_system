@@ -232,7 +232,7 @@ namespace Library
 				else
 				{
 					// Load all members when the input is shorter than 3 characters
-					var members = await _memberRepository.GetWithProjectionAsync(
+					var members = await _memberRepository.GetCollectionWithProjectionAsync(
 						m => new
 						{
 							m.IIN,
@@ -481,6 +481,7 @@ namespace Library
 				// Reset the progress bar asynchronously
 				await Task.Run(() =>
 				{
+					this.CreateControl(); //Handle if form exit sonner then were initialized
 					this.BeginInvoke(async () =>
 					{
 						// Call the method to reset the progress bar
@@ -587,7 +588,7 @@ namespace Library
 		/// If the selected member has a valid IIN, it invokes an event to initiate the borrowing process and shows the borrowing form.
 		/// Logs the progress and errors during the process.
 		/// </summary>
-		private async void LeToolStripMenuItem_Click(object sender, EventArgs e)
+		private async void BorrowBookToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -632,7 +633,7 @@ namespace Library
 		/// Checks if a member has borrowed any books and, if so, displays their information in another form.
 		/// Logs actions and handles errors during the process.
 		/// </summary>
-		private async void SeeLendedBooksForThisMemberToolStripMenuItem_Click(object sender, EventArgs e)
+		private async void ReturnBookToolStripMenuItem_Click(object sender, EventArgs e) 
 		{
 			// Check if a valid member is selected and retrieve their IIN
 			(bool isValid, long IIN) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
@@ -643,11 +644,11 @@ namespace Library
 				{
 					_logger.LogInformation("Valid member selected with IIN: {IIN}. Fetching borrowed books information.", IIN);
 
-					var MemberService = new MemberService(_logger, _memberRepository);
+					var memberService = new MemberService(_logger, _memberRepository);
 					// Using the repository instead of directly querying the database
-					var memberData = await MemberService.GetMemberWithBorrowedBooksAsync(IIN);
+					var memberWithBooks = await memberService.GetMemberWithBorrowedBooksAsync(IIN);
 
-					if (memberData == null)
+					if (memberWithBooks == null)
 					{
 						_logger.LogWarning("No member found with IIN: {IIN}.", IIN);
 						MessageBox.Show($"Member with IIN: {IIN} not found.");
@@ -655,7 +656,7 @@ namespace Library
 					}
 
 					// Log if the member has borrowed books or not
-					if (memberData.Books.Any())
+					if (memberWithBooks.Books.Any())
 					{
 						_logger.LogInformation("Member has borrowed books. Triggering the return event for IIN: {IIN}.", IIN);
 
@@ -670,7 +671,7 @@ namespace Library
 					else
 					{
 						_logger.LogInformation("Member has not borrowed any books. Showing message to the user.");
-						MessageBox.Show($"{memberData.Name} {memberData.Surname} has not borrowed any books yet.");
+						MessageBox.Show($"{memberWithBooks.Name} {memberWithBooks.Surname} has not borrowed any books yet.");
 					}
 				}
 				catch (Exception ex)

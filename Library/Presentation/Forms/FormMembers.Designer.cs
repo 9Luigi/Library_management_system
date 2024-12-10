@@ -128,14 +128,14 @@
 			BorrowBookToolStripMenuItem.Name = "BorrowBookToolStripMenuItem";
 			BorrowBookToolStripMenuItem.Size = new Size(180, 22);
 			BorrowBookToolStripMenuItem.Text = "Borrow a book";
-			BorrowBookToolStripMenuItem.Click += LeToolStripMenuItem_Click;
+			BorrowBookToolStripMenuItem.Click +=BorrowBookToolStripMenuItem_Click;
 			// 
 			// ReturnBookToolStripMenuItem
 			// 
 			ReturnBookToolStripMenuItem.Name = "ReturnBookToolStripMenuItem";
 			ReturnBookToolStripMenuItem.Size = new Size(180, 22);
 			ReturnBookToolStripMenuItem.Text = "Return book";
-			ReturnBookToolStripMenuItem.Click += SeeLendedBooksForThisMemberToolStripMenuItem_Click;
+			ReturnBookToolStripMenuItem.Click +=ReturnBookToolStripMenuItem_Click;
 			// 
 			// pictureBoxMember
 			// 

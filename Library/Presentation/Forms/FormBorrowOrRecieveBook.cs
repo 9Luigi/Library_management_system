@@ -39,7 +39,7 @@ namespace Library
 					break;
 
 				case GridCriterion.BooksByMember:
-					DataGridViewForLendBook.DataSource = await _memberService.GetMembersBooksAsync(IIN);
+					DataGridViewForLendBook.DataSource = await _memberService.GetMemberWithHisBooksAsync(IIN);
 					break;
 			}
 		}
@@ -114,9 +114,9 @@ namespace Library
 			catch (Exception ex) { MessageBox.Show($"An error occurred: {ex.Message}"); }
 		}
 
-		private void UnlendABookToolStripMenuItem_Click(object sender, EventArgs e)
-		{
-			/*if (DataGridViewForLendBook.CurrentCell?.Value != null && DataGridViewForLendBook.CurrentCell.ColumnIndex == 0)
+		private void UnlendABookToolStripMenuItem_Click(object sender, EventArgs e) //TODO Write
+		{/*
+			if (DataGridViewForLendBook.CurrentCell?.Value != null && DataGridViewForLendBook.CurrentCell.ColumnIndex == 0)
 			{
 				if (long.TryParse(DataGridViewForLendBook.CurrentCell.Value.ToString(), out long bookId))
 				{
@@ -159,8 +159,7 @@ namespace Library
 				{
 					MessageBox.Show("Invalid book ID");
 				}
-			}
-		*/
+			}*/
 		}
 	}
 }

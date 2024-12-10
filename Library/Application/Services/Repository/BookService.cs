@@ -1,5 +1,4 @@
 ﻿using Library.Domain.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Library.Application.Services.Repository
@@ -18,7 +17,7 @@ namespace Library.Application.Services.Repository
 		{
 			_logger.LogInformation("GetMembersAsync started.");
 
-			var members = await _bookRepository.GetWithProjectionAsync(
+			var books = await _bookRepository.GetCollectionWithProjectionAsync(
 				b => new
 				{
 					b.Id,
@@ -31,9 +30,9 @@ namespace Library.Application.Services.Repository
 				new LibraryContextForEFcore()
 			);
 
-			_logger.LogInformation("Retrieved {Count} members from the database.", members.Count);
+			_logger.LogInformation("Retrieved {Count} members from the database.", books.Count);
 
-			return members.Cast<dynamic>().ToList();
+			return books.Cast<dynamic>().ToList();
 		}
 	}
 }

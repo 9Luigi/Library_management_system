@@ -30,7 +30,7 @@ namespace Library
 			{
 				_logger.LogInformation("GetMembersAsync started.");
 
-				var members = await _memberRepository.GetWithProjectionAsync(
+				var members = await _memberRepository.GetCollectionWithProjectionAsync(
 					m => new
 					{
 						m.IIN,
@@ -61,7 +61,7 @@ namespace Library
 		/// <param name="IIN">The IIN (Identification Number) of the member to retrieve.</param>
 		/// <returns>A dynamic object representing the member's data and borrowed books, or null if the member is not found.</returns>
 		/// <exception cref="Exception">Thrown when an error occurs while retrieving member data from the database.</exception>
-		public async Task<dynamic> GetMemberWithBorrowedBooksAsync(long IIN)
+		internal async Task<Member> GetMemberWithBorrowedBooksAsync(long IIN)
 		{
 			try
 			{
@@ -69,28 +69,14 @@ namespace Library
 				_logger.LogInformation("Attempting to retrieve member data and borrowed books for IIN: {IIN}", IIN);
 
 				// Define the projection to retrieve member data along with their borrowed books
-				var result = await _memberRepository.GetWithProjectionAsync(
-					m => new
-					{
-						m.IIN,
-						m.Name,
-						m.Surname,
-						Books = m.Books.Select(b => new
-						{
-							b.Id,
-							b.Title,
-							b.Genre
-						}).ToList()
-					},
+				var member = await _memberRepository.GetOneWithProjectionAsync(
+					m => m,
 					new LibraryContextForEFcore(),
 					m => m.Books // Include the Books navigation property
 				);
 
 				// Log the success of data retrieval
 				_logger.LogInformation("Successfully retrieved member data and borrowed books for IIN: {IIN}", IIN);
-
-				// Filter the result to match the specific IIN
-				var member = result.FirstOrDefault(m => m.IIN == IIN);
 
 				// Log the result of the filtering
 				if (member != null)
@@ -118,31 +104,26 @@ namespace Library
 		/// <param name="memberIIN">The IIN of the member for whom books are to be retrieved.</param>
 		/// <returns>A list of books associated with the member as dynamic objects.</returns>
 		/// <exception cref="KeyNotFoundException">Thrown when no books are found for the specified member.</exception>
-		public async Task<List<dynamic>> GetMembersBooksAsync(long memberIIN)
+		internal async Task<Member> GetMemberWithHisBooksAsync(long memberIIN)
 		{
 			_logger.LogInformation("Start fetching books for member with IIN: {MemberIIN}", memberIIN);
 
 			using var context = new LibraryContextForEFcore();
 
-			var books = await context.Members
+			var memberWithBooks = await context.Members
+				.Include(m => m.Books)
 				.Where(m => m.IIN == memberIIN)
-				.SelectMany(m => m.Books.Select(b => new
-				{
-					b.Id,
-					b.Title,
-					b.Genre
-				}))
-				.ToListAsync();
+				.FirstOrDefaultAsync();
 
-			if (books == null || !books.Any())
+			if (memberWithBooks == null || memberWithBooks.Books == null || !memberWithBooks.Books.Any())
 			{
 				_logger.LogWarning("No books found for member with IIN: {MemberIIN}", memberIIN);
 				throw new KeyNotFoundException($"Books for member with IIN {memberIIN} not found.");
 			}
 
-			_logger.LogInformation("Successfully retrieved {BookCount} books for member with IIN: {MemberIIN}", books.Count, memberIIN);
+			_logger.LogInformation("Successfully retrieved {BookCount} books for member with IIN: {MemberIIN}", memberWithBooks.Books.Count, memberIIN);
 
-			return books.Cast<dynamic>().ToList();
+			return memberWithBooks;
 		}
 	}
 }
