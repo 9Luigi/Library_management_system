@@ -32,9 +32,9 @@
 			DataGridViewForLendBook = new DataGridView();
 			CMSLendBook = new ContextMenuStrip(components);
 			lendABookToolStripMenuItem = new ToolStripMenuItem();
+			returnBookToolStripMenuItem = new ToolStripMenuItem();
 			PBBorrowOrReturn = new ProgressBar();
 			unlendABookToolStripMenuItem = new ToolStripMenuItem();
-			returnBookToolStripMenuItem = new ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)DataGridViewForLendBook).BeginInit();
 			CMSLendBook.SuspendLayout();
 			SuspendLayout();
@@ -42,7 +42,7 @@
 			// DataGridViewForLendBook
 			// 
 			DataGridViewForLendBook.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			DataGridViewForLendBook.Location = new Point(14, 16);
+			DataGridViewForLendBook.Location = new Point(15, 26);
 			DataGridViewForLendBook.Margin = new Padding(3, 4, 3, 4);
 			DataGridViewForLendBook.Name = "DataGridViewForLendBook";
 			DataGridViewForLendBook.RowHeadersWidth = 51;
@@ -56,14 +56,20 @@
 			CMSLendBook.ImageScalingSize = new Size(20, 20);
 			CMSLendBook.Items.AddRange(new ToolStripItem[] { lendABookToolStripMenuItem, returnBookToolStripMenuItem });
 			CMSLendBook.Name = "cmsLendBook";
-			CMSLendBook.Size = new Size(211, 80);
+			CMSLendBook.Size = new Size(177, 52);
 			// 
 			// lendABookToolStripMenuItem
 			// 
 			lendABookToolStripMenuItem.Name = "lendABookToolStripMenuItem";
-			lendABookToolStripMenuItem.Size = new Size(210, 24);
+			lendABookToolStripMenuItem.Size = new Size(176, 24);
 			lendABookToolStripMenuItem.Text = "Borrow a book";
 			lendABookToolStripMenuItem.Click += LendABookToolStripMenuItem_Click;
+			// 
+			// returnBookToolStripMenuItem
+			// 
+			returnBookToolStripMenuItem.Name = "returnBookToolStripMenuItem";
+			returnBookToolStripMenuItem.Size = new Size(176, 24);
+			returnBookToolStripMenuItem.Text = "Return book";
 			// 
 			// PBBorrowOrReturn
 			// 
@@ -80,12 +86,6 @@
 			unlendABookToolStripMenuItem.Text = "Return a book";
 			unlendABookToolStripMenuItem.Click += UnlendABookToolStripMenuItem_Click;
 			// 
-			// returnBookToolStripMenuItem
-			// 
-			returnBookToolStripMenuItem.Name = "returnBookToolStripMenuItem";
-			returnBookToolStripMenuItem.Size = new Size(210, 24);
-			returnBookToolStripMenuItem.Text = "Return book";
-			// 
 			// FormBorrowOrRecieveBook
 			// 
 			AutoScaleDimensions = new SizeF(8F, 20F);
@@ -95,6 +95,7 @@
 			Controls.Add(DataGridViewForLendBook);
 			Margin = new Padding(3, 4, 3, 4);
 			Name = "FormBorrowOrRecieveBook";
+			FormClosed += FormBorrowOrRecieveBook_FormClosed;
 			((System.ComponentModel.ISupportInitialize)DataGridViewForLendBook).EndInit();
 			CMSLendBook.ResumeLayout(false);
 			ResumeLayout(false);

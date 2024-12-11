@@ -2,7 +2,6 @@
 using Library.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Data;
 using static Library.FormMembers;
 
 namespace Library
@@ -115,7 +114,7 @@ namespace Library
 		}
 
 		private void UnlendABookToolStripMenuItem_Click(object sender, EventArgs e) //TODO Write
-		{/*
+		{
 			if (DataGridViewForLendBook.CurrentCell?.Value != null && DataGridViewForLendBook.CurrentCell.ColumnIndex == 0)
 			{
 				if (long.TryParse(DataGridViewForLendBook.CurrentCell.Value.ToString(), out long bookId))
@@ -159,7 +158,12 @@ namespace Library
 				{
 					MessageBox.Show("Invalid book ID");
 				}
-			}*/
+			}
+		}
+
+		private void FormBorrowOrRecieveBook_FormClosed(object sender, FormClosedEventArgs e)
+		{
+			DataGridViewForLendBook.DataSource = null;
 		}
 	}
 }

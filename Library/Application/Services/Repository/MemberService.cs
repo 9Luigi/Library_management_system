@@ -104,7 +104,7 @@ namespace Library
 		/// <param name="memberIIN">The IIN of the member for whom books are to be retrieved.</param>
 		/// <returns>Member with included books</returns>
 		/// <exception cref="KeyNotFoundException">Thrown when no books are found for the specified member.</exception>
-		internal async Task<Member> GetMemberWithHisBooksAsync(long memberIIN)
+		internal async Task<List<dynamic>> GetMemberWithHisBooksAsync(long memberIIN)
 		{
 			_logger.LogInformation("Start fetching books for member with IIN: {MemberIIN}", memberIIN);
 
@@ -123,7 +123,12 @@ namespace Library
 
 			_logger.LogInformation("Successfully retrieved {BookCount} books for member with IIN: {MemberIIN}", memberWithBooks.Books.Count, memberIIN);
 
-			return memberWithBooks;
+		 var booksData = memberWithBooks.Books.Select(b => new //TODO transfer Member, not anonym
+			{
+				BookId = b.Id,
+				BookTitle = b.Title,
+			}).ToList<dynamic>();
+			return booksData;
 		}
 	}
 }
