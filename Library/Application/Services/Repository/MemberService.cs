@@ -99,12 +99,21 @@ namespace Library
 			}
 		}
 		/// <summary>
-		/// Retrieves a list of books for the specified member based on their IIN.
+		/// Retrieves a member with their books by IIN and populates the given DataGridView with the retrieved data.
 		/// </summary>
-		/// <param name="memberIIN">The IIN of the member for whom books are to be retrieved.</param>
-		/// <returns>Member with included books</returns>
-		/// <exception cref="KeyNotFoundException">Thrown when no books are found for the specified member.</exception>
-		internal async Task<List<dynamic>> GetMemberWithHisBooksAsync(long memberIIN)
+		/// <param name="memberIIN">The IIN of the member to fetch.</param>
+		/// <param name="dataGridView">The DataGridView control to display the member's books.</param>
+		/// <returns>
+		/// Returns the <see cref="Member"/> object containing the member's details and their books.
+		/// </returns>
+		/// <exception cref="KeyNotFoundException">
+		/// Thrown when the member or their books cannot be found in the database.
+		/// </exception>
+		/// <remarks>
+		/// This method populates the DataGridView with the books related to the member and updates the 
+		/// top-left header cell of the DataGridView with the member's details.
+		/// </remarks>
+		internal async Task<bool> GetMemberWithHisBooksToDataGridViewAsync(long memberIIN, DataGridView dataGridView)
 		{
 			_logger.LogInformation("Start fetching books for member with IIN: {MemberIIN}", memberIIN);
 
@@ -123,12 +132,20 @@ namespace Library
 
 			_logger.LogInformation("Successfully retrieved {BookCount} books for member with IIN: {MemberIIN}", memberWithBooks.Books.Count, memberIIN);
 
-		 var booksData = memberWithBooks.Books.Select(b => new //TODO transfer Member, not anonym
-			{
-				BookId = b.Id,
-				BookTitle = b.Title,
-			}).ToList<dynamic>();
-			return booksData;
+			// Populate DataGridView with the member's books
+			dataGridView.DataSource = memberWithBooks.Books
+				.Select(book => new
+				{
+					memberWithBooks.IIN,
+					BookID = book.Id,
+					BookTitle = book.Title,
+					//BookAuthor = book.Author // Include additional fields if available
+				})
+				.ToList();
+
+			//dataGridView.Columns[0].Visible = false;
+			return true;
 		}
+
 	}
 }

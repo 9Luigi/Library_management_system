@@ -1,5 +1,6 @@
 ﻿using Library.Application.Services.Repository;
 using Library.Domain.Models;
+using Library.Presentation.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using static Library.FormMembers;
@@ -34,11 +35,15 @@ namespace Library
 			switch (criterion)
 			{
 				case GridCriterion.AllBooks:
+					returnBookToolStripMenuItem.Visible = false;
+					lendABookToolStripMenuItem.Visible = true;
 					DataGridViewForLendBook.DataSource = await _bookService.GetAllBooksAsync();
 					break;
 
 				case GridCriterion.BooksByMember:
-					DataGridViewForLendBook.DataSource = await _memberService.GetMemberWithHisBooksAsync(IIN);
+					returnBookToolStripMenuItem.Visible = true;
+					lendABookToolStripMenuItem.Visible = false;
+					await _memberService.GetMemberWithHisBooksToDataGridViewAsync(IIN, DataGridViewForLendBook);
 					break;
 			}
 		}
@@ -72,7 +77,7 @@ namespace Library
 			}
 		}
 
-		private async void LendABookToolStripMenuItem_Click(object sender, EventArgs e)
+		private async void BorrowABookToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -113,57 +118,68 @@ namespace Library
 			catch (Exception ex) { MessageBox.Show($"An error occurred: {ex.Message}"); }
 		}
 
-		private void UnlendABookToolStripMenuItem_Click(object sender, EventArgs e) //TODO Write
+		private void ReturnBookToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			if (DataGridViewForLendBook.CurrentCell?.Value != null && DataGridViewForLendBook.CurrentCell.ColumnIndex == 0)
+			// Ensure a row is selected
+			if (DataGridViewForLendBook.CurrentRow == null)
 			{
-				if (long.TryParse(DataGridViewForLendBook.CurrentCell.Value.ToString(), out long bookId))
-				{
-					using LibraryContextForEFcore db = new();
-					var selectedMember = db.Members.Include(m => m.Books).FirstOrDefault(m => m.IIN == IIN);
-					var selectedBook = db.Books.FirstOrDefault(b => b.Id == bookId);
+				MessageBox.Show("No row selected in the DataGridView");
+				return;
+			}
 
-					// check if book and member exist
-					if (selectedMember != null && selectedBook != null)
-					{
-						// Remove book from member
-						selectedMember.Books.Remove(selectedBook);
-						selectedBook.Amount += 1; //TODO refresh grid after borrow a book
-						FillGridWith(GridCriterion.BooksByMember); //FillGrid seems than be called only when ivent from fmembers is triggered
-													  // Update DataGridView binding by updating the data source
-						var selectedBooks = db.Members
-								   .Where(m => m.IIN == IIN)
-								   .Include(m => m.Books)
-								   .SelectMany(m => m.Books.Select(b => new
-								   {
-									   b.Id,
-									   b.Title,
-									   b.Genre
-								   }))
-								   .ToList();
-						DataGridViewForLendBook.DataSource = selectedBooks;
+			// Find the "BookID" column
+			var bookIdColumn = DataGridViewForLendBook.Columns["BookID"];
+			if (bookIdColumn == null)
+			{
+				MessageBox.Show("Column 'BookID' not found in the DataGridView");
+				return;
+			}
 
-						if (db.SaveChanges() > 0)
-						{
-							MessageBox.Show($"{selectedBook.Title} successfully returned by {selectedMember.Name} {selectedMember.Surname}");
+			// Retrieve the value from the "BookID" column in the current row
+			var cellValue = DataGridViewForLendBook.CurrentRow.Cells[bookIdColumn.Index]?.Value;
+			if (cellValue == null || !long.TryParse(cellValue.ToString(), out long bookId))
+			{
+				MessageBox.Show("Invalid Book ID");
+				return;
+			}
 
-						}
-					}
-					else
-					{
-						MessageBox.Show("Selected book or member not found");
-					}
-				}
-				else
-				{
-					MessageBox.Show("Invalid book ID");
-				}
+			using LibraryContextForEFcore db = new();
+			var selectedMember = db.Members.Include(m => m.Books).FirstOrDefault(m => m.IIN == IIN);
+			if (selectedMember == null)
+			{
+				MessageBox.Show("Member not found");
+				return;
+			}
+
+			var selectedBook = db.Books.FirstOrDefault(b => b.Id == bookId);
+			if (selectedBook == null)
+			{
+				MessageBox.Show("Book not found");
+				return;
+			}
+
+			// Remove the book from the member's book list
+			selectedMember.Books.Remove(selectedBook);
+			selectedBook.Amount += 1;
+
+			// Save changes to the database
+			if (db.SaveChanges() > 0)
+			{
+				MessageBox.Show($"{selectedBook.Title} successfully returned by {selectedMember.Name} {selectedMember.Surname}");
+				// Refresh the DataGridView after returning the book
+				FillGridWith(GridCriterion.BooksByMember);
 			}
 		}
+
 
 		private void FormBorrowOrRecieveBook_FormClosed(object sender, FormClosedEventArgs e)
 		{
 			DataGridViewForLendBook.DataSource = null;
+		}
+
+		private void FormBorrowOrRecieveBook_Load(object sender, EventArgs e)
+		{
+			DataGridViewController.CustomizeDataGridView(this.DataGridViewForLendBook);
 		}
 	}
 }
