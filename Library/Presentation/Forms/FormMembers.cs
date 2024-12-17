@@ -2,7 +2,8 @@
 using Library.Presentation.Controllers;
 using Library.Presentation.Controllers.PictureController;
 using Microsoft.Extensions.Logging;
-using System.Data;
+using Library.Application.Services.CRUD;
+using Library.Infrastructure.Repositories;
 namespace Library
 {
 	public partial class FormMembers : Form
@@ -10,7 +11,7 @@ namespace Library
 		#region FieldsAndProperties
 		readonly GenericRepository<Member> _memberRepository;
 		readonly ILogger _logger;
-		internal FormBorrowOrRecieveBook FlendOrRecieveBook { get; private set; } //TODO:CRITICAL logic of borrow and return book is broken
+		internal FormBorrowOrReturnBook FlendOrRecieveBook { get; private set; } //TODO:CRITICAL logic of borrow and return book is broken
 		internal FaddEdit_prop FaddEdit_prop { get; private set; }
 		internal CancellationTokenSource CancellationTokenSource { get; set; }
 		internal CancellationToken CancellationToken { get; set; }
@@ -22,7 +23,7 @@ namespace Library
 		{
 			InitializeComponent();
 			CancellationTokenSource = new CancellationTokenSource();
-			FlendOrRecieveBook = new FormBorrowOrRecieveBook();
+			FlendOrRecieveBook = new FormBorrowOrReturnBook();
 			FaddEdit_prop = new FaddEdit_prop();
 			_logger = LoggerService.CreateLogger<FormMembers>();
 			_memberRepository = new();
@@ -93,7 +94,7 @@ namespace Library
 		{
 			_logger.LogInformation("EditToolStripMenuItem_Click: Started processing the event.");
 			// Attempt to retrieve a valid IIN from the selected row in the DataGridView
-			(bool isValid, long IIN) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
+			(bool isValid, long IIN) = LibraryService.TryGetValueFromRow<long>(dataGridViewForMembers);
 
 			if (isValid)
 			{
@@ -117,7 +118,7 @@ namespace Library
 			_logger.LogInformation("DeleteToolStripMenuItem_Click: Started processing the event.");
 
 			// Retrieve data from the selected row in the DataGridView
-			(bool IsValid, long IIN) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
+			(bool IsValid, long IIN) = LibraryService.TryGetValueFromRow<long>(dataGridViewForMembers);
 			_logger.LogInformation("Attempted to extract IIN from the selected DataGridView row.");
 
 			// If IIN was successfully checked
@@ -186,76 +187,51 @@ namespace Library
 				_logger.LogWarning("Right mouse button was clicked, but not on a valid cell (row: {RowIndex}, column: {ColumnIndex})", e.RowIndex, e.ColumnIndex);
 			}
 		}
+		private int previousTextLength = 0; // Track the previous length of the input text
 
-
+		/// <summary>
+		/// Handles the text changed event of the TbIINSearch text box. Searches for members
+		/// based on the input IIN. If the input is a valid IIN, the members matching the IIN
+		/// will be displayed. Otherwise, all members will be shown. In case of an error, 
+		/// it logs the exception and shows a message to the user.
+		/// </summary>
+		/// <param name="sender">The object that triggered the event.</param>
+		/// <param name="e">The event arguments.</param>
 		private async void TbIINSearch_TextChanged(object sender, EventArgs e)
 		{
 			_logger.LogInformation("Entered TbIINSearch_TextChanged method. Text length: {TextLength}", TbIINSearch.Text.Length);
+			var memberService = new MemberService(_logger, _memberRepository);
 
-			try
+			// If the current text length is less than or equal to 3 and it was greater than 3 previously, perform the fetch
+			if (TbIINSearch.Text.Length <= 3 && previousTextLength > 3)
 			{
-				if (TbIINSearch.Text.Length > 3)
+				dataGridViewForMembers.DataSource = await memberService.GetMembersAsync();
+				_logger.LogInformation("All members loaded and displayed in DataGridView.");
+			}
+			else if (TbIINSearch.Text.Length > 3)
+			{
+				// When text length is greater than 3, perform the filtered search
+				string input = TbIINSearch.Text.Trim();
+				_logger.LogInformation("User entered input: {Input}", input);
+
+				if (long.TryParse(input, out long IIN) && IIN != 0)
 				{
-					string input = TbIINSearch.Text.Trim();
-					_logger.LogInformation("User entered input: {Input}", input);
-
-					if (long.TryParse(input, out long IIN) && IIN != 0)
-					{
-						_logger.LogInformation("Valid IIN parsed: {IIN}", IIN);
-
-						// Perform the member search
-						var matchedMembers = await _memberRepository.GetWithProjectionAsync(
-							m => new
-							{
-								m.IIN,
-								m.Name,
-								m.Surname,
-								m.Age,
-								m.RegistrationDate,
-								Books = string.Join(", ", m.Books.Select(b => b.Title))
-							},
-							IIN,
-							m => m.IIN,
-							new LibraryContextForEFcore(),
-							m => m.Books
-						);
-
-						dataGridViewForMembers.DataSource = matchedMembers;
-						_logger.LogInformation("Matched members found and displayed in DataGridView.");
-					}
-					else
-					{
-						dataGridViewForMembers.DataSource = null;
-						_logger.LogWarning("Invalid IIN input: {Input}", input);
-					}
+					_logger.LogInformation("Valid IIN parsed: {IIN}", IIN);
+					dataGridViewForMembers.DataSource = await memberService.GetFilteredMembersAsync(IIN);
+					_logger.LogInformation("Matched members found and displayed in DataGridView.");
 				}
 				else
 				{
-					// Load all members when the input is shorter than 3 characters
-					var members = await _memberRepository.GetCollectionWithProjectionAsync(
-						m => new
-						{
-							m.IIN,
-							m.Name,
-							m.Surname,
-							m.Age,
-							m.RegistrationDate,
-							Books = string.Join(", ", m.Books.Select(b => b.Title))
-						},
-						new LibraryContextForEFcore(),
-						m => m.Books
-					);
-
-					dataGridViewForMembers.DataSource = members;
-					_logger.LogInformation("All members loaded and displayed in DataGridView.");
+					dataGridViewForMembers.DataSource = null;
+					_logger.LogWarning("Invalid IIN input: {Input}", input);
 				}
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An error occurred while searching members.");
-				MessageBox.Show("An error occurred while fetching the data. Please try again later.");
-			}
+
+			// Update previous text length after processing
+			previousTextLength = TbIINSearch.Text.Length;
 		}
+
+
 
 
 		/// <summary>
@@ -593,7 +569,7 @@ namespace Library
 			try
 			{
 				// Try to get IIN from the selected row in the DataGridView
-				(bool isValid, long IIN) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
+				(bool isValid, long IIN) = LibraryService.TryGetValueFromRow<long>(dataGridViewForMembers);
 
 				if (isValid)
 				{
@@ -633,60 +609,57 @@ namespace Library
 		/// Checks if a member has borrowed any books and, if so, displays their information in another form.
 		/// Logs actions and handles errors during the process.
 		/// </summary>
-		private async void ReturnBookToolStripMenuItem_Click(object sender, EventArgs e) 
+		private async void ReturnBookToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			// Check if a valid member is selected and retrieve their IIN
-			(bool isValid, long IIN) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
-
-			if (isValid)
-			{
-				try
-				{
-					_logger.LogInformation("Valid member selected with IIN: {IIN}. Fetching borrowed books information.", IIN);
-
-					var memberService = new MemberService(_logger, _memberRepository);
-					// Using the repository instead of directly querying the database
-					var memberWithBooks = await memberService.GetMemberWithBorrowedBooksAsync(IIN);
-
-					if (memberWithBooks == null)
-					{
-						_logger.LogWarning("No member found with IIN: {IIN}.", IIN);
-						MessageBox.Show($"Member with IIN: {IIN} not found.");
-						return;
-					}
-
-					// Log if the member has borrowed books or not
-					if (memberWithBooks.Books.Any())
-					{
-						_logger.LogInformation("Member has borrowed books. Triggering the return event for IIN: {IIN}.", IIN);
-
-						// If the member has borrowed books, trigger the event and show the form
-						MemberCreateOrUpdateEvent?.Invoke(new MemberEventArgs("RETURN", IIN));
-						FlendOrRecieveBook.ShowDialog();
-
-						// Refresh the data grid after the operation
-						_logger.LogInformation("Refreshing data grid after the return operation for IIN: {IIN}.", IIN);
-						await RefreshDataGridForMembers();
-					}
-					else
-					{
-						_logger.LogInformation("Member has not borrowed any books. Showing message to the user.");
-						MessageBox.Show($"{memberWithBooks.Name} {memberWithBooks.Surname} has not borrowed any books yet.");
-					}
-				}
-				catch (Exception ex)
-				{
-					// Log and show an error message if any exception occurs
-					_logger.LogError(ex, "An error occurred while fetching lended books for member with IIN: {IIN}.", IIN);
-					MessageBox.Show($"An error occurred: {ex.Message}");
-				}
-			}
-			else
+			(bool isValid, long IIN) = LibraryService.TryGetValueFromRow<long>(dataGridViewForMembers);
+			if (!isValid)
 			{
 				_logger.LogWarning("No valid member selected. Cannot proceed with the operation.");
 				MessageBox.Show("Please select a valid member to proceed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return;
+			}
+
+			_logger.LogInformation("Valid member selected with IIN: {IIN}. Fetching borrowed books information.", IIN);
+
+			try
+			{
+				var memberService = new MemberService(_logger, _memberRepository);
+
+				// Using the repository instead of directly querying the database
+				var memberWithBooks = await memberService.GetMemberWithBorrowedBooksAsync(IIN);
+				if (memberWithBooks == null)
+				{
+					_logger.LogWarning("No member found with IIN: {IIN}.", IIN);
+					MessageBox.Show($"Member with IIN: {IIN} not found.");
+					return;
+				}
+
+				// Guard clause: If the member has not borrowed any books
+				if (memberWithBooks.Books.Count <= 0)
+				{
+					_logger.LogInformation("Member has not borrowed any books. Showing message to the user.");
+					MessageBox.Show($"{memberWithBooks.Name} {memberWithBooks.Surname} has not borrowed any books yet.");
+					return;
+				}
+
+				// Member has borrowed books, proceed with the return operation
+				_logger.LogInformation("Member has borrowed books. Triggering the return event for IIN: {IIN}.", IIN);
+				MemberCreateOrUpdateEvent?.Invoke(new MemberEventArgs("RETURN", IIN));
+				FlendOrRecieveBook.ShowDialog();
+
+				// Refresh the data grid after the operation
+				_logger.LogInformation("Refreshing data grid after the return operation for IIN: {IIN}.", IIN);
+				await RefreshDataGridForMembers();
+			}
+			catch (Exception ex)
+			{
+				// Handle any exceptions
+				_logger.LogError(ex, "An error occurred while fetching lended books for member with IIN: {IIN}.", IIN);
+				MessageBox.Show($"An error occurred: {ex.Message}");
 			}
 		}
+
 
 		/// <summary>
 		/// Handles the double-click event on a cell in the DataGridView for members.
@@ -707,54 +680,51 @@ namespace Library
 		{
 			_logger.LogInformation("Entered dataGridViewForMembers_CellMouseDoubleClick method");
 
-			// Check if the left mouse button was double-clicked on a valid cell (not a header)
-			if (e.Button == MouseButtons.Left && e.RowIndex >= 0 && e.ColumnIndex >= 0)
-			{
-				_logger.LogInformation("Left mouse button double-clicked on valid cell at row {RowIndex}, column {ColumnIndex}", e.RowIndex, e.ColumnIndex);
-
-				// Set the current cell to the clicked one
-				dataGridViewForMembers.CurrentCell = dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
-
-				// Attempt to retrieve the IIN from the selected row
-				var (isValid, IIN) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
-
-				if (isValid)
-				{
-					_logger.LogInformation("Valid IIN ({IIN}) retrieved from row {RowIndex}", IIN, e.RowIndex);
-
-					// Check if the event has subscribers
-					if (MemberCreateOrUpdateEvent != null)
-					{
-						// Invoke the edit event with the IIN
-						MemberCreateOrUpdateEvent.Invoke(new MemberEventArgs("EDIT", IIN));
-						_logger.LogInformation("MemberCreateOrUpdateEvent invoked for IIN: {IIN}", IIN);
-
-						try
-						{
-							// Show the edit form dialog
-							FaddEdit_prop.ShowDialog();
-							_logger.LogInformation("FaddEdit_prop dialog closed successfully");
-						}
-						catch (Exception ex)
-						{
-							_logger.LogError(ex, "Error occurred while displaying FaddEdit_prop dialog");
-						}
-					}
-					else
-					{
-						_logger.LogWarning("MemberCreateOrUpdateEvent has no subscribers");
-					}
-				}
-				else
-				{
-					_logger.LogWarning("Failed to retrieve a valid IIN from row {RowIndex}", e.RowIndex);
-				}
-			}
-			else
+			// Guard clause: Ensure the left mouse button was double-clicked on a valid cell
+			if (e.Button != MouseButtons.Left || e.RowIndex < 0 || e.ColumnIndex < 0)
 			{
 				_logger.LogWarning("Mouse double-click occurred outside a valid cell (row: {RowIndex}, column: {ColumnIndex})", e.RowIndex, e.ColumnIndex);
+				return;
+			}
+
+			_logger.LogInformation("Left mouse button double-clicked on valid cell at row {RowIndex}, column {ColumnIndex}", e.RowIndex, e.ColumnIndex);
+
+			// Set the current cell to the clicked one
+			dataGridViewForMembers.CurrentCell = dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
+
+			// Attempt to retrieve the IIN from the selected row
+			var (isValid, IIN) = LibraryService.TryGetValueFromRow<long>(dataGridViewForMembers);
+			if (!isValid)
+			{
+				_logger.LogWarning("Failed to retrieve a valid IIN from row {RowIndex}", e.RowIndex);
+				return;
+			}
+
+			_logger.LogInformation("Valid IIN ({IIN}) retrieved from row {RowIndex}", IIN, e.RowIndex);
+
+			// Guard clause: Check if the event has subscribers
+			if (MemberCreateOrUpdateEvent == null)
+			{
+				_logger.LogWarning("MemberCreateOrUpdateEvent has no subscribers");
+				return;
+			}
+
+			// Invoke the edit event with the IIN
+			MemberCreateOrUpdateEvent.Invoke(new MemberEventArgs("EDIT", IIN));
+			_logger.LogInformation("MemberCreateOrUpdateEvent invoked for IIN: {IIN}", IIN);
+
+			try
+			{
+				// Show the edit form dialog
+				FaddEdit_prop.ShowDialog();
+				_logger.LogInformation("FaddEdit_prop dialog closed successfully");
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error occurred while displaying FaddEdit_prop dialog");
 			}
 		}
+
 
 		/// <summary>
 		/// Handles the event when the current cell in the DataGridView for members changes.
@@ -779,7 +749,7 @@ namespace Library
 			try
 			{
 				// Attempt to retrieve the IIN from the current row
-				var (isValid, IIN) = DataGridViewController.TryGetIINFromRow(dataGridViewForMembers);
+				var (isValid, IIN) = LibraryService.TryGetValueFromRow<long>(dataGridViewForMembers);
 
 				if (isValid)
 				{

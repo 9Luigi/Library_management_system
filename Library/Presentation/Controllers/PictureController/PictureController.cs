@@ -84,21 +84,23 @@ namespace Library.Presentation.Controllers.PictureController
                 double aspectRatio = (double)photo.Width / photo.Height;
                 photo = CorrectImageOrientation(photo); // Restrict photo rotation
 
-                if (Math.Abs(aspectRatio - AspectRatioRequirement.ThreeToFour) > 0.01 // Check photo aspect ratio
-                    && Math.Abs(aspectRatio - AspectRatioRequirement.TwoToThree) > 0.01
-                    && Math.Abs(aspectRatio - AspectRatioRequirement.FiveToFour) > 0.01
-                    && Math.Abs(aspectRatio - AspectRatioRequirement.NineToSixteen) > 0.01)
-                {
-                    MessageBox.Show("Photo might not be 3:4 / 6:8 / 4:5");
-                    photo.Dispose();
-                    return null;
-                }
-                else
-                {
-                    return photo;
-                }
-            }
-            catch (OutOfMemoryException ex)
+				// Checking aspect ratio using values ​​from a static class
+				bool isValidAspectRatio = AspectRatioRequirement.ValidAspectRatios
+					.Any(ratio => Math.Abs(aspectRatio - ratio) <= 0.01);
+
+				if (!isValidAspectRatio)
+				{
+					MessageBox.Show("Photo must be be 3:4 / 6:8 / 4:5");
+					photo.Dispose();
+					return null;
+				}
+				else
+				{
+					return photo;
+				}
+
+			}
+			catch (OutOfMemoryException ex)
             {
                 MessageBox.Show("Error, corrupted image or wrong format: " + ex.Message);
                 return null;

@@ -56,7 +56,7 @@
 			menuStrip1.Items.AddRange(new ToolStripItem[] { memberToolStripMenuItem, exitToolStripMenuItem });
 			menuStrip1.Location = new Point(0, 0);
 			menuStrip1.Name = "menuStrip1";
-			menuStrip1.Size = new Size(1083, 24);
+			menuStrip1.Size = new Size(944, 24);
 			menuStrip1.TabIndex = 1;
 			menuStrip1.Text = "mainMenu";
 			// 
@@ -70,7 +70,7 @@
 			// addMemberToolStripMenuItem
 			// 
 			addMemberToolStripMenuItem.Name = "addMemberToolStripMenuItem";
-			addMemberToolStripMenuItem.Size = new Size(180, 22);
+			addMemberToolStripMenuItem.Size = new Size(144, 22);
 			addMemberToolStripMenuItem.Text = "Add member";
 			addMemberToolStripMenuItem.Click += AddMemberToolStripMenuItem_Click;
 			// 
@@ -94,9 +94,8 @@
 			dataGridViewForMembers.Name = "dataGridViewForMembers";
 			dataGridViewForMembers.ReadOnly = true;
 			dataGridViewForMembers.RowHeadersWidth = 51;
-			dataGridViewForMembers.RowTemplate.Height = 25;
 			dataGridViewForMembers.SelectionMode = DataGridViewSelectionMode.CellSelect;
-			dataGridViewForMembers.Size = new Size(812, 419);
+			dataGridViewForMembers.Size = new Size(674, 360);
 			dataGridViewForMembers.TabIndex = 2;
 			dataGridViewForMembers.CellMouseClick += View_CellMouseClick;
 			dataGridViewForMembers.CellMouseDoubleClick += DataGridViewForMembers_CellMouseDoubleClick;
@@ -107,43 +106,43 @@
 			cmMember.ImageScalingSize = new Size(20, 20);
 			cmMember.Items.AddRange(new ToolStripItem[] { editToolStripMenuItem, deleteToolStripMenuItem, BorrowBookToolStripMenuItem, ReturnBookToolStripMenuItem });
 			cmMember.Name = "cmMember";
-			cmMember.Size = new Size(181, 114);
+			cmMember.Size = new Size(152, 92);
 			// 
 			// editToolStripMenuItem
 			// 
 			editToolStripMenuItem.Name = "editToolStripMenuItem";
-			editToolStripMenuItem.Size = new Size(180, 22);
+			editToolStripMenuItem.Size = new Size(151, 22);
 			editToolStripMenuItem.Text = "Edit";
 			editToolStripMenuItem.Click += EditToolStripMenuItem_Click;
 			// 
 			// deleteToolStripMenuItem
 			// 
 			deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-			deleteToolStripMenuItem.Size = new Size(180, 22);
+			deleteToolStripMenuItem.Size = new Size(151, 22);
 			deleteToolStripMenuItem.Text = "Delete";
 			deleteToolStripMenuItem.Click += DeleteToolStripMenuItem_Click;
 			// 
 			// BorrowBookToolStripMenuItem
 			// 
 			BorrowBookToolStripMenuItem.Name = "BorrowBookToolStripMenuItem";
-			BorrowBookToolStripMenuItem.Size = new Size(180, 22);
+			BorrowBookToolStripMenuItem.Size = new Size(151, 22);
 			BorrowBookToolStripMenuItem.Text = "Borrow a book";
-			BorrowBookToolStripMenuItem.Click +=BorrowBookToolStripMenuItem_Click;
+			BorrowBookToolStripMenuItem.Click += BorrowBookToolStripMenuItem_Click;
 			// 
 			// ReturnBookToolStripMenuItem
 			// 
 			ReturnBookToolStripMenuItem.Name = "ReturnBookToolStripMenuItem";
-			ReturnBookToolStripMenuItem.Size = new Size(180, 22);
+			ReturnBookToolStripMenuItem.Size = new Size(151, 22);
 			ReturnBookToolStripMenuItem.Text = "Return book";
-			ReturnBookToolStripMenuItem.Click +=ReturnBookToolStripMenuItem_Click;
+			ReturnBookToolStripMenuItem.Click += ReturnBookToolStripMenuItem_Click;
 			// 
 			// pictureBoxMember
 			// 
 			pictureBoxMember.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 			pictureBoxMember.Image = (Image)resources.GetObject("pictureBoxMember.Image");
-			pictureBoxMember.Location = new Point(830, 24);
+			pictureBoxMember.Location = new Point(692, 24);
 			pictureBoxMember.Name = "pictureBoxMember";
-			pictureBoxMember.Size = new Size(241, 419);
+			pictureBoxMember.Size = new Size(240, 360);
 			pictureBoxMember.SizeMode = PictureBoxSizeMode.StretchImage;
 			pictureBoxMember.TabIndex = 3;
 			pictureBoxMember.TabStop = false;
@@ -151,9 +150,9 @@
 			// TbIINSearch
 			// 
 			TbIINSearch.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-			TbIINSearch.Location = new Point(326, 478);
+			TbIINSearch.Location = new Point(326, 437);
 			TbIINSearch.Name = "TbIINSearch";
-			TbIINSearch.Size = new Size(431, 23);
+			TbIINSearch.Size = new Size(292, 23);
 			TbIINSearch.TabIndex = 4;
 			TbIINSearch.Text = "Enter IIN";
 			TbIINSearch.TextAlign = HorizontalAlignment.Center;
@@ -163,9 +162,9 @@
 			// pbMembers
 			// 
 			pbMembers.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-			pbMembers.Location = new Point(12, 449);
+			pbMembers.Location = new Point(12, 390);
 			pbMembers.Name = "pbMembers";
-			pbMembers.Size = new Size(1059, 23);
+			pbMembers.Size = new Size(920, 23);
 			pbMembers.Step = 1;
 			pbMembers.TabIndex = 6;
 			// 
@@ -173,7 +172,7 @@
 			// 
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
-			ClientSize = new Size(1083, 542);
+			ClientSize = new Size(944, 501);
 			Controls.Add(pbMembers);
 			Controls.Add(TbIINSearch);
 			Controls.Add(pictureBoxMember);

@@ -54,7 +54,7 @@
 			// 
 			// TBSurname
 			// 
-			TBSurname.Location = new Point(12, 72);
+			TBSurname.Location = new Point(12, 50);
 			TBSurname.Name = "TBSurname";
 			TBSurname.Size = new Size(100, 23);
 			TBSurname.TabIndex = 1;
@@ -63,7 +63,7 @@
 			// 
 			// TBPatronymic
 			// 
-			TBPatronymic.Location = new Point(12, 110);
+			TBPatronymic.Location = new Point(12, 88);
 			TBPatronymic.Name = "TBPatronymic";
 			TBPatronymic.Size = new Size(100, 23);
 			TBPatronymic.TabIndex = 2;
@@ -72,7 +72,7 @@
 			// 
 			// TBAge
 			// 
-			TBAge.Location = new Point(12, 186);
+			TBAge.Location = new Point(12, 164);
 			TBAge.Name = "TBAge";
 			TBAge.Size = new Size(100, 23);
 			TBAge.TabIndex = 4;
@@ -83,14 +83,14 @@
 			// 
 			pbPhoto.Location = new Point(230, 12);
 			pbPhoto.Name = "pbPhoto";
-			pbPhoto.Size = new Size(247, 419);
+			pbPhoto.Size = new Size(240, 360);
 			pbPhoto.SizeMode = PictureBoxSizeMode.StretchImage;
 			pbPhoto.TabIndex = 9;
 			pbPhoto.TabStop = false;
 			// 
 			// BSelectPhoto
 			// 
-			BSelectPhoto.Location = new Point(310, 436);
+			BSelectPhoto.Location = new Point(295, 378);
 			BSelectPhoto.Name = "BSelectPhoto";
 			BSelectPhoto.Size = new Size(101, 23);
 			BSelectPhoto.TabIndex = 8;
@@ -100,7 +100,7 @@
 			// 
 			// BAddMember
 			// 
-			BAddMember.Location = new Point(175, 461);
+			BAddMember.Location = new Point(12, 355);
 			BAddMember.Name = "BAddMember";
 			BAddMember.Size = new Size(119, 46);
 			BAddMember.TabIndex = 9;
@@ -111,7 +111,7 @@
 			// label1
 			// 
 			label1.AutoSize = true;
-			label1.Location = new Point(118, 37);
+			label1.Location = new Point(118, 15);
 			label1.Name = "label1";
 			label1.Size = new Size(44, 15);
 			label1.TabIndex = 12;
@@ -120,7 +120,7 @@
 			// label2
 			// 
 			label2.AutoSize = true;
-			label2.Location = new Point(118, 75);
+			label2.Location = new Point(118, 53);
 			label2.Name = "label2";
 			label2.Size = new Size(59, 15);
 			label2.TabIndex = 13;
@@ -129,7 +129,7 @@
 			// label3
 			// 
 			label3.AutoSize = true;
-			label3.Location = new Point(118, 113);
+			label3.Location = new Point(118, 91);
 			label3.Name = "label3";
 			label3.Size = new Size(68, 15);
 			label3.TabIndex = 14;
@@ -138,7 +138,7 @@
 			// label4
 			// 
 			label4.AutoSize = true;
-			label4.Location = new Point(118, 151);
+			label4.Location = new Point(118, 129);
 			label4.Name = "label4";
 			label4.Size = new Size(27, 15);
 			label4.TabIndex = 15;
@@ -147,7 +147,7 @@
 			// label5
 			// 
 			label5.AutoSize = true;
-			label5.Location = new Point(118, 189);
+			label5.Location = new Point(118, 167);
 			label5.Name = "label5";
 			label5.Size = new Size(28, 15);
 			label5.TabIndex = 16;
@@ -156,7 +156,7 @@
 			// label6
 			// 
 			label6.AutoSize = true;
-			label6.Location = new Point(118, 227);
+			label6.Location = new Point(118, 205);
 			label6.Name = "label6";
 			label6.Size = new Size(56, 15);
 			label6.TabIndex = 17;
@@ -165,7 +165,7 @@
 			// label7
 			// 
 			label7.AutoSize = true;
-			label7.Location = new Point(118, 265);
+			label7.Location = new Point(118, 243);
 			label7.Name = "label7";
 			label7.Size = new Size(42, 15);
 			label7.TabIndex = 18;
@@ -174,7 +174,7 @@
 			// label8
 			// 
 			label8.AutoSize = true;
-			label8.Location = new Point(118, 307);
+			label8.Location = new Point(118, 285);
 			label8.Name = "label8";
 			label8.Size = new Size(86, 15);
 			label8.TabIndex = 19;
@@ -182,7 +182,7 @@
 			// 
 			// MTBPhoneNumber
 			// 
-			MTBPhoneNumber.Location = new Point(12, 304);
+			MTBPhoneNumber.Location = new Point(12, 282);
 			MTBPhoneNumber.Mask = "+7(999) 000-0000";
 			MTBPhoneNumber.Name = "MTBPhoneNumber";
 			MTBPhoneNumber.Size = new Size(100, 23);
@@ -193,7 +193,7 @@
 			// MTBBirthday
 			// 
 			MTBBirthday.Culture = new System.Globalization.CultureInfo("");
-			MTBBirthday.Location = new Point(12, 224);
+			MTBBirthday.Location = new Point(12, 202);
 			MTBBirthday.Mask = "00.00.0000";
 			MTBBirthday.Name = "MTBBirthday";
 			MTBBirthday.Size = new Size(100, 23);
@@ -204,7 +204,7 @@
 			// 
 			// MTBIIN
 			// 
-			MTBIIN.Location = new Point(12, 148);
+			MTBIIN.Location = new Point(12, 126);
 			MTBIIN.Mask = "000000000000";
 			MTBIIN.Name = "MTBIIN";
 			MTBIIN.Size = new Size(100, 23);
@@ -215,7 +215,7 @@
 			// 
 			// TBName
 			// 
-			TBName.Location = new Point(12, 34);
+			TBName.Location = new Point(12, 12);
 			TBName.Name = "TBName";
 			TBName.Size = new Size(100, 23);
 			TBName.TabIndex = 0;
@@ -224,14 +224,14 @@
 			// 
 			// MTBAdress
 			// 
-			MTBAdress.Location = new Point(12, 262);
+			MTBAdress.Location = new Point(12, 240);
 			MTBAdress.Name = "MTBAdress";
 			MTBAdress.Size = new Size(100, 23);
 			MTBAdress.TabIndex = 6;
 			// 
 			// BUpdateMember
 			// 
-			BUpdateMember.Location = new Point(175, 461);
+			BUpdateMember.Location = new Point(12, 355);
 			BUpdateMember.Name = "BUpdateMember";
 			BUpdateMember.Size = new Size(119, 46);
 			BUpdateMember.TabIndex = 10;
@@ -242,7 +242,7 @@
 			// AdressLabelHint
 			// 
 			AdressLabelHint.AutoSize = true;
-			AdressLabelHint.Location = new Point(2, 285);
+			AdressLabelHint.Location = new Point(12, 264);
 			AdressLabelHint.Name = "AdressLabelHint";
 			AdressLabelHint.Size = new Size(211, 15);
 			AdressLabelHint.TabIndex = 20;

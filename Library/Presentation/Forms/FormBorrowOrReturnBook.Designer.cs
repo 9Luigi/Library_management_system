@@ -1,6 +1,6 @@
 ﻿namespace Library
 {
-    partial class FormBorrowOrRecieveBook
+    partial class FormBorrowOrReturnBook
     {
         /// <summary>
         /// Required designer variable.

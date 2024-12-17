@@ -1,12 +1,17 @@
 ﻿using Library.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-namespace Library
+using Library.Infrastructure.Repositories;
+
+namespace Library.Application.Services.CRUD
 {
+	/// <summary>
+	/// Service class responsible for operations related to library members.
+	/// </summary>
 	public class MemberService
 	{
-		internal readonly ILogger _logger;
-		internal readonly GenericRepository<Member> _memberRepository;
+		private readonly ILogger _logger;
+		private readonly GenericRepository<Member> _memberRepository;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MemberService"/> class.
@@ -19,17 +24,89 @@ namespace Library
 			_memberRepository = memberRepository ?? throw new ArgumentNullException(nameof(memberRepository));
 		}
 
+		#region CRUD
+
 		/// <summary>
-		/// Retrieves a list of members with their details, including a list of borrowed books.
+		/// Retrieves a list of members filtered by their IIN, including their borrowed books.
 		/// </summary>
-		/// <returns>A list of dynamic objects representing the members and their borrowed books.</returns>
-		/// <exception cref="Exception">Thrown when an error occurs while retrieving member data from the database.</exception>
-		public async Task<List<dynamic>> GetMembersAsync()
+		/// <param name="IIN">The IIN of the member to filter by.</param>
+		/// <returns>
+		/// A task that represents the asynchronous operation. The task result contains a list of dynamic objects
+		/// with the following properties:
+		/// - IIN: The IIN of the member.
+		/// - Name: The name of the member.
+		/// - Surname: The surname of the member.
+		/// - Age: The age of the member.
+		/// - RegistrationDate: The registration date of the member.
+		/// - Books: A string containing the titles of the books borrowed by the member, separated by commas.
+		/// </returns>
+		/// <exception cref="Exception">
+		/// Thrown if there is an error during data retrieval or processing.
+		/// </exception>
+		internal async Task<List<dynamic>> GetFilteredMembersAsync(long IIN)
 		{
+			using LibraryContextForEFcore dbContext = new();
+			try
+			{
+				var results = await _memberRepository.GetCollectionWithProjectionAsync(
+					m => new
+					{
+						m.IIN,
+						m.Name,
+						m.Surname,
+						m.Age,
+						m.RegistrationDate,
+						Books = m.Books.Select(b => b.Title)
+					},
+					IIN,
+					m => m.IIN,
+					dbContext,
+					m => m.Books
+				);
+
+				// Projection to dynamic
+				return results.Select(member => (dynamic)new
+				{
+					member.IIN,
+					member.Name,
+					member.Surname,
+					member.Age,
+					member.RegistrationDate,
+					Books = string.Join(", ", member.Books)
+				}).ToList();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occurred while fetching filtered members.");
+				throw;
+			}
+		}
+
+		/// <summary>
+		/// Retrieves a list of members with their information, including borrowed book titles.
+		/// </summary>
+		/// <param name="dbContext">The <see cref="LibraryContextForEFcore"/> instance for database operations.</param>
+		/// <returns>
+		/// A task that represents the asynchronous operation. The task result contains a list of dynamic objects
+		/// with the following properties:
+		/// - IIN: The IIN of the member.
+		/// - Name: The name of the member.
+		/// - Surname: The surname of the member.
+		/// - Age: The age of the member.
+		/// - RegistrationDate: The registration date of the member.
+		/// - Books: A string containing the titles of the books borrowed by the member, separated by commas.
+		/// </returns>
+		/// <exception cref="Exception">
+		/// Thrown if there is an error during data retrieval.
+		/// </exception>
+		internal async Task<List<dynamic>> GetMembersAsync()
+		{
+			using LibraryContextForEFcore dbContext = new();
 			try
 			{
 				_logger.LogInformation("GetMembersAsync started.");
 
+				// Retrieve members with their borrowed books
 				var members = await _memberRepository.GetCollectionWithProjectionAsync(
 					m => new
 					{
@@ -38,14 +115,15 @@ namespace Library
 						m.Surname,
 						m.Age,
 						m.RegistrationDate,
-						Books = string.Join(", ", m.Books.Select(b => b.Title))
+						Books = string.Join(", ", m.Books.Select(b => b.Title)) // Join book titles
 					},
-					new LibraryContextForEFcore(),
+					dbContext,
 					m => m.Books
 				);
 
-				_logger.LogInformation("Retrieved {Count} members from the database.", members);
+				_logger.LogInformation("Retrieved {Count} members from the database.", members.Count);
 
+				// Return the members as dynamic objects
 				return members.Cast<dynamic>().ToList();
 			}
 			catch (Exception ex)
@@ -63,15 +141,16 @@ namespace Library
 		/// <exception cref="Exception">Thrown when an error occurs while retrieving member data from the database.</exception>
 		internal async Task<Member> GetMemberWithBorrowedBooksAsync(long IIN)
 		{
+			using LibraryContextForEFcore dbContext = new();
 			try
 			{
 				// Log entry into the method
 				_logger.LogInformation("Attempting to retrieve member data and borrowed books for IIN: {IIN}", IIN);
 
 				// Define the projection to retrieve member data along with their borrowed books
-				var member = await _memberRepository.GetOneWithProjectionAsync(
+				var member = await _memberRepository.GetOneByIDWithProjectionAsync(
 					m => m,
-					new LibraryContextForEFcore(),
+					dbContext,
 					m => m.Books // Include the Books navigation property
 				);
 
@@ -98,6 +177,7 @@ namespace Library
 				throw; // Re-throw the exception after logging it
 			}
 		}
+
 		/// <summary>
 		/// Retrieves a member with their books by IIN and populates the given DataGridView with the retrieved data.
 		/// </summary>
@@ -115,19 +195,26 @@ namespace Library
 		/// </remarks>
 		internal async Task<bool> GetMemberWithHisBooksToDataGridViewAsync(long memberIIN, DataGridView dataGridView)
 		{
+			using LibraryContextForEFcore dbContext = new();
 			_logger.LogInformation("Start fetching books for member with IIN: {MemberIIN}", memberIIN);
 
-			using var context = new LibraryContextForEFcore();
-
-			var memberWithBooks = await context.Members
+			var memberWithBooks = await dbContext.Members
 				.Include(m => m.Books)
 				.Where(m => m.IIN == memberIIN)
 				.FirstOrDefaultAsync();
 
-			if (memberWithBooks == null || memberWithBooks.Books == null || !memberWithBooks.Books.Any())
+			if (memberWithBooks == null || memberWithBooks.Books == null || memberWithBooks.Books.Count < 0)
 			{
 				_logger.LogWarning("No books found for member with IIN: {MemberIIN}", memberIIN);
-				throw new KeyNotFoundException($"Books for member with IIN {memberIIN} not found.");
+
+				// Display warning message using MessageBox instead of throwing an error
+				MessageBox.Show($"No books found for member with IIN: {memberIIN}.",
+								"Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+				// Optionally clear the DataGridView as well
+				dataGridView.DataSource = null;
+
+				return false;
 			}
 
 			_logger.LogInformation("Successfully retrieved {BookCount} books for member with IIN: {MemberIIN}", memberWithBooks.Books.Count, memberIIN);
@@ -139,13 +226,12 @@ namespace Library
 					memberWithBooks.IIN,
 					BookID = book.Id,
 					BookTitle = book.Title,
-					//BookAuthor = book.Author // Include additional fields if available
+					// BookAuthor = book.Author // Include additional fields if available
 				})
 				.ToList();
 
-			//dataGridView.Columns[0].Visible = false;
 			return true;
 		}
-
+		#endregion
 	}
 }

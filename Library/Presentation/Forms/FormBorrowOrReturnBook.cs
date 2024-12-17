@@ -1,5 +1,6 @@
-﻿using Library.Application.Services.Repository;
+﻿using Library.Application.Services.CRUD;
 using Library.Domain.Models;
+using Library.Infrastructure.Repositories;
 using Library.Presentation.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -7,26 +8,29 @@ using static Library.FormMembers;
 
 namespace Library
 {
-	public partial class FormBorrowOrRecieveBook : Form
+	public partial class FormBorrowOrReturnBook : Form
 	{
-		ILogger _logger;
-		GenericRepository<Book> _bookRepository;
-		GenericRepository<Member> _memberRepository;
-		BookService _bookService;
-		MemberService _memberService;
+		readonly ILogger _logger;
+		readonly GenericRepository<Book> _bookRepository;
+		readonly GenericRepository<Member> _memberRepository;
+		readonly BookService _bookService;
+		readonly MemberService _memberService;
+		readonly LibraryService _libraryService;
+
 		private enum GridCriterion
 		{
 			AllBooks,
 			BooksByMember
 		}
-		public FormBorrowOrRecieveBook()
+		public FormBorrowOrReturnBook()
 		{
-			MemberCreateOrUpdateEvent += SelectBooksByIIN;
-			_logger = LoggerService.CreateLogger<FormBorrowOrRecieveBook>();
+			MemberCreateOrUpdateEvent += SelectBooksByIIN; //TODO create another event for this???
+			_logger = LoggerService.CreateLogger<FormBorrowOrReturnBook>();
 			_bookRepository = new GenericRepository<Book>();
 			_memberRepository = new GenericRepository<Member>();
 			_bookService = new(_logger, _bookRepository);
 			_memberService = new(_logger, _memberRepository);
+			_libraryService = new();
 			InitializeComponent();
 		}
 		internal long IIN { get; private set; }
@@ -81,41 +85,25 @@ namespace Library
 		{
 			try
 			{
-				//TODO Handle click on any cell except headers
-				if (DataGridViewForLendBook.CurrentCell?.Value != null && DataGridViewForLendBook.CurrentCell.ColumnIndex == 0)
+				(bool isValid, int bookID) = LibraryService.TryGetValueFromRow<int>(DataGridViewForLendBook, 0);
+				if (isValid)
 				{
-					if (int.TryParse(DataGridViewForLendBook.CurrentCell.Value.ToString(), out int bookId))
-					{
-						using LibraryContextForEFcore db = new();
-						var selectedBook = await db.Books.FirstOrDefaultAsync(b => b.Id == bookId); //TODO Use service
-						var memberWithBooks = await db.Members
-						.Include(m => m.Books)
-						.FirstOrDefaultAsync(m => m.IIN == IIN); //TODO Use service
-
-						// check if book and member exist
-						if (selectedBook == null) { MessageBox.Show("Selected book does not exist"); return; }
-						if (memberWithBooks == null) { MessageBox.Show("Selected member does not exist"); return; }
-						if (selectedBook.Amount <= 0) { MessageBox.Show($"{selectedBook.Title} has zero amount in store"); return; }
-						if (memberWithBooks.Books.Any(b => b.Id == bookId))
-						{
-							MessageBox.Show("This member has already borrowed this book.");
-							return;
-						}
-
-						// Add book to member
-						memberWithBooks.Books.Add(selectedBook);
-						// Decrease book amount
-						selectedBook.Amount -= 1;
-
-						if (await db.SaveChangesAsync() > 0)
-						{
-							MessageBox.Show("Book successfully borrowed");
-							FillGridWith(GridCriterion.AllBooks);
-						}
-					}
+					var result = await _libraryService.BorrowBook(bookID, IIN);
+					if (result) MessageBoxController.ShowSuccess("Book were succesfully borrowed");
 				}
 			}
-			catch (Exception ex) { MessageBox.Show($"An error occurred: {ex.Message}"); }
+			catch (KeyNotFoundException knfEx)
+			{
+				MessageBox.Show($"Error: {knfEx.Message}");
+			}
+			catch (InvalidOperationException ex)
+			{
+				MessageBox.Show($"Operation error: {ex.Message}");
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show($"An unexpected error occurred: {ex.Message}");
+			}
 		}
 
 		private void ReturnBookToolStripMenuItem_Click(object sender, EventArgs e)

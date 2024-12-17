@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-namespace Library;
+namespace Library.Infrastructure.Repositories;
 public class GenericRepository<T> where T : class //TODO logs
 {
 
@@ -23,9 +23,7 @@ public class GenericRepository<T> where T : class //TODO logs
 			var entity = await _dbContext.Set<T>()
 				.FirstOrDefaultAsync(e => EF.Property<TKey>(e, GetPropertyName(fieldSelector))!.Equals(value));
 
-			if (entity == null)
-				throw new KeyNotFoundException($"Entity with field value '{value}' not found.");
-			return entity;
+			return entity ?? throw new KeyNotFoundException($"Entity with field value '{value}' not found.");
 		}
 		catch (Exception)
 		{
@@ -57,22 +55,18 @@ public class GenericRepository<T> where T : class //TODO logs
 	/// <returns>The entity that matches the specified primary key value.</returns>
 	/// <exception cref="KeyNotFoundException">Thrown if no entity with the specified ID is found.</exception>
 	/// <exception cref="Exception">Thrown for any other errors that occur during execution.</exception>
-	internal async Task<T> GetByIdAsync(DbContext _dbContext, long id)
+	internal async Task<T> GetByIdAsync(DbContext _dbContext, int id)
 	{
 		try
 		{
 			var entity = await _dbContext.Set<T>().FindAsync(id);
-			if (entity == null)
-				throw new KeyNotFoundException($"Entity with {id} not found");
-			return entity;
+			return entity ?? throw new KeyNotFoundException($"Entity with {id} not found"); ;
 		}
 		catch (Exception)
 		{
 			throw;
 		}
 	}
-
-
 	/// <summary>
 	/// Retrieves all entities of type <typeparamref name="T"/>.
 	/// </summary>
@@ -129,26 +123,6 @@ public class GenericRepository<T> where T : class //TODO logs
 			throw;
 		}
 	}
-	public async Task<TResult> GetOneWithProjectionAsync<TResult>(
-		Expression<Func<T, TResult>> selector,
-		DbContext _dbContext,
-		params Expression<Func<T, object>>[] includes)
-	{
-		try
-		{
-			IQueryable<T> query = _dbContext.Set<T>();
-
-			foreach (var include in includes)
-			{
-				query = query.Include(include);
-			}
-			return await query.Select(selector).FirstAsync();
-		}
-		catch (Exception)
-		{
-			throw;
-		}
-	}
 	/// <summary>
 	/// Asynchronously retrieves a list of projections from the database, applying a filter with a specified field and search value.
 	/// </summary>
@@ -158,7 +132,7 @@ public class GenericRepository<T> where T : class //TODO logs
 	/// <param name="searchField">The field to apply the filter to (using LIKE).</param>
 	/// <param name="includes">An optional array of expressions representing the related entities to include in the query.</param>
 	/// <returns>A list of projected results of type <typeparamref name="TResult"/> that match the filter.</returns>
-	public async Task<List<TResult>> GetWithProjectionAsync<TResult>(
+	public async Task<List<TResult>> GetCollectionWithProjectionAsync<TResult>(
 	Expression<Func<T, TResult>> selector,
 	long searchValue, // The value to filter by
 	Expression<Func<T, object>> searchField, // Field to apply the filter on
@@ -180,6 +154,26 @@ public class GenericRepository<T> where T : class //TODO logs
 				$"%{searchValue}%"));
 			// Perform projection and return results
 			return await query.Select(selector).ToListAsync();
+		}
+		catch (Exception)
+		{
+			throw;
+		}
+	}
+	public async Task<TResult> GetOneByIDWithProjectionAsync<TResult>(
+		Expression<Func<T, TResult>> selector,
+		DbContext _dbContext,
+		params Expression<Func<T, object>>[] includes)
+	{
+		try
+		{
+			IQueryable<T> query = _dbContext.Set<T>();
+
+			foreach (var include in includes)
+			{
+				query = query.Include(include);
+			}
+			return await query.Select(selector).FirstAsync();
 		}
 		catch (Exception)
 		{

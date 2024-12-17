@@ -47,37 +47,5 @@ namespace Library.Presentation.Controllers
             view.BorderStyle = BorderStyle.None;
             view.GridColor = Color.FromArgb(221, 221, 221);
         }
-
-        /// <summary>
-        /// Checks the value in the specified column of the selected row in a DataGridView.
-        /// </summary>
-        /// <param name="view">The DataGridView to analyze.</param>
-        /// <param name="columnIndexToCheck">The index of the column to check for the value.</param>
-        /// <param name="IIN">An output parameter for the found IIN value.</param>
-        /// <returns>A tuple where the first element indicates success, and the second contains the IIN value.</returns>
-        internal static (bool, long) TryGetIINFromRow(DataGridView view, int columnIndexToCheck = 0)
-        {
-            // Check if any cell is selected
-            if (view.CurrentCell == null)
-                return (false, 0);
-
-            // Get the row index of the selected cell and ensure it is valid
-            int rowIndex = view.CurrentCell.RowIndex;
-            if (rowIndex < 0 || rowIndex >= view.Rows.Count)
-                return (false, 0);
-
-            // Ensure the specified column index is valid
-            if (columnIndexToCheck < 0 || columnIndexToCheck >= view.ColumnCount)
-                return (false, 0);
-
-            // Check the value in the specified column of the selected row
-            var cellValue = view.Rows[rowIndex].Cells[columnIndexToCheck]?.Value;
-            if (cellValue != null && long.TryParse(cellValue.ToString(), out long IIN))
-            {
-                return (true, IIN);
-            }
-
-            return (false, 0);
-        }
     }
 }

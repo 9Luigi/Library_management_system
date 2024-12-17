@@ -1,4 +1,5 @@
 ﻿using Library.Domain.Models;
+using Library.Infrastructure.Repositories;
 using Library.Presentation.Controllers;
 using Library.Presentation.Controllers.PictureController;
 using Library.Properties;
@@ -15,7 +16,7 @@ namespace Library
 	/// </summary>
 	public partial class FaddEdit_prop : Form
 	{
-		LibraryContextForEFcore _updateContext = new LibraryContextForEFcore();
+		readonly LibraryContextForEFcore _updateContext = new();
 		/// <summary>
 		/// A byte array that holds the photo of the member in the form of image bytes.
 		/// </summary>
@@ -96,9 +97,9 @@ namespace Library
 			switch (e.Action)
 			{
 				case "EDIT":
-					BUpdateMember.Enabled = true;
+					BUpdateMember.Visible = true;
 					BAddMember.Visible = false;
-					MTBIIN.Visible = false;
+					MTBIIN.Enabled = false;
 					try
 					{
 						MemberToEdit = await _memberRepository.GetByFieldAsync(_updateContext, m => m.IIN, e.IIN);
