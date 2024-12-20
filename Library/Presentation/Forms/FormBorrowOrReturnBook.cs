@@ -94,7 +94,7 @@ namespace Library
 			}
 			catch (InvalidOperationException ex)
 			{
-				ErrorController.HandleException(ex, "Check if member already has this book.");
+				ErrorController.HandleException(ex, ex.Message);
 			}
 			catch (Exception ex)
 			{

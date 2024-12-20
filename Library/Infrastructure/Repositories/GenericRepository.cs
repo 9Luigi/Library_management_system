@@ -118,6 +118,7 @@ public class GenericRepository<T> where T : class //TODO logs
 			throw;
 		}
 	}
+
 	/// <summary>
 	/// Asynchronously retrieves a list of projections from the database, applying a filter with a specified field and search value.
 	/// </summary>
@@ -126,13 +127,21 @@ public class GenericRepository<T> where T : class //TODO logs
 	/// <param name="searchValue">The value to search for in the specified field.</param>
 	/// <param name="searchField">The field to apply the filter to (using LIKE).</param>
 	/// <param name="includes">An optional array of expressions representing the related entities to include in the query.</param>
-	/// <returns>A list of projected results of type <typeparamref name="TResult"/> that match the filter.</returns>
+	/// <returns>
+	/// A list of projected results of type <typeparamref name="TResult"/> that match the filter.
+	/// </returns>
+	/// <exception cref="ArgumentNullException">
+	/// Thrown if <paramref name="selector"/> or <paramref name="searchField"/> is null.
+	/// </exception>
+	/// <exception cref="InvalidOperationException">
+	/// Thrown if the query cannot be executed (e.g., invalid entity state or EF configuration).
+	/// </exception>
 	public async Task<List<TResult>> GetCollectionWithProjectionAsync<TResult>(
-	Expression<Func<T, TResult>> selector,
-	long searchValue, // The value to filter by
-	Expression<Func<T, object>> searchField, // Field to apply the filter on
-	DbContext _dbContext,
-	params Expression<Func<T, object>>[] includes) // Related entities to include
+		Expression<Func<T, TResult>> selector,
+		long searchValue, // The value to filter by
+		DbContext _dbContext,
+		Expression<Func<T, object>> searchField, // Field to apply the filter on
+		params Expression<Func<T, object>>[] includes) // Related entities to include
 	{
 		try
 		{
@@ -144,9 +153,12 @@ public class GenericRepository<T> where T : class //TODO logs
 			{
 				query = query.Include(include);
 			}
+
+			// Apply filtering based on LIKE search
 			query = query.Where(m => EF.Functions.Like(
 				EF.Property<string>(m, GetPropertyName(searchField)).ToString(),
 				$"%{searchValue}%"));
+
 			// Perform projection and return results
 			return await query.Select(selector).ToListAsync();
 		}
@@ -155,6 +167,62 @@ public class GenericRepository<T> where T : class //TODO logs
 			throw;
 		}
 	}
+	/// <summary>
+	/// Asynchronously retrieves a collection of entities from the database with optional filtering, related entity inclusion, and projection.
+	/// </summary>
+	/// <typeparam name="TResult">The type of the projected result.</typeparam>
+	/// <param name="selector">
+	/// The projection expression that defines what data to return from the entity.
+	/// </param>
+	/// <param name="filter">An optional filter condition that can be applied to the query.</param>
+	/// <param name="includes">
+	/// An optional array of expressions for including related entities in the query.
+	/// </param>
+	/// <returns>
+	/// A task that represents the asynchronous operation. The task result contains a list of projected entities matching the filter.
+	/// </returns>
+	/// <remarks>
+	/// This method supports filtering and including related entities for more complex queries while applying projection to improve performance.
+	/// </remarks>
+	/// <exception cref="ArgumentNullException">
+	/// Thrown if <paramref name="selector"/> is null.
+	/// </exception>
+	/// <exception cref="InvalidOperationException">
+	/// Thrown if the query cannot be executed (e.g., invalid entity state or EF configuration).
+	/// </exception>
+	public async Task<List<TResult>> GetCollectionWithProjectionAsync<TResult>(
+		Expression<Func<T, TResult>> selector, // Projection for results
+		DbContext _dbContext, // Database context
+		Expression<Func<T, bool>> filter = null, // Filter condition
+		params Expression<Func<T, object>>[] includes) // Related entities to include
+	{
+		try
+		{
+			// Initialize the query
+			IQueryable<T> query = _dbContext.Set<T>();
+
+			// Include related entities
+			foreach (var include in includes)
+			{
+				query = query.Include(include);
+			}
+
+			// Apply filtering if a condition is provided
+			if (filter != null)
+			{
+				query = query.Where(filter);
+			}
+
+			// Apply projection and return results
+			return await query.Select(selector).ToListAsync();
+		}
+		catch (Exception)
+		{
+			throw;
+		}
+	}
+
+
 	public async Task<TResult> GetOneByIDWithProjectionAsync<TResult>(
 		Expression<Func<T, TResult>> selector,
 		DbContext _dbContext,

@@ -46,7 +46,8 @@ namespace Library.Application.Services.CRUD
 						b.PublicationDate,
 						b.Amount
 					},
-					dbContext
+					dbContext,
+					b => b.Amount > 0
 				);
 
 				_logger.LogInformation("Retrieved {Count} books from the database.", books.Count);

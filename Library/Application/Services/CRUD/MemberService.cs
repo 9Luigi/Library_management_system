@@ -60,8 +60,8 @@ namespace Library.Application.Services.CRUD
 						Books = m.Books.Select(b => b.Title)
 					},
 					IIN,
-					m => m.IIN,
 					dbContext,
+					m => m.IIN,
 					m => m.Books
 				);
 
@@ -82,7 +82,6 @@ namespace Library.Application.Services.CRUD
 				throw;
 			}
 		}
-
 		/// <summary>
 		/// Retrieves a list of members with their information, including borrowed book titles.
 		/// </summary>
