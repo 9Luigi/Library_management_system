@@ -109,8 +109,7 @@ namespace Library
 				(bool isValid, int bookID) = LibraryService.TryGetValueFromRow<int>(DataGridViewForLendBook, 1); //1 is index of column with book id
 				if (isValid)
 				{
-					var result = await _libraryService.ReturnBook(bookID, IIN);
-					if (result) MessageBoxController.ShowSuccess("Book were succesfully returned");
+					await _libraryService.ReturnBook(bookID, IIN);
 					FillGridWith(GridCriterion.BooksByMember);
 				}
 			}
