@@ -45,7 +45,7 @@ namespace Library.Presentation.Controllers
                     correctSymbols = correctAdress;
                     break;
                 default:
-                    MessageBox.Show("RegexController.Check default invoked, not allowed!");
+                    MessageBoxController.ShowWarning("RegexController.Check default invoked, not allowed!");
                     break;
             }
             if (selectedPattern != null)
@@ -53,7 +53,7 @@ namespace Library.Presentation.Controllers
                 Regex regex = new(selectedPattern, RegexOptions.IgnoreCase);
                 if (!regex.IsMatch(input))
                 {
-                    MessageBox.Show($"value of field {control.Name} is not correct, " +
+                    MessageBoxController.ShowWarning($"value of field {control.Name} is not correct, " +
                         $"correct {control.Name} field may include {correctSymbols}");
                     return false;
                 }

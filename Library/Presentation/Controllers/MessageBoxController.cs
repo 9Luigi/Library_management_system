@@ -26,6 +26,12 @@
 		{
 			MessageBox.Show(message, caption, MessageBoxButtons.OK, icon);
 		}
+
+		public static bool ShowConfirmation(string message, string caption)
+		{
+			var result = MessageBox.Show(message, caption, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+			return result == DialogResult.Yes;
+		}
 	}
 
 }

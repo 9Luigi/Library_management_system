@@ -24,7 +24,7 @@ namespace Library.Presentation.Controllers.PictureController
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message);
+                MessageBoxController.ShowError(ex.Message);
                 return Array.Empty<byte>();
             }
         }
@@ -76,7 +76,7 @@ namespace Library.Presentation.Controllers.PictureController
                 // Check if image is larger than 1 MB (1 MB = 1024 * 1024 bytes)
                 if (imageSize > 1024 * 1024)
                 {
-                    MessageBox.Show($"Image is {imageSize / 1024} MB, compressing image...");
+                    MessageBoxController.ShowInfo($"Image is {imageSize / 1024} MB, compressing image...");
                     photo = ConvertByteToImage(CompressImage(photo)); // Compress the image if it's larger than 10 MB
                 }
                 imageBytes = ImageToByteConvert(photo);
@@ -90,7 +90,7 @@ namespace Library.Presentation.Controllers.PictureController
 
 				if (!isValidAspectRatio)
 				{
-					MessageBox.Show("Photo must be be 3:4 / 6:8 / 4:5");
+					MessageBoxController.ShowWarning("Photo must be be 3:4 / 6:8 / 4:5");
 					photo.Dispose();
 					return null;
 				}
@@ -102,12 +102,12 @@ namespace Library.Presentation.Controllers.PictureController
 			}
 			catch (OutOfMemoryException ex)
             {
-                MessageBox.Show("Error, corrupted image or wrong format: " + ex.Message);
+                ErrorController.HandleException(ex, "Corrupted image or wrong format");
                 return null;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("An error occurred: " + ex.Message);
+				ErrorController.HandleException(ex, "An error occurred: " + ex.Message);
                 return null;
             }
         }
@@ -170,7 +170,7 @@ namespace Library.Presentation.Controllers.PictureController
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error compressing image: " + ex.Message);
+                MessageBoxController.ShowError("Error compressing image: " + ex.Message);
                 return Array.Empty<byte>();
             }
         }

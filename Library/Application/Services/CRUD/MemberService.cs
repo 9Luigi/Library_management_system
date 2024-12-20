@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Library.Infrastructure.Repositories;
+using Library.Presentation.Controllers;
 
 namespace Library.Application.Services.CRUD
 {
@@ -23,7 +24,6 @@ namespace Library.Application.Services.CRUD
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_memberRepository = memberRepository ?? throw new ArgumentNullException(nameof(memberRepository));
 		}
-
 		#region CRUD
 
 		/// <summary>
@@ -208,8 +208,7 @@ namespace Library.Application.Services.CRUD
 				_logger.LogWarning("No books found for member with IIN: {MemberIIN}", memberIIN);
 
 				// Display warning message using MessageBox instead of throwing an error
-				MessageBox.Show($"No books found for member with IIN: {memberIIN}.",
-								"Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				MessageBoxController.ShowWarning($"No books found for member with IIN: {memberIIN}.");
 
 				// Optionally clear the DataGridView as well
 				dataGridView.DataSource = null;

@@ -18,12 +18,12 @@ namespace Library.Presentation.Controllers
 
             if (string.IsNullOrWhiteSpace(textBoxBase.Text))
             {
-                MessageBox.Show(textBoxBase.Name + " is empty, fill in the empty requiered(*) fields");
+                MessageBoxController.ShowWarning(textBoxBase.Name + " is empty, fill in the empty requiered(*) fields");
                 return false;
             }
             if (textBoxBase.Text.Length > 75)
             {
-                MessageBox.Show($"{textBoxBase.Name} cannot be more than 75 symbols");
+                MessageBoxController.ShowWarning($"{textBoxBase.Name} cannot be more than 75 symbols");
                 return false;
             }
             else return true;

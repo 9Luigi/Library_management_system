@@ -110,12 +110,12 @@ namespace Library
 						}
 						else
 						{
-							MessageBox.Show("Cannot load data, probably member was deleted by another employee while you edit, try again please");
+							MessageBoxController.ShowWarning("Cannot load data, probably member was deleted by another employee while you edit, try again please");
 						}
 					}
 					catch (Exception ex)
 					{
-						MessageBox.Show("An error occurred while loading member data.", ex.Message);
+						MessageBoxController.ShowError($"An error occurred while loading member data: {ex.Message}");
 					}
 					break;
 				case "CREATE":
@@ -194,13 +194,10 @@ namespace Library
 					{
 						if (await _memberRepository.AddAsync(new LibraryContextForEFcore(), createdMember))
 						{
-							DialogResult result = MessageBox.Show
-								(
-									"Do you want to add another one?",
-									$"{createdMember.Name} {createdMember.Surname} added successfully",
-									MessageBoxButtons.YesNo
-								);
-							if (result == DialogResult.Yes)
+							var result = MessageBoxController.ShowConfirmation("Do you want to add another one?",
+									$"{createdMember.Name} {createdMember.Surname} added successfully");
+
+							if (result)
 							{
 								ResetForm();
 							}
@@ -209,15 +206,15 @@ namespace Library
 								this.Close();
 							}
 						}
-						else MessageBox.Show($"Cannot add {createdMember.Name} {createdMember.Surname} try again later. Inner exception: {{ex.InnerException?.Message ?? \"None\"}}\"");
+						else MessageBoxController.ShowWarning($"Cannot add {createdMember.Name} {createdMember.Surname} try again later. Inner exception: {{ex.InnerException?.Message ?? \"None\"}}\"");
 					}
 					catch (DbUpdateException ex)
 					{
-						MessageBox.Show($"Error updating database: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
+						ErrorController.HandleException(ex, $"Error updating database: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
 					}
 					catch (Exception ex)
 					{
-						MessageBox.Show($"An unexpected error occurred: {ex.Message}. Please contact support. Inner exception: {{ex.InnerException?.Message ?? \"None\"}}\"");
+						ErrorController.HandleException(ex, $"An unexpected error occurred: {ex.Message}. Please contact support. Inner exception: {{ex.InnerException?.Message ?? \"None\"}}\"");
 					}
 					break;
 
@@ -237,16 +234,16 @@ namespace Library
 
 					if (!isUpdated)
 					{
-						MessageBox.Show("You didn't change member's fields");
+						MessageBoxController.ShowWarning("You didn't change member's fields");
 						return;
 					}
 					else
 					{
-						MessageBox.Show("Member's fields updated successfully");
+						MessageBoxController.ShowSuccess("Member's fields updated successfully");
 					}
 
-					var closeDialog = MessageBox.Show($"{MemberToEdit.Name} {MemberToEdit.Surname} updated successfully. Close the form?", "Update Successful", MessageBoxButtons.YesNo);
-					if (closeDialog == DialogResult.Yes)
+					var closeDialog = MessageBoxController.ShowConfirmation($"{MemberToEdit.Name} {MemberToEdit.Surname} updated successfully. Close the form?", "Update Successful");
+					if (closeDialog)
 					{
 						Close();
 					}

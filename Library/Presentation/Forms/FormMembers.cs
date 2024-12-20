@@ -70,12 +70,7 @@ namespace Library
 				_logger.LogError(ex, "An error occurred while handling AddMemberToolStripMenuItem_Click");
 
 				// Show an error message to the user.
-				MessageBox.Show(
-					$"An unexpected error occurred: {ex.Message}\nPlease contact support if the problem persists.",
-					"Error",
-					MessageBoxButtons.OK,
-					MessageBoxIcon.Error
-				);
+				MessageBoxController.ShowError($"An unexpected error occurred: {ex.Message}\nPlease contact support if the problem persists.");
 			}
 		}
 
@@ -128,10 +123,10 @@ namespace Library
 
 				// Show a confirmation dialog to the user
 				_logger.LogInformation("Displaying confirmation dialog for deletion.");
-				DialogResult result = MessageBox.Show("Are you sure to remove?", "Removing member", MessageBoxButtons.YesNo);
+				bool ifConfirmed = MessageBoxController.ShowConfirmation("Are you sure to remove?", "Removing member");
 
 				// If the user confirms the deletion
-				if (result == DialogResult.Yes)
+				if (ifConfirmed)
 				{
 					_logger.LogInformation("User confirmed deletion with YES.");
 
@@ -141,7 +136,7 @@ namespace Library
 						_logger.LogInformation("Member successfully removed from the database.");
 
 						// Inform the user that the member was successfully removed
-						MessageBox.Show("Member successfully removed");
+						MessageBoxController.ShowSuccess("Member successfully removed");
 
 						// Refresh the DataGridView with updated data
 						await RefreshDataGridForMembers();
@@ -153,7 +148,7 @@ namespace Library
 			{
 				_logger.LogWarning("Failed to extract IIN from the DataGridView row.");
 				// If the IIN could not be extracted from the DataGridView row
-				MessageBox.Show("Cannot delete this member, try later or contact your system administrator");
+				MessageBoxController.ShowWarning("Cannot delete this member, try later or contact your system administrator");
 			}
 		}
 
@@ -303,8 +298,7 @@ namespace Library
 					}
 					catch (Exception ex)
 					{
-						_logger.LogError(ex, "An error occurred while loading members.");
-						MessageBox.Show("An error occurred while loading members. Please try again later.");
+						ErrorController.HandleException(ex, "An error occurred while loading members");
 					}
 				}, CancellationToken);
 
@@ -313,7 +307,7 @@ namespace Library
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occurred in RefreshDataGridForMembers method.");
-				MessageBox.Show($"An error with message:{ex.Message}, occurred while preparing data for display. Please try again later.");
+				MessageBoxController.ShowError($"An error with message:{ex.Message}, occurred while preparing data for display. Please try again later.");
 			}
 		}
 
@@ -348,7 +342,7 @@ namespace Library
 			{
 				// Log any error that occurs during the database query
 				_logger.LogError(ex, "An error occurred while retrieving the total members count.");
-				MessageBox.Show("An error occurred while retrieving the total members count. Please try again.");
+				MessageBoxController.ShowError("An error occurred while retrieving the total members count. Please try again.");
 				return 0; // Return a default value in case of an error
 			}
 		}
@@ -374,13 +368,13 @@ namespace Library
 			{
 				// Log any ArgumentOutOfRangeException errors (if maxValue is less than minValue)
 				_logger.LogError(ex, "Invalid progress bar range: minValue = {MinValue}, maxValue = {MaxValue}.", minValue, maxValue);
-				MessageBox.Show("Error: Invalid range for the progress bar.");
+				MessageBoxController.ShowError("Error: Invalid range for the progress bar.");
 			}
 			catch (Exception ex)
 			{
 				// Log any other errors
 				_logger.LogError(ex, "An error occurred while updating the progress bar.");
-				MessageBox.Show("An unexpected error occurred while updating the progress bar.");
+				MessageBoxController.ShowError("An unexpected error occurred while updating the progress bar.");
 			}
 		}
 
@@ -429,9 +423,7 @@ namespace Library
 			{
 				// Log the exception details
 				_logger.LogError(ex, "An error occurred while updating the DataGridView.");
-
-				// Optionally, inform the user of the error
-				MessageBox.Show("An error occurred while updating the data. Please try again later.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBoxController.ShowError("An error occurred while updating the data. Please try again later.");
 			}
 		}
 
@@ -474,7 +466,7 @@ namespace Library
 				_logger.LogError(ex, "An error occurred while resetting the progress bar.");
 
 				// Optionally, inform the user of the error
-				MessageBox.Show("An error occurred while resetting the progress bar. Please try again later.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBoxController.ShowError("An error occurred while resetting the progress bar. Please try again later.");
 			}
 		}
 
@@ -502,7 +494,7 @@ namespace Library
 				_logger.LogError(ex, "An error occurred while trying to close the form.");
 
 				// Optionally, inform the user of the error
-				MessageBox.Show("An error occurred while closing the application. Please try again later.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBoxController.ShowError("An error occurred while closing the application. Please try again later.");
 			}
 		}
 
@@ -520,8 +512,8 @@ namespace Library
 
 				if (e.CloseReason == CloseReason.UserClosing)
 				{
-					var result = MessageBox.Show("Are you sure you want to exit?", "Confirm Exit", MessageBoxButtons.YesNo);
-					if (result == DialogResult.No)
+					var result = MessageBoxController.ShowConfirmation("Are you sure you want to exit?", "Confirm Exit");
+					if (result)
 					{
 						e.Cancel = true; // Prevent the form from closing
 						_logger.LogInformation("User canceled the form closing.");
@@ -593,13 +585,13 @@ namespace Library
 					_logger.LogWarning("No valid member selected for borrowing.");
 
 					// Show an error message if no member is selected
-					MessageBox.Show("Please select a member to proceed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+					MessageBoxController.ShowWarning("Please select a member to proceed.");
 				}
 			}
 			catch (Exception ex)
 			{
 				// Log any errors that occur during the process
-				_logger.LogError(ex, "An error occurred while processing the borrowing action.");
+				ErrorController.HandleException(ex, "An error occurred while processing the borrowing action.");
 			}
 		}
 
@@ -616,7 +608,7 @@ namespace Library
 			if (!isValid)
 			{
 				_logger.LogWarning("No valid member selected. Cannot proceed with the operation.");
-				MessageBox.Show("Please select a valid member to proceed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				MessageBoxController.ShowWarning("Please select a valid member to proceed.");
 				return;
 			}
 
@@ -631,7 +623,7 @@ namespace Library
 				if (memberWithBooks == null)
 				{
 					_logger.LogWarning("No member found with IIN: {IIN}.", IIN);
-					MessageBox.Show($"Member with IIN: {IIN} not found.");
+					MessageBoxController.ShowWarning($"Member with IIN: {IIN} not found.");
 					return;
 				}
 
@@ -639,7 +631,7 @@ namespace Library
 				if (memberWithBooks.Books.Count <= 0)
 				{
 					_logger.LogInformation("Member has not borrowed any books. Showing message to the user.");
-					MessageBox.Show($"{memberWithBooks.Name} {memberWithBooks.Surname} has not borrowed any books yet.");
+					MessageBoxController.ShowWarning($"{memberWithBooks.Name} {memberWithBooks.Surname} has not borrowed any books yet.");
 					return;
 				}
 
@@ -656,7 +648,7 @@ namespace Library
 			{
 				// Handle any exceptions
 				_logger.LogError(ex, "An error occurred while fetching lended books for member with IIN: {IIN}.", IIN);
-				MessageBox.Show($"An error occurred: {ex.Message}");
+				MessageBoxController.ShowError($"An error occurred: {ex.Message}");
 			}
 		}
 
@@ -762,19 +754,17 @@ namespace Library
 					}
 					else
 					{
-						MessageBox.Show($"Member with IIN {IIN} was not found.", "Member Not Found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+						MessageBoxController.ShowWarning($"Member with IIN {IIN} was not found.");
 					}
 				}
 				else
 				{
-					MessageBox.Show("Invalid or missing IIN in the selected row.", "Invalid Data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+					MessageBoxController.ShowWarning("Invalid or missing IIN in the selected row");
 				}
 			}
 			catch (Exception ex)
 			{
-				// Log the exception and show an error message to the user
-				_logger.LogError(ex, "An error occurred while fetching the member's data or displaying the photo.");
-				MessageBox.Show($"An error occurred while retrieving the member's data. Error message: {ex.Message}. Please try again later.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				ErrorController.HandleException(ex, "An error occurred while fetching the member's data or displaying the photo.");
 			}
 		}
 	}
