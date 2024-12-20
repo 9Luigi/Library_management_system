@@ -30,7 +30,6 @@
 		private void InitializeComponent()
 		{
 			components = new System.ComponentModel.Container();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMembers));
 			menuStrip1 = new MenuStrip();
 			memberToolStripMenuItem = new ToolStripMenuItem();
 			addMemberToolStripMenuItem = new ToolStripMenuItem();
@@ -139,7 +138,7 @@
 			// pictureBoxMember
 			// 
 			pictureBoxMember.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-			pictureBoxMember.Image = (Image)resources.GetObject("pictureBoxMember.Image");
+			pictureBoxMember.Image = Properties.Resources.NoImage;
 			pictureBoxMember.Location = new Point(692, 24);
 			pictureBoxMember.Name = "pictureBoxMember";
 			pictureBoxMember.Size = new Size(240, 360);

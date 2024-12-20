@@ -1,6 +1,8 @@
 ﻿using Library.Infrastructure.Repositories;
 using Library.Domain.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using Library.Presentation.Controllers;
 
 namespace Library.Application.Services.CRUD
 {
@@ -97,50 +99,49 @@ namespace Library.Application.Services.CRUD
 				using var _dbContext = new LibraryContextForEFcore();
 				_logger.LogInformation("Attempting to borrow book with ID: {BookID} for member with IIN: {IIN}", bookID, IIN);
 
-				// Retrieve the book using the generic repository
-				var selectedBook = await _bookRepository.GetByIdAsync(_dbContext, bookID);
-
-				// Retrieve the member with books using the generic repository
-				var memberWithBooks = await _memberRepository.GetByFieldAsync(
-					_dbContext,
-					m => m.IIN,
-					IIN
-				);
-
-				// Include books explicitly if required (manual loading for navigation property)
-				await _dbContext.Entry(memberWithBooks)
-						  .Collection(m => m.Books)
-						  .LoadAsync();
+				// Retrieve the book directly from the DbContext
+				var selectedBook = await _dbContext.Books.FirstOrDefaultAsync(b => b.Id == bookID);
 
 				// Validate book existence
 				if (selectedBook == null)
 				{
 					_logger.LogWarning("Book with ID {BookID} does not exist", bookID);
-					throw new InvalidOperationException("Selected book does not exist");
-				}
-				// Validate member existence
-				if (memberWithBooks == null)
-				{
-					_logger.LogWarning("Member with IIN {IIN} does not exist", IIN);
-					throw new InvalidOperationException("Selected member does not exist");
+					throw new InvalidOperationException($"Book with ID {bookID} does not exist.");
 				}
 
 				// Check if the book is available
 				if (selectedBook.Amount <= 0)
 				{
 					_logger.LogWarning("Book {Title} has zero amount in store", selectedBook.Title);
-					throw new InvalidOperationException($"{selectedBook.Title} has zero amount in store");
+					throw new InvalidOperationException($"Book '{selectedBook.Title}' has zero amount in store.");
+				}
+
+				// Retrieve the member directly from the DbContext, loading only the IIN and IDs of borrowed books
+				var memberWithBookIds = await _dbContext.Members
+					.Where(m => m.IIN == IIN)
+					.Select(m => new
+					{
+						Member = m,
+						BookIds = m.Books.Select(b => b.Id).ToList()
+					})
+					.FirstOrDefaultAsync();
+
+				// Validate member existence
+				if (memberWithBookIds == null)
+				{
+					_logger.LogWarning("Member with IIN {IIN} does not exist", IIN);
+					throw new InvalidOperationException($"Member with IIN {IIN} does not exist.");
 				}
 
 				// Check if the member already borrowed this book
-				if (memberWithBooks.Books.Any(b => b.Id == bookID))
+				if (memberWithBookIds.BookIds.Contains(bookID))
 				{
 					_logger.LogWarning("Member with IIN {IIN} has already borrowed book with ID {BookID}", IIN, bookID);
 					throw new InvalidOperationException("This member has already borrowed this book.");
 				}
 
-				// Update data
-				memberWithBooks.Books.Add(selectedBook);
+				// Update the relationships and amounts
+				memberWithBookIds.Member.Books.Add(selectedBook);
 				selectedBook.Amount -= 1;
 
 				// Save changes
@@ -151,7 +152,7 @@ namespace Library.Application.Services.CRUD
 				}
 
 				_logger.LogError("Failed to save changes for borrowing book with ID {BookID}", bookID);
-				throw new InvalidOperationException("Failed to save changes");
+				throw new InvalidOperationException("Failed to save changes.");
 			}
 			catch (Exception ex)
 			{
@@ -159,6 +160,7 @@ namespace Library.Application.Services.CRUD
 				throw; // Re-throw the exception to be handled in client code
 			}
 		}
+
 
 		/// <summary>
 		/// Attempts to return a borrowed book.
@@ -175,29 +177,32 @@ namespace Library.Application.Services.CRUD
 				using LibraryContextForEFcore context = new();
 
 				// Retrieve the book to return
-				var bookToReturn = await _bookRepository.GetByIdAsync(context, bookID);
+				var bookToReturn = await context.Books.FindAsync(bookID);
 				if (bookToReturn == null)
 				{
 					_logger.LogWarning("Book with ID {BookID} not found", bookID);
-					throw new KeyNotFoundException($"Book with id {bookID} is not found");
+					MessageBoxController.ShowWarning($"Book with ID {bookID} not found.");
+					return false;
 				}
 
-				// Retrieve the member to whom the book belongs
-				var memberWithBook = await _memberRepository.GetByFieldAsync(context, m => m.IIN, IIN);
+				// Retrieve the member
+				var memberWithBook = await context.Members
+					.Include(m => m.Books) // Include borrowed books
+					.SingleOrDefaultAsync(m => m.IIN == IIN);
 				if (memberWithBook == null)
 				{
 					_logger.LogWarning("Member with IIN {IIN} not found", IIN);
-					throw new KeyNotFoundException($"Member with IIN {IIN} is not found");
+					MessageBoxController.ShowWarning($"Member with IIN {IIN} not found.");
+					return false;
 				}
 
-				// Load the member's borrowed books
-				await context.Entry(memberWithBook).Collection(m => m.Books).LoadAsync();
-
 				// Ensure the member has borrowed the book
-				if (!memberWithBook.Books.Contains(bookToReturn))
+				bool hasBorrowedBook = memberWithBook.Books.Any(b => b.Id == bookID);
+				if (!hasBorrowedBook)
 				{
 					_logger.LogWarning("Member with IIN {IIN} has not borrowed book with ID {BookID}", IIN, bookID);
-					throw new InvalidOperationException($"Member with IIN {IIN} has not borrowed book with id {bookID}");
+					MessageBoxController.ShowWarning($"Member with IIN {IIN} has not borrowed book with ID {bookID}.");
+					return false;
 				}
 
 				// Proceed with returning the book
@@ -209,10 +214,12 @@ namespace Library.Application.Services.CRUD
 				if (success)
 				{
 					_logger.LogInformation("Book with ID {BookID} successfully returned by member with IIN {IIN}", bookID, IIN);
+					MessageBoxController.ShowSuccess($"Book with ID {bookID} successfully returned.");
 				}
 				else
 				{
 					_logger.LogError("Failed to save changes for returning book with ID {BookID}", bookID);
+					MessageBoxController.ShowError($"Failed to save changes for returning book with ID {bookID}. Please try again.");
 				}
 
 				return success;
@@ -220,9 +227,11 @@ namespace Library.Application.Services.CRUD
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occurred while returning book with ID {BookID} for member with IIN {IIN}", bookID, IIN);
-				throw; // Re-throw the exception to be handled in client code
+				MessageBoxController.ShowError($"An error occurred while returning the book: {ex.Message}");
+				return false;
 			}
 		}
+
 		#endregion
 	}
 }

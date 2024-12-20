@@ -30,7 +30,6 @@ public class GenericRepository<T> where T : class //TODO logs
 			throw;
 		}
 	}
-
 	/// <summary>
 	/// Extracts the property name from an expression that selects a property of the entity.
 	/// </summary>
@@ -67,10 +66,6 @@ public class GenericRepository<T> where T : class //TODO logs
 			throw;
 		}
 	}
-	/// <summary>
-	/// Retrieves all entities of type <typeparamref name="T"/>.
-	/// </summary>
-	/// <returns>A task that returns a collection of all entities.</returns>
 	#region GetWithProjectionAsync
 	/// <summary>
 	/// Asynchronously retrieves a projected list of entities of type <typeparamref name="T"/> from the database.

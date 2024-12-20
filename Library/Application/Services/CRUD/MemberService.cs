@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Library.Infrastructure.Repositories;
 using Library.Presentation.Controllers;
+using System;
 
 namespace Library.Application.Services.CRUD
 {
@@ -133,6 +134,22 @@ namespace Library.Application.Services.CRUD
 			}
 		}
 
+		/// <summary>
+		/// Asynchronously retrieves the count of borrowed books for a member based on their IIN.
+		/// </summary>
+		/// <param name="IIN">The IIN (Individual Identification Number) of the member whose borrowed books count is to be retrieved.</param>
+		/// <returns>Returns an integer representing the number of borrowed books. If no member is found, returns 0.</returns>
+		/// <exception cref="Exception">Throws an exception if an error occurs while querying the database.</exception>
+		public async Task<int> GetBorrowedBooksCountAsync(long IIN)
+		{
+			using (var context = new LibraryContextForEFcore())
+			{
+				return await context.Members
+					.Where(m => m.IIN == IIN)
+					.Select(m => m.Books.Count)  // Get the count of borrowed books
+					.FirstOrDefaultAsync();
+			}
+		}
 		/// <summary>
 		/// Retrieves a specific member's data along with a list of borrowed books based on the provided IIN.
 		/// </summary>

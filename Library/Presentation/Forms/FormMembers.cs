@@ -612,30 +612,22 @@ namespace Library
 				return;
 			}
 
-			_logger.LogInformation("Valid member selected with IIN: {IIN}. Fetching borrowed books information.", IIN);
+			_logger.LogInformation("Valid member selected with IIN: {IIN}. Checking borrowed books status.", IIN);
 
 			try
 			{
 				var memberService = new MemberService(_logger, _memberRepository);
 
-				// Using the repository instead of directly querying the database
-				var memberWithBooks = await memberService.GetMemberWithBorrowedBooksAsync(IIN);
-				if (memberWithBooks == null)
-				{
-					_logger.LogWarning("No member found with IIN: {IIN}.", IIN);
-					MessageBoxController.ShowWarning($"Member with IIN: {IIN} not found.");
-					return;
-				}
-
-				// Guard clause: If the member has not borrowed any books
-				if (memberWithBooks.Books.Count <= 0)
+				// Check if the member has borrowed any books by querying just the count of borrowed books
+				int borrowedBooksCount = await memberService.GetBorrowedBooksCountAsync(IIN);
+				if (borrowedBooksCount == 0)
 				{
 					_logger.LogInformation("Member has not borrowed any books. Showing message to the user.");
-					MessageBoxController.ShowWarning($"{memberWithBooks.Name} {memberWithBooks.Surname} has not borrowed any books yet.");
+					MessageBoxController.ShowWarning($"Member with IIN: {IIN} has not borrowed any books yet.");
 					return;
 				}
 
-				// Member has borrowed books, proceed with the return operation
+				// Proceed with the return operation as the member has borrowed books
 				_logger.LogInformation("Member has borrowed books. Triggering the return event for IIN: {IIN}.", IIN);
 				MemberCreateOrUpdateEvent?.Invoke(new MemberEventArgs("RETURN", IIN));
 				FlendOrRecieveBook.ShowDialog();
@@ -647,10 +639,11 @@ namespace Library
 			catch (Exception ex)
 			{
 				// Handle any exceptions
-				_logger.LogError(ex, "An error occurred while fetching lended books for member with IIN: {IIN}.", IIN);
+				_logger.LogError(ex, "An error occurred while checking borrowed books for member with IIN: {IIN}.", IIN);
 				MessageBoxController.ShowError($"An error occurred: {ex.Message}");
 			}
 		}
+
 
 
 		/// <summary>
