@@ -1,6 +1,6 @@
 ﻿namespace Library.Presentation.Controllers
 {
-	public static class MessageBoxController //TODO implement in the application
+	public static class MessageBoxController 
 	{
 		public static void ShowError(string message)
 		{

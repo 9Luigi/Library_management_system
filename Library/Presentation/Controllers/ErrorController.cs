@@ -31,7 +31,7 @@ namespace Library.Presentation.Controllers
 			// Handle UI thread exceptions
 			Application.ThreadException += (sender, e) =>
 			{
-				HandleException(e.Exception, "An unexpected error occurred in the application.");
+				HandleException(e.Exception, "An unexpected error occurred in the application. Contact sys admin");
 			};
 
 			// Handle non-UI thread exceptions

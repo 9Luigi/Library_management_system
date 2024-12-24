@@ -373,4 +373,25 @@ public class GenericRepository<T> where T : class //TODO logs
 			throw;
 		}
 	}
+	/// <summary>
+	/// Asynchronously checks if any record in the database matches the specified condition.
+	/// </summary>
+	/// <typeparam name="T">The type of the entity being queried.</typeparam>
+	/// <param name="context">The database context used to access the entity set.</param>
+	/// <param name="predicate">The condition to evaluate for the existence of a matching record.</param>
+	/// <returns>
+	/// A task that represents the asynchronous operation. 
+	/// The task result contains <c>true</c> if any record matches the condition; otherwise, <c>false</c>.
+	/// </returns>
+	/// <exception cref="ArgumentNullException">
+	/// Thrown if <paramref name="context"/> or <paramref name="predicate"/> is null.
+	/// </exception>
+	public async Task<bool> AnyAsync(DbContext context, Expression<Func<T, bool>> predicate)
+	{
+		if (context == null) throw new ArgumentNullException(nameof(context));
+		if (predicate == null) throw new ArgumentNullException(nameof(predicate));
+
+		return await context.Set<T>().AnyAsync(predicate);
+	}
+
 }

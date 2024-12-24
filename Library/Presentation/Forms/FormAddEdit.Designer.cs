@@ -58,8 +58,6 @@
 			TBSurname.Name = "TBSurname";
 			TBSurname.Size = new Size(100, 23);
 			TBSurname.TabIndex = 1;
-			TBSurname.Click += TextBoxBase_OnClick;
-			TBSurname.Enter += TextBoxBase_OnFocusEnter;
 			// 
 			// TBPatronymic
 			// 
@@ -67,8 +65,6 @@
 			TBPatronymic.Name = "TBPatronymic";
 			TBPatronymic.Size = new Size(100, 23);
 			TBPatronymic.TabIndex = 2;
-			TBPatronymic.Click += TextBoxBase_OnClick;
-			TBPatronymic.Enter += TextBoxBase_OnFocusEnter;
 			// 
 			// TBAge
 			// 
@@ -76,8 +72,6 @@
 			TBAge.Name = "TBAge";
 			TBAge.Size = new Size(100, 23);
 			TBAge.TabIndex = 4;
-			TBAge.Click += TextBoxBase_OnClick;
-			TBAge.Enter += TextBoxBase_OnFocusEnter;
 			// 
 			// pbPhoto
 			// 
@@ -187,8 +181,6 @@
 			MTBPhoneNumber.Name = "MTBPhoneNumber";
 			MTBPhoneNumber.Size = new Size(100, 23);
 			MTBPhoneNumber.TabIndex = 7;
-			MTBPhoneNumber.Click += TextBoxBase_OnClick;
-			MTBPhoneNumber.Enter += TextBoxBase_OnFocusEnter;
 			// 
 			// MTBBirthday
 			// 
@@ -199,8 +191,6 @@
 			MTBBirthday.Size = new Size(100, 23);
 			MTBBirthday.TabIndex = 5;
 			MTBBirthday.ValidatingType = typeof(DateTime);
-			MTBBirthday.Click += TextBoxBase_OnClick;
-			MTBBirthday.Enter += TextBoxBase_OnFocusEnter;
 			// 
 			// MTBIIN
 			// 
@@ -210,8 +200,6 @@
 			MTBIIN.Size = new Size(100, 23);
 			MTBIIN.TabIndex = 3;
 			MTBIIN.ValidatingType = typeof(int);
-			MTBIIN.Click += TextBoxBase_OnClick;
-			MTBIIN.Enter += TextBoxBase_OnFocusEnter;
 			// 
 			// TBName
 			// 
@@ -219,8 +207,6 @@
 			TBName.Name = "TBName";
 			TBName.Size = new Size(100, 23);
 			TBName.TabIndex = 0;
-			TBName.Click += TextBoxBase_OnClick;
-			TBName.Enter += TextBoxBase_OnFocusEnter;
 			// 
 			// MTBAdress
 			// 
@@ -275,6 +261,7 @@
 			Controls.Add(TBSurname);
 			Controls.Add(TBName);
 			Name = "FaddEdit_prop";
+			FormClosing += FaddEdit_prop_FormClosing;
 			((System.ComponentModel.ISupportInitialize)pbPhoto).EndInit();
 			ResumeLayout(false);
 			PerformLayout();

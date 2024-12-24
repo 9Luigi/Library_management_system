@@ -1,4 +1,5 @@
-﻿using Library.Domain.Models;
+﻿using Library.Application.Services.CRUD;
+using Library.Domain.Models;
 using Library.Infrastructure.Repositories;
 using Library.Presentation.Controllers;
 using Library.Presentation.Controllers.PictureController;
@@ -9,14 +10,12 @@ using static Library.FormMembers;
 
 namespace Library
 {
-	//TODO XML comments
 	//TODO logs via ILogger to XML
 	/// <summary>
 	/// Form for adding or editing member properties in the library system.
 	/// </summary>
 	public partial class FaddEdit_prop : Form
 	{
-		readonly LibraryContextForEFcore _updateContext = new();
 		/// <summary>
 		/// A byte array that holds the photo of the member in the form of image bytes.
 		/// </summary>
@@ -25,7 +24,7 @@ namespace Library
 		/// A property to store the member object being edited, if any.
 		/// </summary>
 		internal Member? MemberToEdit { get; set; }
-		private readonly GenericRepository<Member> _memberRepository;
+		private readonly MemberService _memberService;
 		/// <summary>
 		/// Constructor that initializes the form and subscribes to the MemberCreateOrUpdateEvent event.
 		/// Sets the default photo image.
@@ -38,7 +37,7 @@ namespace Library
 
 			var _dbContext = new LibraryContextForEFcore();
 			var _logger = LoggerService.CreateLogger<FaddEdit_prop>();
-			_memberRepository = new();
+			_memberService = new(_logger, new GenericRepository<Member>());
 		}
 
 
@@ -73,21 +72,6 @@ namespace Library
 				await ActionWithMember("CREATE");
 			}
 		}
-
-		/// <summary>
-		/// Handles the focus enter event for the textboxes (not implemented).
-		/// </summary>
-		private void TextBoxBase_OnFocusEnter(object sender, EventArgs e)
-		{
-		}
-
-		/// <summary>
-		/// Handles the click event for textboxes (not implemented).
-		/// </summary>
-		private void TextBoxBase_OnClick(object sender, EventArgs e)
-		{
-		}
-
 		/// <summary>
 		/// Handles the event when a create or update action is requested.
 		/// Based on the action, it either prepares the form for editing or creating a new member.
@@ -102,8 +86,7 @@ namespace Library
 					MTBIIN.Enabled = false;
 					try
 					{
-						MemberToEdit = await _memberRepository.GetByFieldAsync(_updateContext, m => m.IIN, e.IIN);
-						_updateContext.Attach(MemberToEdit);
+						MemberToEdit = await _memberService.GetMemberByIINForUpdateAsync(e.IIN);
 						if (MemberToEdit != null)
 						{
 							FillMemberData(MemberToEdit);
@@ -135,22 +118,24 @@ namespace Library
 		/// <returns>True if all fields are valid, otherwise false.</returns>
 		private bool CheckFieldsBeforeAction()
 		{
-			foreach (Control control in this.Controls)
+			bool allFieldsValid = this.Controls
+				.OfType<TextBoxBase>()
+				.All(textBox => TextBoxBaseController.CheckTextBoxBaseTextOnNull(textBox));
+
+			if (!allFieldsValid) return false;
+
+			bool areRegexValid = new[]
 			{
-				if (control is TextBoxBase textBoxBase && !TextBoxBaseController.CheckTextBoxBaseTextOnNull(textBoxBase))
-				{
-					return false;
-				}
-			}
-			if (RegexController.Check(TBName.Text, TBName) && RegexController.Check(TBSurname.Text, TBSurname)
-			&& RegexController.Check(MTBBirthday.Text, MTBBirthday) &&
-			RegexController.Check(MTBAdress.Text, MTBAdress) && RegexController.Check(MTBPhoneNumber.Text, MTBPhoneNumber))
-			{
-				if (string.IsNullOrEmpty(TBPatronymic.Text) || TBPatronymic.Text == "None") return true;
-				else if (RegexController.Check(TBPatronymic.Text, TBPatronymic)) return true;
-				else return false;
-			}
-			else return false;
+				RegexController.Check(TBName.Text, TBName),
+				RegexController.Check(TBSurname.Text, TBSurname),
+				RegexController.Check(MTBBirthday.Text, MTBBirthday),
+				RegexController.Check(MTBAdress.Text, MTBAdress),
+				RegexController.Check(MTBPhoneNumber.Text, MTBPhoneNumber)
+			}.All(valid => valid);
+
+			if (!areRegexValid) return false;
+
+			return string.IsNullOrEmpty(TBPatronymic.Text) || TBPatronymic.Text == "None" || RegexController.Check(TBPatronymic.Text, TBPatronymic);
 		}
 
 		/// <summary>
@@ -179,20 +164,21 @@ namespace Library
 			switch (operation)
 			{
 				case "CREATE":
+					//if(_memberService.IsIINExistsAsync()) //TODO check if IIN exists via MemberService
 					Member createdMember = new
 						(
 							TBName.Text,
 							TBSurname.Text,
 							DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture),
 							MTBAdress.Text,
-							Convert.ToInt64(MTBIIN.Text), //TODO check for duplicates cause it's primary key
+							Convert.ToInt64(MTBIIN.Text),
 							MTBPhoneNumber.Text,
 							PhotoAsBytes!,
 							CheckIfHasPatronymic(TBPatronymic.Text)
 						);
 					try
 					{
-						if (await _memberRepository.AddAsync(new LibraryContextForEFcore(), createdMember))
+						if (await _memberService.CreateMemberAsync(createdMember))
 						{
 							var result = MessageBoxController.ShowConfirmation("Do you want to add another one?",
 									$"{createdMember.Name} {createdMember.Surname} added successfully");
@@ -230,7 +216,7 @@ namespace Library
 					MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);
 
 					// Save the changes to the database
-					bool isUpdated = await _memberRepository.UpdateAttachedFieldsAsync(_updateContext, MemberToEdit);
+					bool isUpdated = await _memberService.UpdateMemberChangedFieldsAsync(MemberToEdit);
 
 					if (!isUpdated)
 					{
@@ -298,6 +284,11 @@ namespace Library
 			TextBoxBaseController.AllTextBoxBaseOnFormClear(this);
 			pictureBoxController.pictureBoxImageSetDefault(pbPhoto);
 			TBName.Focus();
+		}
+
+		private void FaddEdit_prop_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			_memberService.CloseUpdateContext(); //Dispose update context wich used to update member fields
 		}
 	}
 }

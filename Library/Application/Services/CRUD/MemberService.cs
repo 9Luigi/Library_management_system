@@ -4,16 +4,18 @@ using Microsoft.Extensions.Logging;
 using Library.Infrastructure.Repositories;
 using Library.Presentation.Controllers;
 using System;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Library.Application.Services.CRUD
 {
 	/// <summary>
 	/// Service class responsible for operations related to library members.
 	/// </summary>
-	public class MemberService
+	internal class MemberService
 	{
 		private readonly ILogger _logger;
 		private readonly GenericRepository<Member> _memberRepository;
+		internal LibraryContextForEFcore? _updateDBContext;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MemberService"/> class.
@@ -26,7 +28,6 @@ namespace Library.Application.Services.CRUD
 			_memberRepository = memberRepository ?? throw new ArgumentNullException(nameof(memberRepository));
 		}
 		#region CRUD
-
 		/// <summary>
 		/// Retrieves a list of members filtered by their IIN, including their borrowed books.
 		/// </summary>
@@ -141,13 +142,12 @@ namespace Library.Application.Services.CRUD
 		/// <exception cref="Exception">Throws an exception if an error occurs while querying the database.</exception>
 		public async Task<int> GetBorrowedBooksCountAsync(long IIN)
 		{
-			using (var context = new LibraryContextForEFcore())
-			{
-				return await context.Members
-					.Where(m => m.IIN == IIN)
-					.Select(m => m.Books.Count)  // Get the count of borrowed books
-					.FirstOrDefaultAsync();
-			}
+			using var context = new LibraryContextForEFcore();
+
+			return await context.Members
+				.Where(m => m.IIN == IIN)
+				.Select(m => m.Books.Count)  // Get the count of borrowed books
+				.FirstOrDefaultAsync();
 		}
 		/// <summary>
 		/// Retrieves a specific member's data along with a list of borrowed books based on the provided IIN.
@@ -191,6 +191,27 @@ namespace Library.Application.Services.CRUD
 				// Log the exception with relevant details
 				_logger.LogError(ex, "An error occurred while fetching member data and borrowed books for IIN: {IIN}", IIN);
 				throw; // Re-throw the exception after logging it
+			}
+		}
+
+		internal async Task<bool> CreateMemberAsync(Member memberToCreate)
+		{
+			LibraryContextForEFcore context = new();
+			try
+			{
+				bool isCreated = await _memberRepository.AddAsync(context, memberToCreate);
+
+				if (isCreated)
+				{
+					_logger.LogInformation("New member created successfully.");
+				}
+
+				return isCreated;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error occurred while creating a new member.");
+				throw;
 			}
 		}
 
@@ -246,6 +267,40 @@ namespace Library.Application.Services.CRUD
 				.ToList();
 
 			return true;
+		}
+		internal async Task<bool> UpdateMemberChangedFieldsAsync(Member memberToUpdate)
+		{
+			try { return await _memberRepository.UpdateAttachedFieldsAsync(_updateDBContext!, memberToUpdate); }
+			finally { CloseUpdateContext(); }
+		}
+		internal async Task<Member> GetMemberByIINForUpdateAsync(long IIN)
+		{
+			CreateUpdateContext();
+			return await _memberRepository.GetByFieldAsync(_updateDBContext!, m => m.IIN, IIN);
+		}
+		#endregion
+		#region Validation
+		internal async Task<bool> IsIINExistsAsync(long IIN)
+		{
+			using LibraryContextForEFcore context = new();
+			bool isIINExists = await _memberRepository.AnyAsync(context, m => m.IIN == IIN);
+			if (isIINExists)
+			{
+				MessageBoxController.ShowWarning($"A member with IIN {IIN} already exists.");
+				return false;
+			}
+			return true;
+		}
+		#endregion
+		#region FieldControlMethods
+		internal void CloseUpdateContext()
+		{
+			_updateDBContext?.Dispose();
+			_updateDBContext = null;
+		}
+		internal void CreateUpdateContext()
+		{
+			_updateDBContext = new();
 		}
 		#endregion
 	}

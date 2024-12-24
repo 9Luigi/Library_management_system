@@ -12,7 +12,8 @@ namespace Library
 		readonly GenericRepository<Member> _memberRepository;
 		readonly ILogger _logger;
 		internal FormBorrowOrReturnBook FlendOrRecieveBook { get; private set; } //TODO:CRITICAL logic of borrow and return book is broken
-		internal FaddEdit_prop FaddEdit_prop { get; private set; }
+		internal FaddEdit_prop _FaddEdit_prop = new();
+
 		internal CancellationTokenSource CancellationTokenSource { get; set; }
 		internal CancellationToken CancellationToken { get; set; }
 		internal delegate void MemberCreateOrUpdateDelegate(MemberEventArgs e);
@@ -23,8 +24,7 @@ namespace Library
 		{
 			InitializeComponent();
 			CancellationTokenSource = new CancellationTokenSource();
-			FlendOrRecieveBook = new FormBorrowOrReturnBook();
-			FaddEdit_prop = new FaddEdit_prop();
+			FlendOrRecieveBook = new FormBorrowOrReturnBook(); //TODO create only if need?
 			_logger = LoggerService.CreateLogger<FormMembers>();
 			_memberRepository = new();
 		}
@@ -57,7 +57,7 @@ namespace Library
 				_logger.LogInformation("MemberCreateOrUpdateEvent was successfully invoked.");
 
 				// Show the form dialog for adding a new member.
-				FaddEdit_prop.ShowDialog();
+				_FaddEdit_prop.ShowDialog();
 				_logger.LogInformation("Member creation form was displayed successfully.");
 
 				// Refresh the data grid asynchronously after the form is closed.
@@ -99,7 +99,7 @@ namespace Library
 				_logger.LogInformation("MemberCreateOrUpdateEvent invoked");
 				_logger.LogInformation("Start to try for FaddEdit_prop.ShowDialog()");
 				// Show the edit form dialog
-				FaddEdit_prop.ShowDialog();
+				_FaddEdit_prop.ShowDialog();
 				_logger.LogInformation("FaddEdit_prop form were closed");
 				// Refresh the data grid asynchronously
 				await RefreshDataGridForMembers();
@@ -507,21 +507,23 @@ namespace Library
 		{
 			try
 			{
-				// Log the attempt to close the form
-				_logger.LogInformation("FMembers form is closing.");
+				// Log the attempt to close the form with reason
+				_logger.LogInformation($"FMembers form is closing. Reason: {e.CloseReason}.");
 
 				if (e.CloseReason == CloseReason.UserClosing)
 				{
+					// Show confirmation dialog
 					var result = MessageBoxController.ShowConfirmation("Are you sure you want to exit?", "Confirm Exit");
-					if (result)
+					if (!result) // If user selects "No", prevent the form from closing
 					{
-						e.Cancel = true; // Prevent the form from closing
+						e.Cancel = true;
 						_logger.LogInformation("User canceled the form closing.");
+						return;
 					}
 				}
 
-				// Log successful form closing
-				_logger.LogInformation("FMembers form closed successfully.");
+				// Log that the form is closing
+				_logger.LogInformation("FMembers form is closing successfully.");
 			}
 			catch (Exception ex)
 			{
@@ -529,6 +531,7 @@ namespace Library
 				_logger.LogError(ex, "An error occurred during the form closing process.");
 			}
 		}
+
 
 		/// <summary>
 		/// Clears IIN textbox when clicked on it.
@@ -701,7 +704,7 @@ namespace Library
 			try
 			{
 				// Show the edit form dialog
-				FaddEdit_prop.ShowDialog();
+				_FaddEdit_prop.ShowDialog();
 				_logger.LogInformation("FaddEdit_prop dialog closed successfully");
 			}
 			catch (Exception ex)
