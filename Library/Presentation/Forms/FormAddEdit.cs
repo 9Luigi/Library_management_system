@@ -5,6 +5,7 @@ using Library.Presentation.Controllers;
 using Library.Presentation.Controllers.PictureController;
 using Library.Properties;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 using System.Globalization;
 using static Library.FormMembers;
 
@@ -23,6 +24,7 @@ namespace Library
 		/// <summary>
 		/// A property to store the member object being edited, if any.
 		/// </summary>
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		internal Member? MemberToEdit { get; set; }
 		private readonly MemberService _memberService;
 		/// <summary>

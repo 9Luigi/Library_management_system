@@ -8,9 +8,8 @@ namespace Library
 		internal DbSet<Member> Members { get; set; } = null!;
 		internal DbSet<Book> Books { get; set; } = null!;
 		internal DbSet<Author> Authors { get; set; } = null!;
-		string ConnectionString = @"Server=" + 
-			Environment.MachineName + 
-			";DataBase=Library;User Id=Adm_RKudrik;Password=g7DcA)RH^qZw;MultipleActiveResultSets=true;Encrypt=False";
+		private readonly string ConnectionString = Properties.Settings.Default.LibraryConnectionString;
+
 		protected override void OnConfiguring(DbContextOptionsBuilder dbOptions)
 		{
 			dbOptions.UseSqlServer(ConnectionString);

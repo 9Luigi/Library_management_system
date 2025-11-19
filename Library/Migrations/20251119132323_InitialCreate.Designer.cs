@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Migrations
 {
     [DbContext(typeof(LibraryContextForEFcore))]
-    [Migration("20241205152231_INIT")]
-    partial class INIT
+    [Migration("20251119132323_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.0")
+                .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -55,7 +55,7 @@ namespace Library.Migrations
                     b.ToTable("BookMember");
                 });
 
-            modelBuilder.Entity("Library.Models.Author", b =>
+            modelBuilder.Entity("Library.Domain.Models.Author", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -97,7 +97,7 @@ namespace Library.Migrations
                     b.ToTable("Authors");
                 });
 
-            modelBuilder.Entity("Library.Models.Book", b =>
+            modelBuilder.Entity("Library.Domain.Models.Book", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -131,8 +131,7 @@ namespace Library.Migrations
                         .HasColumnType("nvarchar(25)")
                         .HasColumnName("Genre");
 
-                    b.Property<DateTime?>("PublicationDate")
-                        .IsRequired()
+                    b.Property<DateTime>("PublicationDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("publicationYear");
 
@@ -152,7 +151,7 @@ namespace Library.Migrations
                     b.ToTable("Books");
                 });
 
-            modelBuilder.Entity("Library.Models.Member", b =>
+            modelBuilder.Entity("Library.Domain.Models.Member", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -232,13 +231,13 @@ namespace Library.Migrations
 
             modelBuilder.Entity("AuthorBook", b =>
                 {
-                    b.HasOne("Library.Models.Author", null)
+                    b.HasOne("Library.Domain.Models.Author", null)
                         .WithMany()
                         .HasForeignKey("AuthorsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Library.Models.Book", null)
+                    b.HasOne("Library.Domain.Models.Book", null)
                         .WithMany()
                         .HasForeignKey("BooksId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -247,13 +246,13 @@ namespace Library.Migrations
 
             modelBuilder.Entity("BookMember", b =>
                 {
-                    b.HasOne("Library.Models.Book", null)
+                    b.HasOne("Library.Domain.Models.Book", null)
                         .WithMany()
                         .HasForeignKey("BooksId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Library.Models.Member", null)
+                    b.HasOne("Library.Domain.Models.Member", null)
                         .WithMany()
                         .HasForeignKey("MembersId")
                         .OnDelete(DeleteBehavior.Cascade)

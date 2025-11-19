@@ -1,9 +1,10 @@
-﻿using Library.Domain.Models;
+﻿using Library.Application.Services.CRUD;
+using Library.Domain.Models;
+using Library.Infrastructure.Repositories;
 using Library.Presentation.Controllers;
 using Library.Presentation.Controllers.PictureController;
 using Microsoft.Extensions.Logging;
-using Library.Application.Services.CRUD;
-using Library.Infrastructure.Repositories;
+using System.ComponentModel;
 namespace Library
 {
 	public partial class FormMembers : Form
@@ -13,8 +14,9 @@ namespace Library
 		readonly ILogger _logger;
 		internal FormBorrowOrReturnBook FlendOrRecieveBook { get; private set; } //TODO:CRITICAL logic of borrow and return book is broken
 		internal FaddEdit_prop _FaddEdit_prop = new();
-
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		internal CancellationTokenSource CancellationTokenSource { get; set; }
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		internal CancellationToken CancellationToken { get; set; }
 		internal delegate void MemberCreateOrUpdateDelegate(MemberEventArgs e);
 		static internal event MemberCreateOrUpdateDelegate? MemberCreateOrUpdateEvent;
