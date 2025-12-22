@@ -7,13 +7,13 @@ using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 namespace Library
 {
+	//TODO datagrid not updating after add/edit member
 	public partial class FormMembers : Form
 	{//TODO Handle zero members in db via service 
 		#region FieldsAndProperties
 		readonly GenericRepository<Member> _memberRepository;
 		readonly ILogger _logger;
 		internal FormBorrowOrReturnBook FlendOrRecieveBook { get; private set; } //TODO:CRITICAL logic of borrow and return book is broken
-		internal FaddEdit_prop _FaddEdit_prop = new();
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		internal CancellationTokenSource CancellationTokenSource { get; set; }
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -54,24 +54,25 @@ namespace Library
 			_logger.LogInformation("AddMemberToolStripMenuItem_Click: Started processing the event.");
 			try
 			{
-				// Trigger the "CREATE" action by invoking the MemberCreateOrUpdateEvent.
+				this.Cursor = Cursors.WaitCursor;
+
+				using FaddEdit_prop _FaddEdit_prop = new();
+
 				MemberCreateOrUpdateEvent?.Invoke(new MemberEventArgs("CREATE"));
 				_logger.LogInformation("MemberCreateOrUpdateEvent was successfully invoked.");
 
-				// Show the form dialog for adding a new member.
+				this.Cursor = Cursors.Default;
+
 				_FaddEdit_prop.ShowDialog();
 				_logger.LogInformation("Member creation form was displayed successfully.");
 
-				// Refresh the data grid asynchronously after the form is closed.
 				await RefreshDataGridForMembers();
 				_logger.LogInformation("Data grid for members was refreshed.");
 			}
 			catch (Exception ex)
 			{
-				// Log the error with exception details.
+				this.Cursor = Cursors.Default; // Всегда возвращаем курсор
 				_logger.LogError(ex, "An error occurred while handling AddMemberToolStripMenuItem_Click");
-
-				// Show an error message to the user.
 				MessageBoxController.ShowError($"An unexpected error occurred: {ex.Message}\nPlease contact support if the problem persists.");
 			}
 		}
@@ -95,14 +96,15 @@ namespace Library
 
 			if (isValid)
 			{
-
+				// Show the edit form dialog
+				using FaddEdit_prop _FaddEdit_prop = new();
 				// Trigger the edit event with the IIN as an argument
 				MemberCreateOrUpdateEvent!.Invoke(new MemberEventArgs("EDIT", IIN));
 				_logger.LogInformation("MemberCreateOrUpdateEvent invoked");
 				_logger.LogInformation("Start to try for FaddEdit_prop.ShowDialog()");
-				// Show the edit form dialog
 				_FaddEdit_prop.ShowDialog();
 				_logger.LogInformation("FaddEdit_prop form were closed");
+				
 				// Refresh the data grid asynchronously
 				await RefreshDataGridForMembers();
 			}
@@ -197,7 +199,7 @@ namespace Library
 		private async void TbIINSearch_TextChanged(object sender, EventArgs e)
 		{
 			_logger.LogInformation("Entered TbIINSearch_TextChanged method. Text length: {TextLength}", TbIINSearch.Text.Length);
-			var memberService = new MemberService(_logger, _memberRepository);
+			var memberService = new MemberService(_logger, _memberRepository, new LibraryContextForEFcore());
 
 			// If the current text length is less than or equal to 3 and it was greater than 3 previously, perform the fetch
 			if (TbIINSearch.Text.Length <= 3 && previousTextLength > 3)
@@ -253,7 +255,7 @@ namespace Library
 					try
 					{
 
-						var memberService = new MemberService(_logger, _memberRepository);
+						var memberService = new MemberService(_logger, _memberRepository , new LibraryContextForEFcore());
 						// Get the total count of members
 						int totalMembersCount = await GetTotalMembersCountAsync();
 						_logger.LogInformation("Total members count retrieved: {TotalCount}", totalMembersCount);
@@ -621,7 +623,7 @@ namespace Library
 
 			try
 			{
-				var memberService = new MemberService(_logger, _memberRepository);
+				var memberService = new MemberService(_logger, _memberRepository, new LibraryContextForEFcore());
 
 				// Check if the member has borrowed any books by querying just the count of borrowed books
 				int borrowedBooksCount = await memberService.GetBorrowedBooksCountAsync(IIN);
@@ -699,13 +701,13 @@ namespace Library
 				return;
 			}
 
-			// Invoke the edit event with the IIN
-			MemberCreateOrUpdateEvent.Invoke(new MemberEventArgs("EDIT", IIN));
-			_logger.LogInformation("MemberCreateOrUpdateEvent invoked for IIN: {IIN}", IIN);
-
 			try
 			{
-				// Show the edit form dialog
+				// Show the form dialog for edit a member.
+				using FaddEdit_prop _FaddEdit_prop = new();
+				// Invoke the edit event with the IIN
+				MemberCreateOrUpdateEvent.Invoke(new MemberEventArgs("EDIT", IIN));
+				_logger.LogInformation("MemberCreateOrUpdateEvent invoked for IIN: {IIN}", IIN);
 				_FaddEdit_prop.ShowDialog();
 				_logger.LogInformation("FaddEdit_prop dialog closed successfully");
 			}
@@ -732,9 +734,9 @@ namespace Library
 		/// Catches and logs any exceptions that occur while fetching the member's data or photo.
 		/// </exception>
 		private async void DataGridViewForMembers_CurrentCellChanged(object sender, EventArgs e)
-		{
-			// Ensure the current cell is not null
-			if (dataGridViewForMembers.CurrentCell == null) return;
+		{ //TODO load photo from cache maybe? 
+		  // Ensure the current cell is not null
+			/*if (dataGridViewForMembers.CurrentCell == null) return;
 
 			try
 			{
@@ -744,11 +746,46 @@ namespace Library
 				if (isValid)
 				{
 					// Fetch the member data asynchronously
-					var findedMember = await _memberRepository.GetByFieldAsync(new LibraryContextForEFcore(), m => m.IIN, IIN);
+				//TODO fix this boolshit	var findedMember = await _memberRepository.GetByFieldAsync(new LibraryContextForEFcore(), m => m.IIN, IIN);
 					if (findedMember != null)
 					{
 						// Convert the member's photo byte array to an Image and display it
-						pictureBoxMember.Image = PictureController.ConvertByteToImage(findedMember.Photo);
+						//pictureBoxMember.Image = PictureController.ConvertByteToImage(findedMember.Photo);
+					}
+					else
+					{
+						MessageBoxController.ShowWarning($"Member with IIN {IIN} was not found.");
+					}
+				}
+				else
+				{
+					MessageBoxController.ShowWarning("Invalid or missing IIN in the selected row");
+				}
+			}
+			catch (Exception ex)
+			{
+				ErrorController.HandleException(ex, "An error occurred while fetching the member's data or displaying the photo.");
+			}*/
+		}
+
+		private async void buttonLoadPhoto_Click(object sender, EventArgs e)
+		{
+			if (dataGridViewForMembers.CurrentCell == null) return;
+
+			try
+			{
+				// Attempt to retrieve the IIN from the current row
+				var (isValid, IIN) = LibraryService.TryGetValueFromRow<long>(dataGridViewForMembers);
+
+				if (isValid)
+				{
+					var memberService = new MemberService(_logger, _memberRepository, new LibraryContextForEFcore());
+					// Fetch the member data asynchronously
+					var findedPhoto = await memberService.GetMemberPhotoByIINAsync(IIN);
+					if (findedPhoto != null)
+					{
+						
+						pictureBoxMember.Image = PictureController.ConvertByteToImage(findedPhoto);
 					}
 					else
 					{

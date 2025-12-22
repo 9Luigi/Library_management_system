@@ -21,7 +21,6 @@ namespace Library.Domain.Models
         public long IIN { get; set; }
         public DateTime RegistrationDate { get; set; }
         public byte[]? Photo { get; set; }
-        [Timestamp]
         public byte[] MemberVersion { get; set; }
         public List<Book> Books { get; set; } = new();
         public Member() { }
@@ -36,7 +35,7 @@ namespace Library.Domain.Models
             Adress = adress;
             PhoneNumber = Phonenumber;
             IIN = iin;
-            Photo = photo;
+            Photo = photo ?? Array.Empty<byte>(); ;
             Age = RegistrationDate.Year - BirthDay.Year;
             if (BirthDay > RegistrationDate.AddYears(-Age)) Age--;
             if (Patronymic == null)

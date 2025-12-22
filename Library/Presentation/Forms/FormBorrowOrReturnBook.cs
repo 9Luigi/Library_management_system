@@ -28,7 +28,7 @@ namespace Library
 			_bookRepository = new GenericRepository<Book>();
 			_memberRepository = new GenericRepository<Member>();
 			_bookService = new(_logger, _bookRepository);
-			_memberService = new(_logger, _memberRepository);
+			_memberService = new(_logger, _memberRepository, new LibraryContextForEFcore());
 			_libraryService = new();
 			InitializeComponent();
 		}

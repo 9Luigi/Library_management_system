@@ -43,6 +43,7 @@
 			pictureBoxMember = new PictureBox();
 			TbIINSearch = new TextBox();
 			pbMembers = new ProgressBar();
+			buttonLoadPhoto = new Button();
 			menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)dataGridViewForMembers).BeginInit();
 			cmMember.SuspendLayout();
@@ -55,7 +56,8 @@
 			menuStrip1.Items.AddRange(new ToolStripItem[] { memberToolStripMenuItem, exitToolStripMenuItem });
 			menuStrip1.Location = new Point(0, 0);
 			menuStrip1.Name = "menuStrip1";
-			menuStrip1.Size = new Size(944, 24);
+			menuStrip1.Padding = new Padding(7, 3, 0, 3);
+			menuStrip1.Size = new Size(1079, 30);
 			menuStrip1.TabIndex = 1;
 			menuStrip1.Text = "mainMenu";
 			// 
@@ -63,20 +65,20 @@
 			// 
 			memberToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { addMemberToolStripMenuItem });
 			memberToolStripMenuItem.Name = "memberToolStripMenuItem";
-			memberToolStripMenuItem.Size = new Size(70, 20);
+			memberToolStripMenuItem.Size = new Size(85, 24);
 			memberToolStripMenuItem.Text = "Member..";
 			// 
 			// addMemberToolStripMenuItem
 			// 
 			addMemberToolStripMenuItem.Name = "addMemberToolStripMenuItem";
-			addMemberToolStripMenuItem.Size = new Size(144, 22);
+			addMemberToolStripMenuItem.Size = new Size(180, 26);
 			addMemberToolStripMenuItem.Text = "Add member";
 			addMemberToolStripMenuItem.Click += AddMemberToolStripMenuItem_Click;
 			// 
 			// exitToolStripMenuItem
 			// 
 			exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-			exitToolStripMenuItem.Size = new Size(38, 20);
+			exitToolStripMenuItem.Size = new Size(47, 24);
 			exitToolStripMenuItem.Text = "Exit";
 			exitToolStripMenuItem.Click += ExitToolStripMenuItem_Click;
 			// 
@@ -84,17 +86,19 @@
 			// 
 			dataGridViewForMembers.AllowUserToAddRows = false;
 			dataGridViewForMembers.AllowUserToDeleteRows = false;
+			dataGridViewForMembers.AllowUserToOrderColumns = true;
 			dataGridViewForMembers.AllowUserToResizeColumns = false;
 			dataGridViewForMembers.AllowUserToResizeRows = false;
 			dataGridViewForMembers.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 			dataGridViewForMembers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			dataGridViewForMembers.Location = new Point(12, 24);
+			dataGridViewForMembers.Location = new Point(14, 32);
+			dataGridViewForMembers.Margin = new Padding(3, 4, 3, 4);
 			dataGridViewForMembers.MultiSelect = false;
 			dataGridViewForMembers.Name = "dataGridViewForMembers";
 			dataGridViewForMembers.ReadOnly = true;
 			dataGridViewForMembers.RowHeadersWidth = 51;
-			dataGridViewForMembers.SelectionMode = DataGridViewSelectionMode.CellSelect;
-			dataGridViewForMembers.Size = new Size(674, 360);
+			dataGridViewForMembers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+			dataGridViewForMembers.Size = new Size(770, 480);
 			dataGridViewForMembers.TabIndex = 2;
 			dataGridViewForMembers.CellMouseClick += View_CellMouseClick;
 			dataGridViewForMembers.CellMouseDoubleClick += DataGridViewForMembers_CellMouseDoubleClick;
@@ -105,33 +109,33 @@
 			cmMember.ImageScalingSize = new Size(20, 20);
 			cmMember.Items.AddRange(new ToolStripItem[] { editToolStripMenuItem, deleteToolStripMenuItem, BorrowBookToolStripMenuItem, ReturnBookToolStripMenuItem });
 			cmMember.Name = "cmMember";
-			cmMember.Size = new Size(152, 92);
+			cmMember.Size = new Size(177, 100);
 			// 
 			// editToolStripMenuItem
 			// 
 			editToolStripMenuItem.Name = "editToolStripMenuItem";
-			editToolStripMenuItem.Size = new Size(151, 22);
+			editToolStripMenuItem.Size = new Size(176, 24);
 			editToolStripMenuItem.Text = "Edit";
 			editToolStripMenuItem.Click += EditToolStripMenuItem_Click;
 			// 
 			// deleteToolStripMenuItem
 			// 
 			deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-			deleteToolStripMenuItem.Size = new Size(151, 22);
+			deleteToolStripMenuItem.Size = new Size(176, 24);
 			deleteToolStripMenuItem.Text = "Delete";
 			deleteToolStripMenuItem.Click += DeleteToolStripMenuItem_Click;
 			// 
 			// BorrowBookToolStripMenuItem
 			// 
 			BorrowBookToolStripMenuItem.Name = "BorrowBookToolStripMenuItem";
-			BorrowBookToolStripMenuItem.Size = new Size(151, 22);
+			BorrowBookToolStripMenuItem.Size = new Size(176, 24);
 			BorrowBookToolStripMenuItem.Text = "Borrow a book";
 			BorrowBookToolStripMenuItem.Click += BorrowBookToolStripMenuItem_Click;
 			// 
 			// ReturnBookToolStripMenuItem
 			// 
 			ReturnBookToolStripMenuItem.Name = "ReturnBookToolStripMenuItem";
-			ReturnBookToolStripMenuItem.Size = new Size(151, 22);
+			ReturnBookToolStripMenuItem.Size = new Size(176, 24);
 			ReturnBookToolStripMenuItem.Text = "Return book";
 			ReturnBookToolStripMenuItem.Click += ReturnBookToolStripMenuItem_Click;
 			// 
@@ -139,9 +143,10 @@
 			// 
 			pictureBoxMember.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 			pictureBoxMember.Image = Properties.Resources.NoImage;
-			pictureBoxMember.Location = new Point(692, 24);
+			pictureBoxMember.Location = new Point(791, 32);
+			pictureBoxMember.Margin = new Padding(3, 4, 3, 4);
 			pictureBoxMember.Name = "pictureBoxMember";
-			pictureBoxMember.Size = new Size(240, 360);
+			pictureBoxMember.Size = new Size(274, 452);
 			pictureBoxMember.SizeMode = PictureBoxSizeMode.StretchImage;
 			pictureBoxMember.TabIndex = 3;
 			pictureBoxMember.TabStop = false;
@@ -149,9 +154,10 @@
 			// TbIINSearch
 			// 
 			TbIINSearch.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-			TbIINSearch.Location = new Point(326, 437);
+			TbIINSearch.Location = new Point(373, 583);
+			TbIINSearch.Margin = new Padding(3, 4, 3, 4);
 			TbIINSearch.Name = "TbIINSearch";
-			TbIINSearch.Size = new Size(292, 23);
+			TbIINSearch.Size = new Size(333, 27);
 			TbIINSearch.TabIndex = 4;
 			TbIINSearch.Text = "Enter IIN";
 			TbIINSearch.TextAlign = HorizontalAlignment.Center;
@@ -161,23 +167,37 @@
 			// pbMembers
 			// 
 			pbMembers.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-			pbMembers.Location = new Point(12, 390);
+			pbMembers.Location = new Point(14, 520);
+			pbMembers.Margin = new Padding(3, 4, 3, 4);
 			pbMembers.Name = "pbMembers";
-			pbMembers.Size = new Size(920, 23);
+			pbMembers.Size = new Size(1051, 31);
 			pbMembers.Step = 1;
 			pbMembers.TabIndex = 6;
 			// 
+			// buttonLoadPhoto
+			// 
+			buttonLoadPhoto.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+			buttonLoadPhoto.Location = new Point(791, 487);
+			buttonLoadPhoto.Name = "buttonLoadPhoto";
+			buttonLoadPhoto.Size = new Size(274, 29);
+			buttonLoadPhoto.TabIndex = 7;
+			buttonLoadPhoto.Text = "Load selected member's photo";
+			buttonLoadPhoto.UseVisualStyleBackColor = true;
+			buttonLoadPhoto.Click += buttonLoadPhoto_Click;
+			// 
 			// FormMembers
 			// 
-			AutoScaleDimensions = new SizeF(7F, 15F);
+			AutoScaleDimensions = new SizeF(8F, 20F);
 			AutoScaleMode = AutoScaleMode.Font;
-			ClientSize = new Size(944, 501);
+			ClientSize = new Size(1079, 668);
+			Controls.Add(buttonLoadPhoto);
 			Controls.Add(pbMembers);
 			Controls.Add(TbIINSearch);
 			Controls.Add(pictureBoxMember);
 			Controls.Add(dataGridViewForMembers);
 			Controls.Add(menuStrip1);
 			MainMenuStrip = menuStrip1;
+			Margin = new Padding(3, 4, 3, 4);
 			Name = "FormMembers";
 			Text = "Members";
 			FormClosing += FMembers_FormClosing;
@@ -205,5 +225,6 @@
         private ToolStripMenuItem deleteToolStripMenuItem;
         private ToolStripMenuItem BorrowBookToolStripMenuItem;
         private ToolStripMenuItem ReturnBookToolStripMenuItem;
-    }
+		private Button buttonLoadPhoto;
+	}
 }

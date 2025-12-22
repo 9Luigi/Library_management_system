@@ -26,8 +26,8 @@ namespace Library.Infrastructure.EFConfigurations
             builder.Property(m => m.Age).HasColumnName("Age").IsRequired();
             builder.Property(m => m.BirthDay).HasColumnName("BirthDay").IsRequired();
             builder.Property(m => m.IIN).HasColumnName("IIN").HasColumnType("BIGINT").IsRequired();
-            builder.Property(m => m.Photo).HasColumnName("Photo").HasDefaultValue(new byte[1]).IsRequired();
-            builder.Property(m => m.RegistrationDate).HasColumnName("RegistrationDate").IsRequired();
+            builder.Property(m => m.Photo).HasColumnName("Photo").HasColumnType("VARBINARY(MAX)").HasDefaultValue(null).IsRequired(false);
+			builder.Property(m => m.RegistrationDate).HasColumnName("RegistrationDate").IsRequired();
             builder.Property(m => m.Adress).HasColumnName("Adress").IsRequired();
             builder.Property(m => m.PhoneNumber).HasColumnName("PhoneNumber").IsRequired().HasMaxLength(75);
             builder.Property(m => m.MemberVersion).HasColumnName("Version").IsRowVersion();

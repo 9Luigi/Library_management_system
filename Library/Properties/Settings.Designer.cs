@@ -26,7 +26,7 @@ namespace Library.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Server=localhost;DataBase=Library;User Id=Adm_RKudrik;Password=\"g7DcA)RH^qZw\";Mul" +
+        [global::System.Configuration.DefaultSettingValueAttribute("Server=localhost;Database=Library;User Id=Adm_RKudrik;Password=\"g7DcA)RH^qZw\";Mul" +
             "tipleActiveResultSets=true;Encrypt=False")]
         public string LibraryConnectionString {
             get {

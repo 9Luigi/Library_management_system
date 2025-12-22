@@ -79,8 +79,7 @@ namespace Library.Migrations
                         .HasColumnName("Name");
 
                     b.Property<byte[]>("Photo")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)")
+                        .HasColumnType("VARBINARY(MAX)")
                         .HasColumnName("Photo");
 
                     b.Property<string>("Surname")
@@ -113,8 +112,7 @@ namespace Library.Migrations
                         .HasColumnName("Version");
 
                     b.Property<byte[]>("CoverImage")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)")
+                        .HasColumnType("VARBINARY(MAX)")
                         .HasColumnName("CoverImage");
 
                     b.Property<string>("Description")
@@ -199,10 +197,7 @@ namespace Library.Migrations
                         .HasColumnName("PhoneNumber");
 
                     b.Property<byte[]>("Photo")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("varbinary(max)")
-                        .HasDefaultValue(new byte[] { 0 })
+                        .HasColumnType("VARBINARY(MAX)")
                         .HasColumnName("Photo");
 
                     b.Property<DateTime>("RegistrationDate")

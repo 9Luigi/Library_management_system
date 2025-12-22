@@ -12,7 +12,7 @@ namespace Library.Domain.Models
         public string Name { get; set; }
         public string Surname { get; set; }
         public string? Biography { get; set; }
-        public byte[] Photo { get; set; }
+        public byte[]? Photo { get; set; }
         public byte[] AuthorVersion { get; set; }
         public List<Book> Books { get; set; } = new();
         public Author() { }

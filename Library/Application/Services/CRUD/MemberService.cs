@@ -15,17 +15,18 @@ namespace Library.Application.Services.CRUD
 	{
 		private readonly ILogger _logger;
 		private readonly GenericRepository<Member> _memberRepository;
-		internal LibraryContextForEFcore? _updateDBContext;
+		internal LibraryContextForEFcore _dbContext;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MemberService"/> class.
 		/// </summary>
 		/// <param name="logger">The logger to log messages related to member operations.</param>
 		/// <param name="memberRepository">The repository used to access member data in the database.</param>
-		internal MemberService(ILogger logger, GenericRepository<Member> memberRepository)
+		internal MemberService(ILogger logger, GenericRepository<Member> memberRepository, LibraryContextForEFcore context)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_memberRepository = memberRepository ?? throw new ArgumentNullException(nameof(memberRepository));
+			_dbContext = context ?? throw new ArgumentNullException(nameof(context));
 		}
 		#region CRUD
 		/// <summary>
@@ -47,7 +48,6 @@ namespace Library.Application.Services.CRUD
 		/// </exception>
 		internal async Task<List<dynamic>> GetFilteredMembersAsync(long IIN)
 		{
-			using LibraryContextForEFcore dbContext = new();
 			try
 			{
 				var results = await _memberRepository.GetCollectionWithProjectionAsync(
@@ -61,7 +61,7 @@ namespace Library.Application.Services.CRUD
 						Books = m.Books.Select(b => b.Title)
 					},
 					IIN,
-					dbContext,
+					_dbContext,
 					m => m.IIN,
 					m => m.Books
 				);
@@ -86,7 +86,7 @@ namespace Library.Application.Services.CRUD
 		/// <summary>
 		/// Retrieves a list of members with their information, including borrowed book titles.
 		/// </summary>
-		/// <param name="dbContext">The <see cref="LibraryContextForEFcore"/> instance for database operations.</param>
+		/// <param name="_dbContext">The <see cref="LibraryContextForEFcore"/> instance for database operations.</param>
 		/// <returns>
 		/// A task that represents the asynchronous operation. The task result contains a list of dynamic objects
 		/// with the following properties:
@@ -102,7 +102,6 @@ namespace Library.Application.Services.CRUD
 		/// </exception>
 		internal async Task<List<dynamic>> GetMembersAsync()
 		{
-			using LibraryContextForEFcore dbContext = new();
 			try
 			{
 				_logger.LogInformation("GetMembersAsync started.");
@@ -118,7 +117,7 @@ namespace Library.Application.Services.CRUD
 						m.RegistrationDate,
 						Books = string.Join(", ", m.Books.Select(b => b.Title)) // Join book titles
 					},
-					dbContext,
+					_dbContext,
 					m => m.Books
 				);
 
@@ -133,7 +132,20 @@ namespace Library.Application.Services.CRUD
 				throw;
 			}
 		}
-
+		internal async Task<byte[]> GetMemberPhotoByIINAsync(long IIN)
+		{
+			var photoBytes = await _dbContext.Members
+				.AsNoTracking()
+				.Where(m => m.IIN == IIN)
+				.Select(m => m.Photo)
+				.FirstOrDefaultAsync();
+			if (photoBytes == null || photoBytes.Length == 0)
+			{
+				_logger.LogWarning("No photo found for member with IIN: {IIN}", IIN);
+				throw new KeyNotFoundException($"No photo found for member with IIN: {IIN}");
+			}
+			return photoBytes;
+		}
 		/// <summary>
 		/// Asynchronously retrieves the count of borrowed books for a member based on their IIN.
 		/// </summary>
@@ -142,9 +154,8 @@ namespace Library.Application.Services.CRUD
 		/// <exception cref="Exception">Throws an exception if an error occurs while querying the database.</exception>
 		public async Task<int> GetBorrowedBooksCountAsync(long IIN)
 		{
-			using var context = new LibraryContextForEFcore();
 
-			return await context.Members
+			return await _dbContext.Members
 				.Where(m => m.IIN == IIN)
 				.Select(m => m.Books.Count)  // Get the count of borrowed books
 				.FirstOrDefaultAsync();
@@ -157,7 +168,6 @@ namespace Library.Application.Services.CRUD
 		/// <exception cref="Exception">Thrown when an error occurs while retrieving member data from the database.</exception>
 		internal async Task<Member> GetMemberWithBorrowedBooksAsync(long IIN)
 		{
-			using LibraryContextForEFcore dbContext = new();
 			try
 			{
 				// Log entry into the method
@@ -166,7 +176,7 @@ namespace Library.Application.Services.CRUD
 				// Define the projection to retrieve member data along with their borrowed books
 				var member = await _memberRepository.GetOneByIDWithProjectionAsync(
 					m => m,
-					dbContext,
+					_dbContext,
 					m => m.Books // Include the Books navigation property
 				);
 
@@ -196,10 +206,9 @@ namespace Library.Application.Services.CRUD
 
 		internal async Task<bool> CreateMemberAsync(Member memberToCreate)
 		{
-			LibraryContextForEFcore context = new();
 			try
 			{
-				bool isCreated = await _memberRepository.AddAsync(context, memberToCreate);
+				bool isCreated = await _memberRepository.AddAsync(_dbContext, memberToCreate);
 
 				if (isCreated)
 				{
@@ -232,10 +241,9 @@ namespace Library.Application.Services.CRUD
 		/// </remarks>
 		internal async Task<bool> GetMemberWithHisBooksToDataGridViewAsync(long memberIIN, DataGridView dataGridView)
 		{
-			using LibraryContextForEFcore dbContext = new();
 			_logger.LogInformation("Start fetching books for member with IIN: {MemberIIN}", memberIIN);
 
-			var memberWithBooks = await dbContext.Members
+			var memberWithBooks = await _dbContext.Members
 				.Include(m => m.Books)
 				.Where(m => m.IIN == memberIIN)
 				.FirstOrDefaultAsync();
@@ -270,37 +278,23 @@ namespace Library.Application.Services.CRUD
 		}
 		internal async Task<bool> UpdateMemberChangedFieldsAsync(Member memberToUpdate)
 		{
-			try { return await _memberRepository.UpdateAttachedFieldsAsync(_updateDBContext!, memberToUpdate); }
-			finally { CloseUpdateContext(); }
+			return await _memberRepository.UpdateAttachedFieldsAsync(_dbContext!, memberToUpdate);
 		}
 		internal async Task<Member> GetMemberByIINForUpdateAsync(long IIN)
 		{
-			CreateUpdateContext();
-			return await _memberRepository.GetByFieldAsync(_updateDBContext!, m => m.IIN, IIN);
+			return await _memberRepository.GetByFieldAsync(_dbContext!, m => m.IIN, IIN);
 		}
 		#endregion
 		#region Validation
 		internal async Task<bool> IsIINExistsAsync(long IIN)
 		{
-			using LibraryContextForEFcore context = new();
-			bool isIINExists = await _memberRepository.AnyAsync(context, m => m.IIN == IIN);
+			bool isIINExists = await _memberRepository.AnyAsync(_dbContext, m => m.IIN == IIN);
 			if (isIINExists)
 			{
 				MessageBoxController.ShowWarning($"A member with IIN {IIN} already exists.");
 				return false;
 			}
 			return true;
-		}
-		#endregion
-		#region FieldControlMethods
-		internal void CloseUpdateContext()
-		{
-			_updateDBContext?.Dispose();
-			_updateDBContext = null;
-		}
-		internal void CreateUpdateContext()
-		{
-			_updateDBContext = new();
 		}
 		#endregion
 	}

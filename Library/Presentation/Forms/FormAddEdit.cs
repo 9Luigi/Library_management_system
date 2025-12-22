@@ -12,41 +12,28 @@ using static Library.FormMembers;
 namespace Library
 {
 	//TODO logs via ILogger to XML
-	/// <summary>
-	/// Form for adding or editing member properties in the library system.
-	/// </summary>
-	public partial class FaddEdit_prop : Form
+
+	public partial class FaddEdit_prop : Form, IDisposable
 	{
-		/// <summary>
-		/// A byte array that holds the photo of the member in the form of image bytes.
-		/// </summary>
+	
 		byte[]? PhotoAsBytes { get; set; }
-		/// <summary>
-		/// A property to store the member object being edited, if any.
-		/// </summary>
+
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		internal Member? MemberToEdit { get; set; }
 		private readonly MemberService _memberService;
-		/// <summary>
-		/// Constructor that initializes the form and subscribes to the MemberCreateOrUpdateEvent event.
-		/// Sets the default photo image.
-		/// </summary>
+		private LibraryContextForEFcore _context; //Disposed in desighner file
+		private readonly ControlsController controlsController = new();
 		public FaddEdit_prop()
 		{
 			MemberCreateOrUpdateEvent += ActionRequested; // Subscribe to event, event is invoked on update/create calls
 			InitializeComponent();
 			pbPhoto.Image = Properties.Resources.NoImage;
 
-			var _dbContext = new LibraryContextForEFcore();
 			var _logger = LoggerService.CreateLogger<FaddEdit_prop>();
-			_memberService = new(_logger, new GenericRepository<Member>());
+			_context = new LibraryContextForEFcore();
+			_memberService = new(_logger, new GenericRepository<Member>(), _context);
 		}
 
-
-		/// <summary>
-		/// Handles the event triggered when a photo is selected by the user.
-		/// Updates the photo display and stores the image as bytes.
-		/// </summary>
 		private void BSelectPhoto_Click(object sender, EventArgs e)
 		{
 			var photo = PictureController.GetImageFromFile();
@@ -63,10 +50,8 @@ namespace Library
 			}
 		}
 
-		/// <summary>
-		/// Handles the event when the Add Member button is clicked.
-		/// Performs validation and calls the action to create a new member.
-		/// </summary>
+	
+
 		private async void BAddMember_Click(object sender, EventArgs e)
 		{
 			if (CheckFieldsBeforeAction())
@@ -74,10 +59,7 @@ namespace Library
 				await ActionWithMember("CREATE");
 			}
 		}
-		/// <summary>
-		/// Handles the event when a create or update action is requested.
-		/// Based on the action, it either prepares the form for editing or creating a new member.
-		/// </summary>
+
 		internal async void ActionRequested(MemberEventArgs e)
 		{
 			switch (e.Action)
@@ -114,10 +96,6 @@ namespace Library
 			}
 		}
 
-		/// <summary>
-		/// Checks that the required fields are filled and validates them using Regex.
-		/// </summary>
-		/// <returns>True if all fields are valid, otherwise false.</returns>
 		private bool CheckFieldsBeforeAction()
 		{
 			bool allFieldsValid = this.Controls
@@ -140,11 +118,6 @@ namespace Library
 			return string.IsNullOrEmpty(TBPatronymic.Text) || TBPatronymic.Text == "None" || RegexController.Check(TBPatronymic.Text, TBPatronymic);
 		}
 
-		/// <summary>
-		/// Checks if the patronymic field has value or returns "None" if empty.
-		/// </summary>
-		/// <param name="patronymic">Patronymic to check.</param>
-		/// <returns>The patronymic value or "None" if empty.</returns>
 		private static string CheckIfHasPatronymic(string patronymic)
 		{
 			if (patronymic != "")
@@ -157,10 +130,6 @@ namespace Library
 			}
 		}
 
-		/// <summary>
-		/// Creates or updates the member based on the operation (CREATE or UPDATE).
-		/// </summary>
-		/// <param name="operation">The operation type (CREATE or UPDATE).</param>
 		private async Task ActionWithMember(string operation)
 		{
 			switch (operation)
@@ -247,10 +216,7 @@ namespace Library
 					break;
 			}
 		}
-		/// <summary>
-		/// Handles the event when the Update Member button is clicked.
-		/// Performs validation and calls the action to update the member.
-		/// </summary>
+
 		private async void BUpdateMember_Click(object sender, EventArgs e)
 		{
 			if (CheckFieldsBeforeAction())
@@ -259,10 +225,6 @@ namespace Library
 			}
 		}
 
-		/// <summary>
-		/// Fills the form with data from the member object.
-		/// </summary>
-		/// <param name="member">The member object to populate the form fields.</param>
 		private void FillMemberData(Member member)
 		{
 			MTBIIN.Text = member.IIN.ToString();
@@ -278,9 +240,6 @@ namespace Library
 			pbPhoto.Image = imageByte != null ? PictureController.ConvertByteToImage(imageByte) : Resources.NoImage;
 		}
 
-		/// <summary>
-		/// Resets the form by clearing all textboxes and setting the default image for the photo.
-		/// </summary>
 		private void ResetForm()
 		{
 			TextBoxBaseController.AllTextBoxBaseOnFormClear(this);
@@ -290,7 +249,8 @@ namespace Library
 
 		private void FaddEdit_prop_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			_memberService.CloseUpdateContext(); //Dispose update context wich used to update member fields
+			MemberCreateOrUpdateEvent -= ActionRequested; // Unsubscribe from event to prevent memory leaks
+			this.Dispose();
 		}
 	}
 }
