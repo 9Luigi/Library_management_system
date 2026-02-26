@@ -265,6 +265,7 @@
 			Margin = new Padding(3, 4, 3, 4);
 			Name = "FaddEdit_prop";
 			FormClosing += FaddEdit_prop_FormClosing;
+			Load += FaddEdit_prop_Load;
 			((System.ComponentModel.ISupportInitialize)pbPhoto).EndInit();
 			ResumeLayout(false);
 			PerformLayout();

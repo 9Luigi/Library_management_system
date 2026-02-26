@@ -1,21 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 namespace Library.Infrastructure.Repositories;
-public class GenericRepository<T> where T : class //TODO logs
+
+public class GenericRepository<T> where T : class //TODO repositoty only for basic CRUD operations
 {
 
-
-	/// <summary>
-	/// Retrieves an entity by a specific field value from the database.
-	/// </summary>
-	/// <typeparam name="TKey">The type of the field used for filtering.</typeparam>
-	/// <param name="_dbContext">The database context used for the query.</param>
-	/// <param name="fieldSelector">An expression to select the field used for filtering.</param>
-	/// <param name="value">The value of the field to search for.</param>
-	/// <returns>The entity that matches the specified field value.</returns>
-	/// <exception cref="KeyNotFoundException">Thrown if no entity with the specified field value is found.</exception>
-	/// <exception cref="ArgumentException">Thrown if the expression does not refer to a valid property.</exception>
-	/// <exception cref="Exception">Thrown for any other errors that occur during execution.</exception>
+	// Retrieves an entity by a specific field value from the database
 	internal async Task<T> GetByFieldAsync<TKey>(DbContext _dbContext, Expression<Func<T, TKey>> fieldSelector, TKey value)
 	{
 		try
@@ -30,13 +20,8 @@ public class GenericRepository<T> where T : class //TODO logs
 			throw;
 		}
 	}
-	/// <summary>
-	/// Extracts the property name from an expression that selects a property of the entity.
-	/// </summary>
-	/// <typeparam name="TKey">The type of the selected property.</typeparam>
-	/// <param name="expression">The expression used to select the property.</param>
-	/// <returns>The name of the property selected by the expression.</returns>
-	/// <exception cref="ArgumentException">Thrown if the expression does not refer to a valid property.</exception>
+
+	// Extracts the property name from an expression that selects a property of the entity
 	private string GetPropertyName<TKey>(Expression<Func<T, TKey>> expression)
 	{
 		if (expression.Body is MemberExpression memberExpression)
@@ -46,14 +31,7 @@ public class GenericRepository<T> where T : class //TODO logs
 		throw new ArgumentException("The expression does not refer to a valid property.", nameof(expression));
 	}
 
-	/// <summary>
-	/// Retrieves an entity by its primary key value from the database.
-	/// </summary>
-	/// <param name="_dbContext">The database context used for the query.</param>
-	/// <param name="id">The primary key value of the entity to retrieve.</param>
-	/// <returns>The entity that matches the specified primary key value.</returns>
-	/// <exception cref="KeyNotFoundException">Thrown if no entity with the specified ID is found.</exception>
-	/// <exception cref="Exception">Thrown for any other errors that occur during execution.</exception>
+	// Retrieves an entity by its primary key value from the database
 	internal async Task<T> GetByIdAsync(DbContext _dbContext, int id)
 	{
 		try
@@ -66,210 +44,8 @@ public class GenericRepository<T> where T : class //TODO logs
 			throw;
 		}
 	}
-	#region GetWithProjectionAsync
-	/// <summary>
-	/// Asynchronously retrieves a projected list of entities of type <typeparamref name="T"/> from the database.
-	/// </summary>
-	/// <typeparam name="TResult">The type of the projected result.</typeparam>
-	/// <param name="selector">
-	/// An expression defining the projection, specifying which properties of the entity to include in the result.
-	/// </param>
-	/// <param name="includes">
-	/// Optional expressions defining related entities to include (e.g., navigation properties).
-	/// </param>
-	/// <returns>
-	/// A task that represents the asynchronous operation. The task result is a list of projected entities of type <typeparamref name="TResult"/>.
-	/// </returns>
-	/// <example>
-	/// Example usage:
-	/// <code>
-	/// var entity = await repository.GetWithProjectionAsync(
-	///     m => new { m.Property1, m.Property2, IncludesCount = m.Includes.Count },
-	///     m => m.Includes);
-	/// </code>
-	/// </example>
-	/// <remarks>
-	/// - This method allows fetching only the required properties of entities to improve performance.
-	/// - Includes are optional and can be used to eagerly load related entities.
-	/// </remarks>
-	/// <exception cref="ArgumentNullException">
-	/// Thrown if <paramref name="selector"/> is null.
-	/// </exception>
-	/// <exception cref="InvalidOperationException">
-	/// Thrown if the query cannot be executed (e.g., invalid entity state or EF configuration).
-	/// </exception>
-	public async Task<List<TResult>> GetCollectionWithProjectionAsync<TResult>(
-		Expression<Func<T, TResult>> selector,
-		DbContext _dbContext,
-		params Expression<Func<T, object>>[] includes)
-	{
-		try
-		{
-			IQueryable<T> query = _dbContext.Set<T>();
 
-			foreach (var include in includes)
-			{
-				query = query.Include(include);
-			}
-			return await query.Select(selector).ToListAsync();
-		}
-		catch (Exception)
-		{
-			throw;
-		}
-	}
-
-	/// <summary>
-	/// Asynchronously retrieves a list of projections from the database, applying a filter with a specified field and search value.
-	/// </summary>
-	/// <typeparam name="TResult">The type of the projection result.</typeparam>
-	/// <param name="selector">The projection expression that defines what data to return.</param>
-	/// <param name="searchValue">The value to search for in the specified field.</param>
-	/// <param name="searchField">The field to apply the filter to (using LIKE).</param>
-	/// <param name="includes">An optional array of expressions representing the related entities to include in the query.</param>
-	/// <returns>
-	/// A list of projected results of type <typeparamref name="TResult"/> that match the filter.
-	/// </returns>
-	/// <exception cref="ArgumentNullException">
-	/// Thrown if <paramref name="selector"/> or <paramref name="searchField"/> is null.
-	/// </exception>
-	/// <exception cref="InvalidOperationException">
-	/// Thrown if the query cannot be executed (e.g., invalid entity state or EF configuration).
-	/// </exception>
-	public async Task<List<TResult>> GetCollectionWithProjectionAsync<TResult>(
-		Expression<Func<T, TResult>> selector,
-		long searchValue, // The value to filter by
-		DbContext _dbContext,
-		Expression<Func<T, object>> searchField, // Field to apply the filter on
-		params Expression<Func<T, object>>[] includes) // Related entities to include
-	{
-		try
-		{
-			// Initialize the query from the DbSet
-			IQueryable<T> query = _dbContext.Set<T>();
-
-			// Include related entities
-			foreach (var include in includes)
-			{
-				query = query.Include(include);
-			}
-
-			// Apply filtering based on LIKE search
-			query = query.Where(m => EF.Functions.Like(
-				EF.Property<string>(m, GetPropertyName(searchField)).ToString(),
-				$"%{searchValue}%"));
-
-			// Perform projection and return results
-			return await query.Select(selector).ToListAsync();
-		}
-		catch (Exception)
-		{
-			throw;
-		}
-	}
-	/// <summary>
-	/// Asynchronously retrieves a collection of entities from the database with optional filtering, related entity inclusion, and projection.
-	/// </summary>
-	/// <typeparam name="TResult">The type of the projected result.</typeparam>
-	/// <param name="selector">
-	/// The projection expression that defines what data to return from the entity.
-	/// </param>
-	/// <param name="filter">An optional filter condition that can be applied to the query.</param>
-	/// <param name="includes">
-	/// An optional array of expressions for including related entities in the query.
-	/// </param>
-	/// <returns>
-	/// A task that represents the asynchronous operation. The task result contains a list of projected entities matching the filter.
-	/// </returns>
-	/// <remarks>
-	/// This method supports filtering and including related entities for more complex queries while applying projection to improve performance.
-	/// </remarks>
-	/// <exception cref="ArgumentNullException">
-	/// Thrown if <paramref name="selector"/> is null.
-	/// </exception>
-	/// <exception cref="InvalidOperationException">
-	/// Thrown if the query cannot be executed (e.g., invalid entity state or EF configuration).
-	/// </exception>
-	public async Task<List<TResult>> GetCollectionWithProjectionAsync<TResult>(
-		Expression<Func<T, TResult>> selector, // Projection for results
-		DbContext _dbContext, // Database context
-		Expression<Func<T, bool>> filter = null, // Filter condition
-		params Expression<Func<T, object>>[] includes) // Related entities to include
-	{
-		try
-		{
-			// Initialize the query
-			IQueryable<T> query = _dbContext.Set<T>();
-
-			// Include related entities
-			foreach (var include in includes)
-			{
-				query = query.Include(include);
-			}
-
-			// Apply filtering if a condition is provided
-			if (filter != null)
-			{
-				query = query.Where(filter);
-			}
-
-			// Apply projection and return results
-			return await query.Select(selector).ToListAsync();
-		}
-		catch (Exception)
-		{
-			throw;
-		}
-	}
-
-
-	public async Task<TResult> GetOneByIDWithProjectionAsync<TResult>(
-		Expression<Func<T, TResult>> selector,
-		DbContext _dbContext,
-		params Expression<Func<T, object>>[] includes)
-	{
-		try
-		{
-			IQueryable<T> query = _dbContext.Set<T>();
-
-			foreach (var include in includes)
-			{
-				query = query.Include(include);
-			}
-			return await query.Select(selector).FirstAsync();
-		}
-		catch (Exception)
-		{
-			throw;
-		}
-	}
-	/// <summary>
-	/// Helper method to extract the property name from a lambda expression.
-	/// </summary>
-	/// <param name="expression">The lambda expression representing the field to extract the property name from.</param>
-	/// <returns>The name of the property represented by the lambda expression.</returns>
-	private string GetPropertyName(Expression<Func<T, object>> expression)
-	{
-		if (expression.Body is MemberExpression memberExpression)
-		{
-			return memberExpression.Member.Name;
-		}
-
-		if (expression.Body is UnaryExpression unaryExpression &&
-			unaryExpression.Operand is MemberExpression operandMemberExpression)
-		{
-			return operandMemberExpression.Member.Name;
-		}
-
-		throw new ArgumentException("The expression does not refer to a valid property.", nameof(expression));
-	}
-
-	#endregion
-	/// <summary>
-	/// Adds a new entity to the database.
-	/// </summary>
-	/// <param name="entity">The entity to add.</param>
-	/// <returns>A task that returns <c>true</c> if the entity was successfully added, otherwise <c>false</c>.</returns>
+	// Adds a new entity to the database
 	internal async Task<bool> AddAsync(DbContext _dbContext, T entity)
 	{
 		try
@@ -285,12 +61,7 @@ public class GenericRepository<T> where T : class //TODO logs
 		}
 	}
 
-	/// <summary>
-	/// Updates specific properties of an existing entity that are attached to the context.
-	/// </summary>
-	/// <param name="entity">The entity with updated values.</param>
-	/// <param name="updatedValues">A dictionary containing the property names and their updated values.</param>
-	/// <returns>A task that returns <c>true</c> if the entity was successfully updated, otherwise <c>false</c>.</returns>
+	// Updates specific properties of an existing entity that are attached to the context
 	internal async Task<bool> UpdateAttachedFieldsAsync(DbContext _dbContext, T entity)
 	{
 		try
@@ -352,12 +123,7 @@ public class GenericRepository<T> where T : class //TODO logs
 		}
 	}
 
-
-	/// <summary>
-	/// Deletes an entity by its identifier.
-	/// </summary>
-	/// <param name="id">The identifier of the entity to delete.</param>
-	/// <returns>A task that returns <c>true</c> if the entity was successfully deleted, otherwise <c>false</c>.</returns>
+	// Deletes an entity by its identifier
 	internal async Task<bool> DeleteAsync<TKey>(DbContext _dbContext, Expression<Func<T, TKey>> fieldSelector, TKey value)
 	{
 		try
@@ -373,19 +139,8 @@ public class GenericRepository<T> where T : class //TODO logs
 			throw;
 		}
 	}
-	/// <summary>
-	/// Asynchronously checks if any record in the database matches the specified condition.
-	/// </summary>
-	/// <typeparam name="T">The type of the entity being queried.</typeparam>
-	/// <param name="context">The database context used to access the entity set.</param>
-	/// <param name="predicate">The condition to evaluate for the existence of a matching record.</param>
-	/// <returns>
-	/// A task that represents the asynchronous operation. 
-	/// The task result contains <c>true</c> if any record matches the condition; otherwise, <c>false</c>.
-	/// </returns>
-	/// <exception cref="ArgumentNullException">
-	/// Thrown if <paramref name="context"/> or <paramref name="predicate"/> is null.
-	/// </exception>
+
+	// Asynchronously checks if any record in the database matches the specified condition
 	public async Task<bool> AnyAsync(DbContext context, Expression<Func<T, bool>> predicate)
 	{
 		if (context == null) throw new ArgumentNullException(nameof(context));

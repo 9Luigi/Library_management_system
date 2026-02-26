@@ -1,6 +1,7 @@
 ﻿using Library.Infrastructure.Repositories;
 using Microsoft.Extensions.Logging;
 using Library.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 namespace Library.Application.Services.CRUD
 {
 	/// <summary>
@@ -36,23 +37,19 @@ namespace Library.Application.Services.CRUD
 
 			try
 			{
-				var books = await _bookRepository.GetCollectionWithProjectionAsync(
-					b => new
-					{
-						b.Id,
-						b.Title,
-						b.Genre,
-						b.Description,
-						b.PublicationDate,
-						b.Amount
-					},
-					dbContext,
-					b => b.Amount > 0
-				);
+				var books = await dbContext.Set<Book>().Where(b => b.Amount > 0).Select(b => new
+				{
+					b.Id,
+					b.Title,
+					b.Genre,
+					b.Description,
+					b.PublicationDate,
+					b.Amount
+				}).ToListAsync();
 
 				_logger.LogInformation("Retrieved {Count} books from the database.", books.Count);
 
-				return books.Cast<dynamic>().ToList();
+				return books.Cast<dynamic>().ToList(); //TODO : Refactor to avoid dynamic
 			}
 			catch (Exception ex)
 			{

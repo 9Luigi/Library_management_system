@@ -3,7 +3,7 @@ using Library.Domain.Models;
 using Library.Infrastructure.Repositories;
 using Library.Presentation.Controllers;
 using Microsoft.Extensions.Logging;
-using static Library.FormMembers;
+using System.ComponentModel;
 
 namespace Library
 {
@@ -15,15 +15,20 @@ namespace Library
 		readonly BookService _bookService;
 		readonly MemberService _memberService;
 		readonly LibraryService _libraryService;
-
+		readonly LibraryContextForEFcore _context = new(); //Disposed in desighner file
 		private enum GridCriterion
 		{
 			AllBooks,
 			BooksByMember
 		}
+
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public string ActionMode { get; set; } = "BORROW";
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public long MemberIIN { get; set; }
+
 		public FormBorrowOrReturnBook()
 		{
-			MemberCreateOrUpdateEvent += SelectBooksByIIN; //TODO create another event for this???
 			_logger = LoggerService.CreateLogger<FormBorrowOrReturnBook>();
 			_bookRepository = new GenericRepository<Book>();
 			_memberRepository = new GenericRepository<Member>();
@@ -32,7 +37,27 @@ namespace Library
 			_libraryService = new();
 			InitializeComponent();
 		}
-		internal long IIN { get; private set; }
+
+		private void FormBorrowOrReturnBook_Load(object sender, EventArgs e)
+		{
+			DataGridViewController.CustomizeDataGridView(this.DataGridViewForLendBook);
+
+			InitializeForm();
+		}
+
+		private void InitializeForm()
+		{
+			switch (ActionMode.ToUpper())
+			{
+				case "BORROW":
+					FillGridWith(GridCriterion.AllBooks);
+					break;
+				case "RETURN":
+					FillGridWith(GridCriterion.BooksByMember);
+					break;
+			}
+		}
+
 		private async void FillGridWith(GridCriterion criterion)
 		{
 			switch (criterion)
@@ -46,26 +71,7 @@ namespace Library
 				case GridCriterion.BooksByMember:
 					returnBookToolStripMenuItem.Visible = true;
 					lendABookToolStripMenuItem.Visible = false;
-					await _memberService.GetMemberWithHisBooksToDataGridViewAsync(IIN, DataGridViewForLendBook);
-					break;
-			}
-		}
-
-
-
-		//TODO make toolstrip enabled false or something like that than to example deny acces to return strip when action is borrow
-		private void SelectBooksByIIN(MemberEventArgs e)
-		{
-			IIN = e.IIN;
-			switch (e.Action)
-			{
-				case "BORROW":
-					FillGridWith(GridCriterion.AllBooks);
-					break;
-				case "RETURN":
-					FillGridWith(GridCriterion.BooksByMember);
-					break;
-				default:
+					await _memberService.GetMemberWithHisBooksToDataGridViewAsync(_context, MemberIIN, DataGridViewForLendBook);
 					break;
 			}
 		}
@@ -80,14 +86,14 @@ namespace Library
 			}
 		}
 
-		private async void BorrowABookToolStripMenuItem_Click(object sender, EventArgs e) //TODO refresh grid
+		private async void BorrowABookToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			try
 			{
 				(bool isValid, int bookID) = LibraryService.TryGetValueFromRow<int>(DataGridViewForLendBook);
 				if (isValid)
 				{
-					var result = await _libraryService.BorrowBook(bookID, IIN);
+					var result = await _libraryService.BorrowBook(bookID, MemberIIN);
 					if (result) MessageBoxController.ShowSuccess("Book were succesfully borrowed");
 					FillGridWith(GridCriterion.AllBooks);
 				}
@@ -102,14 +108,14 @@ namespace Library
 			}
 		}
 
-		private async void ReturnBookToolStripMenuItem_Click(object sender, EventArgs e) //TODO refresh grid
+		private async void ReturnBookToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			try
 			{
-				(bool isValid, int bookID) = LibraryService.TryGetValueFromRow<int>(DataGridViewForLendBook, 1); //1 is index of column with book id
+				(bool isValid, int bookID) = LibraryService.TryGetValueFromRow<int>(DataGridViewForLendBook, 1);
 				if (isValid)
 				{
-					await _libraryService.ReturnBook(bookID, IIN);
+					await _libraryService.ReturnBook(bookID, MemberIIN);
 					FillGridWith(GridCriterion.BooksByMember);
 				}
 			}
@@ -123,15 +129,9 @@ namespace Library
 			}
 		}
 
-
 		private void FormBorrowOrRecieveBook_FormClosed(object sender, FormClosedEventArgs e)
 		{
 			DataGridViewForLendBook.DataSource = null;
-		}
-
-		private void FormBorrowOrRecieveBook_Load(object sender, EventArgs e)
-		{
-			DataGridViewController.CustomizeDataGridView(this.DataGridViewForLendBook);
 		}
 	}
 }

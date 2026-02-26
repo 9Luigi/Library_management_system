@@ -102,7 +102,6 @@
 			dataGridViewForMembers.TabIndex = 2;
 			dataGridViewForMembers.CellMouseClick += View_CellMouseClick;
 			dataGridViewForMembers.CellMouseDoubleClick += DataGridViewForMembers_CellMouseDoubleClick;
-			dataGridViewForMembers.CurrentCellChanged += DataGridViewForMembers_CurrentCellChanged;
 			// 
 			// cmMember
 			// 

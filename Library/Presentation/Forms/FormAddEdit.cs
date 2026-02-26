@@ -7,15 +7,15 @@ using Library.Properties;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.Globalization;
-using static Library.FormMembers;
 
 namespace Library
 {
-	//TODO logs via ILogger to XML
-
 	public partial class FaddEdit_prop : Form, IDisposable
 	{
-	
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public string ActionMode { get; set; } = "CREATE"; // Default action mode is CREATE
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public long MemberIIN { get; set; }
 		byte[]? PhotoAsBytes { get; set; }
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -23,9 +23,9 @@ namespace Library
 		private readonly MemberService _memberService;
 		private LibraryContextForEFcore _context; //Disposed in desighner file
 		private readonly ControlsController controlsController = new();
+
 		public FaddEdit_prop()
 		{
-			MemberCreateOrUpdateEvent += ActionRequested; // Subscribe to event, event is invoked on update/create calls
 			InitializeComponent();
 			pbPhoto.Image = Properties.Resources.NoImage;
 
@@ -50,8 +50,6 @@ namespace Library
 			}
 		}
 
-	
-
 		private async void BAddMember_Click(object sender, EventArgs e)
 		{
 			if (CheckFieldsBeforeAction())
@@ -60,17 +58,17 @@ namespace Library
 			}
 		}
 
-		internal async void ActionRequested(MemberEventArgs e)
+		internal async void ActionRequested()
 		{
-			switch (e.Action)
+			switch (ActionMode.ToUpper())
 			{
-				case "EDIT":
+				case "UPDATE":
 					BUpdateMember.Visible = true;
 					BAddMember.Visible = false;
 					MTBIIN.Enabled = false;
 					try
 					{
-						MemberToEdit = await _memberService.GetMemberByIINForUpdateAsync(e.IIN);
+						MemberToEdit = await _memberService.GetMemberByIINForUpdateAsync(_context, MemberIIN);
 						if (MemberToEdit != null)
 						{
 							FillMemberData(MemberToEdit);
@@ -149,7 +147,7 @@ namespace Library
 						);
 					try
 					{
-						if (await _memberService.CreateMemberAsync(createdMember))
+						if (await _memberService.CreateMemberAsync(_context, createdMember))
 						{
 							var result = MessageBoxController.ShowConfirmation("Do you want to add another one?",
 									$"{createdMember.Name} {createdMember.Surname} added successfully");
@@ -163,15 +161,15 @@ namespace Library
 								this.Close();
 							}
 						}
-						else MessageBoxController.ShowWarning($"Cannot add {createdMember.Name} {createdMember.Surname} try again later. Inner exception: {{ex.InnerException?.Message ?? \"None\"}}\"");
+						else MessageBoxController.ShowWarning($"Cannot add {createdMember.Name} {createdMember.Surname} try again later.");
 					}
 					catch (DbUpdateException ex)
 					{
-						ErrorController.HandleException(ex, $"Error updating database: {ex.Message}. Inner exception: {ex.InnerException?.Message ?? "None"}");
+						ErrorController.HandleException(ex, $"Error updating database: {ex.Message}.");
 					}
 					catch (Exception ex)
 					{
-						ErrorController.HandleException(ex, $"An unexpected error occurred: {ex.Message}. Please contact support. Inner exception: {{ex.InnerException?.Message ?? \"None\"}}\"");
+						ErrorController.HandleException(ex, $"An unexpected error occurred: {ex.Message}.");
 					}
 					break;
 
@@ -187,7 +185,7 @@ namespace Library
 					MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);
 
 					// Save the changes to the database
-					bool isUpdated = await _memberService.UpdateMemberChangedFieldsAsync(MemberToEdit);
+					bool isUpdated = await _memberService.UpdateMemberChangedFieldsAsync(_context, MemberToEdit);
 
 					if (!isUpdated)
 					{
@@ -208,7 +206,7 @@ namespace Library
 					{
 
 						FillMemberData(MemberToEdit);
-						if (MemberToEdit.Photo == null) return; //TODO message and log
+						if (MemberToEdit.Photo == null) return;
 						pbPhoto.Image = PictureController.ConvertByteToImage(MemberToEdit.Photo);
 						// Focus on the first field
 						TBName.Focus();
@@ -249,8 +247,12 @@ namespace Library
 
 		private void FaddEdit_prop_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			MemberCreateOrUpdateEvent -= ActionRequested; // Unsubscribe from event to prevent memory leaks
 			this.Dispose();
+		}
+
+		private void FaddEdit_prop_Load(object sender, EventArgs e)
+		{
+			ActionRequested();
 		}
 	}
 }
