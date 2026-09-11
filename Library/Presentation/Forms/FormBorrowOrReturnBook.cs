@@ -10,12 +10,12 @@ namespace Library
 	public partial class FormBorrowOrReturnBook : Form
 	{
 		readonly ILogger _logger;
-		readonly GenericRepository<Book> _bookRepository;
-		readonly GenericRepository<Member> _memberRepository;
+		readonly Repository<Book> _bookRepository;
+		readonly Repository<Member> _memberRepository;
 		readonly BookService _bookService;
 		readonly MemberService _memberService;
-		readonly LibraryService _libraryService;
-		readonly LibraryContextForEFcore _context = new(); //Disposed in desighner file
+		readonly CirculationService _libraryService;
+		readonly LibraryContext _context = new(); //Disposed in desighner file
 		private enum GridCriterion
 		{
 			AllBooks,
@@ -30,17 +30,17 @@ namespace Library
 		public FormBorrowOrReturnBook()
 		{
 			_logger = LoggerService.CreateLogger<FormBorrowOrReturnBook>();
-			_bookRepository = new GenericRepository<Book>();
-			_memberRepository = new GenericRepository<Member>();
+			_bookRepository = new Repository<Book>();
+			_memberRepository = new Repository<Member>();
 			_bookService = new(_logger, _bookRepository);
-			_memberService = new(_logger, _memberRepository, new LibraryContextForEFcore());
+			_memberService = new(_logger, _memberRepository, new LibraryContext());
 			_libraryService = new();
 			InitializeComponent();
 		}
 
 		private void FormBorrowOrReturnBook_Load(object sender, EventArgs e)
 		{
-			DataGridViewController.CustomizeDataGridView(this.DataGridViewForLendBook);
+			DataGridViewHelper.CustomizeDataGridView(this.DataGridViewForLendBook);
 
 			InitializeForm();
 		}
@@ -90,21 +90,21 @@ namespace Library
 		{
 			try
 			{
-				(bool isValid, int bookID) = LibraryService.TryGetValueFromRow<int>(DataGridViewForLendBook);
+				(bool isValid, int bookID) = CirculationService.TryGetValueFromRow<int>(DataGridViewForLendBook);
 				if (isValid)
 				{
 					var result = await _libraryService.BorrowBook(bookID, MemberIIN);
-					if (result) MessageBoxController.ShowSuccess("Book were succesfully borrowed");
+					if (result) MessageBoxHelper.ShowSuccess("Book were succesfully borrowed");
 					FillGridWith(GridCriterion.AllBooks);
 				}
 			}
 			catch (InvalidOperationException ex)
 			{
-				ErrorController.HandleException(ex, ex.Message);
+				ErrorHandler.HandleException(ex, ex.Message);
 			}
 			catch (Exception ex)
 			{
-				ErrorController.HandleException(ex, "An unexpected error occurred, contact system admin.");
+				ErrorHandler.HandleException(ex, "An unexpected error occurred, contact system admin.");
 			}
 		}
 
@@ -112,7 +112,7 @@ namespace Library
 		{
 			try
 			{
-				(bool isValid, int bookID) = LibraryService.TryGetValueFromRow<int>(DataGridViewForLendBook, 1);
+				(bool isValid, int bookID) = CirculationService.TryGetValueFromRow<int>(DataGridViewForLendBook, 1);
 				if (isValid)
 				{
 					await _libraryService.ReturnBook(bookID, MemberIIN);
@@ -121,11 +121,11 @@ namespace Library
 			}
 			catch (InvalidOperationException ex)
 			{
-				ErrorController.HandleException(ex, "Check if member has this book");
+				ErrorHandler.HandleException(ex, "Check if member has this book");
 			}
 			catch (Exception ex)
 			{
-				ErrorController.HandleException(ex, "An unexpected error occurred, contact system admin.");
+				ErrorHandler.HandleException(ex, "An unexpected error occurred, contact system admin.");
 			}
 		}
 

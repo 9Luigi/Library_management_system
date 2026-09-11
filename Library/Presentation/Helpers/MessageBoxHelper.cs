@@ -1,6 +1,6 @@
 ﻿namespace Library.Presentation.Controllers
 {
-	public static class MessageBoxController 
+	public static class MessageBoxHelper 
 	{
 		public static void ShowError(string message)
 		{

@@ -10,14 +10,14 @@ namespace Library.Application.Services.CRUD
 	internal class BookService
 	{
 		private readonly ILogger _logger;
-		private readonly GenericRepository<Book> _bookRepository;
+		private readonly Repository<Book> _bookRepository;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="BookService"/> class.
 		/// </summary>
 		/// <param name="logger">Logger instance to log information, warnings, and errors.</param>
 		/// <param name="bookRepository">Repository for accessing book data.</param>
-		internal BookService(ILogger logger, GenericRepository<Book> bookRepository)
+		internal BookService(ILogger logger, Repository<Book> bookRepository)
 		{
 			_logger = logger;
 			_bookRepository = bookRepository;
@@ -32,7 +32,7 @@ namespace Library.Application.Services.CRUD
 		/// <exception cref="Exception">Throws exception if an error occurs while fetching data.</exception>
 		internal async Task<List<dynamic>> GetAllBooksAsync()
 		{
-			using LibraryContextForEFcore dbContext = new();
+			using LibraryContext dbContext = new();
 			_logger.LogInformation("GetAllBooksAsync started.");
 
 			try
@@ -66,7 +66,7 @@ namespace Library.Application.Services.CRUD
 		/// <exception cref="KeyNotFoundException">Thrown when the book with the specified ID does not exist.</exception>
 		internal async Task<Book> GetBookAsync(int id)
 		{
-			using LibraryContextForEFcore dbContext = new();
+			using LibraryContext dbContext = new();
 			try
 			{
 				var book = await _bookRepository.GetByIdAsync(dbContext, id);

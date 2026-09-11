@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 namespace Library.Infrastructure.Repositories;
 
-public class GenericRepository<T> where T : class //TODO repositoty only for basic CRUD operations
+public class Repository<T> where T : class //TODO repositoty only for basic CRUD operations
 {
 
 	// Retrieves an entity by a specific field value from the database

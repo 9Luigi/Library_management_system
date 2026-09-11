@@ -11,16 +11,16 @@ namespace Library.Application.Services.CRUD
 	internal class MemberService
 	{
 		private readonly ILogger _logger;
-		private readonly GenericRepository<Member> _memberRepository;
+		private readonly Repository<Member> _memberRepository;
 
-		internal MemberService(ILogger logger, GenericRepository<Member> memberRepository, LibraryContextForEFcore context)
+		internal MemberService(ILogger logger, Repository<Member> memberRepository, LibraryContext context)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_memberRepository = memberRepository ?? throw new ArgumentNullException(nameof(memberRepository));
 		}
 		#region CRUD
 
-		internal async Task<List<dynamic>> GetFilteredMembersAsync(LibraryContextForEFcore dbOcntext, long IIN)
+		internal async Task<List<dynamic>> GetFilteredMembersAsync(LibraryContext dbOcntext, long IIN)
 		{
 			try
 			{
@@ -55,7 +55,7 @@ namespace Library.Application.Services.CRUD
 			}
 		}
 
-		internal async Task<List<dynamic>> GetMembersAsync(LibraryContextForEFcore dbContext)
+		internal async Task<List<dynamic>> GetMembersAsync(LibraryContext dbContext)
 		{
 			try
 			{
@@ -82,7 +82,7 @@ namespace Library.Application.Services.CRUD
 				throw;
 			}
 		}
-		internal async Task<byte[]> GetMemberPhotoByIINAsync(LibraryContextForEFcore _dbContext, long IIN)
+		internal async Task<byte[]> GetMemberPhotoByIINAsync(LibraryContext _dbContext, long IIN)
 		{
 			var photoBytes = await _dbContext.Members
 				.AsNoTracking()
@@ -96,7 +96,7 @@ namespace Library.Application.Services.CRUD
 			}
 			return photoBytes;
 		}
-		public async Task<int> GetBorrowedBooksCountAsync(LibraryContextForEFcore dbContext, long IIN)
+		public async Task<int> GetBorrowedBooksCountAsync(LibraryContext dbContext, long IIN)
 		{
 
 			return await dbContext.Members
@@ -104,7 +104,7 @@ namespace Library.Application.Services.CRUD
 				.Select(m => m.Books.Count)  // Get the count of borrowed books
 				.FirstOrDefaultAsync();
 		}
-		internal async Task<Member> GetMemberWithBorrowedBooksAsync(LibraryContextForEFcore dbContext,long IIN) //TODO : =>dynamic=>DTO
+		internal async Task<Member> GetMemberWithBorrowedBooksAsync(LibraryContext dbContext,long IIN) //TODO : =>dynamic=>DTO
 		{
 			try
 			{
@@ -151,7 +151,7 @@ namespace Library.Application.Services.CRUD
 			}
 		}
 
-		internal async Task<bool> CreateMemberAsync(LibraryContextForEFcore dbContext ,Member memberToCreate)
+		internal async Task<bool> CreateMemberAsync(LibraryContext dbContext ,Member memberToCreate)
 		{
 			try
 			{
@@ -172,7 +172,7 @@ namespace Library.Application.Services.CRUD
 		}
 
 		internal async Task<bool> GetMemberWithHisBooksToDataGridViewAsync
-			(LibraryContextForEFcore dbContext, long memberIIN, DataGridView dataGridView)
+			(LibraryContext dbContext, long memberIIN, DataGridView dataGridView)
 		{
 			_logger.LogInformation("Start fetching books for member with IIN: {MemberIIN}", memberIIN);
 
@@ -186,7 +186,7 @@ namespace Library.Application.Services.CRUD
 				_logger.LogWarning("No books found for member with IIN: {MemberIIN}", memberIIN);
 
 				// Display warning message using MessageBox instead of throwing an error
-				MessageBoxController.ShowWarning($"No books found for member with IIN: {memberIIN}.");
+				MessageBoxHelper.ShowWarning($"No books found for member with IIN: {memberIIN}.");
 
 				// Optionally clear the DataGridView as well
 				dataGridView.DataSource = null;
@@ -209,22 +209,22 @@ namespace Library.Application.Services.CRUD
 
 			return true;
 		}
-		internal async Task<bool> UpdateMemberChangedFieldsAsync(LibraryContextForEFcore dbContext, Member memberToUpdate)
+		internal async Task<bool> UpdateMemberChangedFieldsAsync(LibraryContext dbContext, Member memberToUpdate)
 		{
 			return await _memberRepository.UpdateAttachedFieldsAsync(dbContext!, memberToUpdate);
 		}
-		internal async Task<Member> GetMemberByIINForUpdateAsync(LibraryContextForEFcore dbContext, long IIN)
+		internal async Task<Member> GetMemberByIINForUpdateAsync(LibraryContext dbContext, long IIN)
 		{
 			return await _memberRepository.GetByFieldAsync(dbContext!, m => m.IIN, IIN);
 		}
 		#endregion
 		#region Validation
-		internal async Task<bool> IsIINExistsAsync(LibraryContextForEFcore dbContext, long IIN)
+		internal async Task<bool> IsIINExistsAsync(LibraryContext dbContext, long IIN)
 		{
 			bool isIINExists = await _memberRepository.AnyAsync(dbContext, m => m.IIN == IIN);
 			if (isIINExists)
 			{
-				MessageBoxController.ShowWarning($"A member with IIN {IIN} already exists.");
+				MessageBoxHelper.ShowWarning($"A member with IIN {IIN} already exists.");
 				return false;
 			}
 			return true;

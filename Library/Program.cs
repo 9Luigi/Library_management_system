@@ -13,10 +13,10 @@ namespace Library
         {
 			// Initialize the logger
 			var logger = LoggerService.CreateLogger<FormMain>(); // Replace with your actual logger implementation
-			ErrorController.Initialize(logger);
+			ErrorHandler.Initialize(logger);
 
 			// Set up global error handling
-			ErrorController.SetupGlobalErrorHandling();
+			ErrorHandler.SetupGlobalErrorHandling();
 
 			// To customize application configuration such as set high DPI settings or default font,
 			// see https://aka.ms/applicationconfiguration.

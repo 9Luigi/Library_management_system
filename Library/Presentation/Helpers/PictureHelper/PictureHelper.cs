@@ -6,7 +6,7 @@ namespace Library.Presentation.Controllers.PictureController
     /// <summary>
     /// A controller class for handling image-related operations such as conversion, compression, and file selection.
     /// </summary>
-    static internal class PictureController
+    static internal class PictureHelper
     {
         /// <summary>
         /// Converts an image to a byte array.
@@ -24,7 +24,7 @@ namespace Library.Presentation.Controllers.PictureController
             }
             catch (Exception ex)
             {
-                MessageBoxController.ShowError(ex.Message);
+                MessageBoxHelper.ShowError(ex.Message);
                 return Array.Empty<byte>();
             }
         }
@@ -76,7 +76,7 @@ namespace Library.Presentation.Controllers.PictureController
                 // Check if image is larger than 1 MB (1 MB = 1024 * 1024 bytes)
                 if (imageSize > 1024 * 1024)
                 {
-                    MessageBoxController.ShowInfo($"Image is {imageSize / 1024} MB, compressing image...");
+                    MessageBoxHelper.ShowInfo($"Image is {imageSize / 1024} MB, compressing image...");
                     photo = ConvertByteToImage(CompressImage(photo)); // Compress the image if it's larger than 10 MB
                 }
                 imageBytes = ImageToByteConvert(photo);
@@ -85,12 +85,12 @@ namespace Library.Presentation.Controllers.PictureController
                 photo = CorrectImageOrientation(photo); // Restrict photo rotation
 
 				// Checking aspect ratio using values ​​from a static class
-				bool isValidAspectRatio = AspectRatioRequirement.ValidAspectRatios
+				bool isValidAspectRatio = AspectRatioRequirements.ValidAspectRatios
 					.Any(ratio => Math.Abs(aspectRatio - ratio) <= 0.01);
 
 				if (!isValidAspectRatio)
 				{
-					MessageBoxController.ShowWarning("Photo must be be 3:4 / 6:8 / 4:5");
+					MessageBoxHelper.ShowWarning("Photo must be be 3:4 / 6:8 / 4:5");
 					photo.Dispose();
 					return null;
 				}
@@ -102,12 +102,12 @@ namespace Library.Presentation.Controllers.PictureController
 			}
 			catch (OutOfMemoryException ex)
             {
-                ErrorController.HandleException(ex, "Corrupted image or wrong format");
+                ErrorHandler.HandleException(ex, "Corrupted image or wrong format");
                 return null;
             }
             catch (Exception ex)
             {
-				ErrorController.HandleException(ex, "An error occurred: " + ex.Message);
+				ErrorHandler.HandleException(ex, "An error occurred: " + ex.Message);
                 return null;
             }
         }
@@ -170,7 +170,7 @@ namespace Library.Presentation.Controllers.PictureController
             }
             catch (Exception ex)
             {
-                MessageBoxController.ShowError("Error compressing image: " + ex.Message);
+                MessageBoxHelper.ShowError("Error compressing image: " + ex.Message);
                 return Array.Empty<byte>();
             }
         }

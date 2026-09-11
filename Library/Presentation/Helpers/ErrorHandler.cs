@@ -5,7 +5,7 @@ namespace Library.Presentation.Controllers
 	using System;
 	using System.Windows.Forms;
 
-	public static class ErrorController
+	public static class ErrorHandler
 	{
 		private static ILogger _logger;
 
@@ -22,7 +22,7 @@ namespace Library.Presentation.Controllers
 			_logger?.LogError(ex, "Error: {Message}", ex.Message);
 
 			// Show a message box to the user
-			MessageBoxController.ShowError(userMessage);
+			MessageBoxHelper.ShowError(userMessage);
 		}
 
 		// Set up global error handling

@@ -6,17 +6,17 @@ namespace Library.Presentation.Controllers
     /// <summary>
     /// Controller responsible for managing the enable/disable state of controls in a Windows Form.
     /// </summary>
-    class ControlsController
+    class ControlsHelper
     {
-        private readonly ILogger<ControlsController> _logger;
+        private readonly ILogger<ControlsHelper> _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ControlsController"/> class.
+        /// Initializes a new instance of the <see cref="ControlsHelper"/> class.
         /// </summary>
         /// <param name="logger">The logger instance to log messages related to control operations.</param>
-        public ControlsController()
+        public ControlsHelper()
         {
-            _logger = LoggerService.CreateLogger<ControlsController>();
+            _logger = LoggerService.CreateLogger<ControlsHelper>();
         }
 
         /// <summary>

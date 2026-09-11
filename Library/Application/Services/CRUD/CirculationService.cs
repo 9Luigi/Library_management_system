@@ -6,17 +6,17 @@ using Library.Presentation.Controllers;
 
 namespace Library.Application.Services.CRUD
 {
-	internal class LibraryService
+	internal class CirculationService
 	{
-		private readonly GenericRepository<Member> _memberRepository;
-		private readonly GenericRepository<Book> _bookRepository;
+		private readonly Repository<Member> _memberRepository;
+		private readonly Repository<Book> _bookRepository;
 		private readonly ILogger _logger;
 
-		public LibraryService()
+		public CirculationService()
 		{
-			_bookRepository = new GenericRepository<Book>();
-			_memberRepository = new GenericRepository<Member>();
-			_logger = LoggerService.CreateLogger<LibraryService>();
+			_bookRepository = new Repository<Book>();
+			_memberRepository = new Repository<Member>();
+			_logger = LoggerService.CreateLogger<CirculationService>();
 		}
 
 		#region Helper
@@ -96,7 +96,7 @@ namespace Library.Application.Services.CRUD
 		{
 			try
 			{
-				using var _dbContext = new LibraryContextForEFcore();
+				using var _dbContext = new LibraryContext();
 				_logger.LogInformation("Attempting to borrow book with ID: {BookID} for member with IIN: {IIN}", bookID, IIN);
 
 				// Retrieve the book directly from the DbContext
@@ -174,14 +174,14 @@ namespace Library.Application.Services.CRUD
 			{
 				_logger.LogInformation("Attempting to return book with ID: {BookID} for member with IIN: {IIN}", bookID, IIN);
 
-				using LibraryContextForEFcore context = new();
+				using LibraryContext context = new();
 
 				// Retrieve the book to return
 				var bookToReturn = await context.Books.FindAsync(bookID);
 				if (bookToReturn == null)
 				{
 					_logger.LogWarning("Book with ID {BookID} not found", bookID);
-					MessageBoxController.ShowWarning($"Book with ID {bookID} not found.");
+					MessageBoxHelper.ShowWarning($"Book with ID {bookID} not found.");
 					return false;
 				}
 
@@ -192,7 +192,7 @@ namespace Library.Application.Services.CRUD
 				if (memberWithBook == null)
 				{
 					_logger.LogWarning("Member with IIN {IIN} not found", IIN);
-					MessageBoxController.ShowWarning($"Member with IIN {IIN} not found.");
+					MessageBoxHelper.ShowWarning($"Member with IIN {IIN} not found.");
 					return false;
 				}
 
@@ -201,7 +201,7 @@ namespace Library.Application.Services.CRUD
 				if (!hasBorrowedBook)
 				{
 					_logger.LogWarning("Member with IIN {IIN} has not borrowed book with ID {BookID}", IIN, bookID);
-					MessageBoxController.ShowWarning($"Member with IIN {IIN} has not borrowed book with ID {bookID}.");
+					MessageBoxHelper.ShowWarning($"Member with IIN {IIN} has not borrowed book with ID {bookID}.");
 					return false;
 				}
 
@@ -214,12 +214,12 @@ namespace Library.Application.Services.CRUD
 				if (success)
 				{
 					_logger.LogInformation("Book with ID {BookID} successfully returned by member with IIN {IIN}", bookID, IIN);
-					MessageBoxController.ShowSuccess($"Book with ID {bookID} successfully returned.");
+					MessageBoxHelper.ShowSuccess($"Book with ID {bookID} successfully returned.");
 				}
 				else
 				{
 					_logger.LogError("Failed to save changes for returning book with ID {BookID}", bookID);
-					MessageBoxController.ShowError($"Failed to save changes for returning book with ID {bookID}. Please try again.");
+					MessageBoxHelper.ShowError($"Failed to save changes for returning book with ID {bookID}. Please try again.");
 				}
 
 				return success;
@@ -227,7 +227,7 @@ namespace Library.Application.Services.CRUD
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occurred while returning book with ID {BookID} for member with IIN {IIN}", bookID, IIN);
-				MessageBoxController.ShowError($"An error occurred while returning the book: {ex.Message}");
+				MessageBoxHelper.ShowError($"An error occurred while returning the book: {ex.Message}");
 				return false;
 			}
 		}

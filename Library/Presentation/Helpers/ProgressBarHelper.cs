@@ -6,7 +6,7 @@ namespace Library.Presentation.Controllers
 	/// <summary>
 	/// Controller for managing ProgressBar operations.
 	/// </summary>
-	internal static class ProgressBarController
+	internal static class ProgressBarHelper
 	{
 		private static readonly Lazy<ILogger> _loggerLazy = new(() =>
 		{

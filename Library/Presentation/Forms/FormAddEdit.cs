@@ -3,6 +3,7 @@ using Library.Domain.Models;
 using Library.Infrastructure.Repositories;
 using Library.Presentation.Controllers;
 using Library.Presentation.Controllers.PictureController;
+using Library.Presentation.Validation;
 using Library.Properties;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
@@ -10,249 +11,273 @@ using System.Globalization;
 
 namespace Library
 {
-	public partial class FaddEdit_prop : Form, IDisposable
-	{
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public string ActionMode { get; set; } = "CREATE"; // Default action mode is CREATE
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public long MemberIIN { get; set; }
-		byte[]? PhotoAsBytes { get; set; }
+    public partial class FaddEdit_prop : Form, IDisposable
+    {
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string ActionMode { get; set; } = "CREATE"; // Default action mode is CREATE
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public long MemberIIN { get; set; }
+        byte[]? PhotoAsBytes { get; set; }
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		internal Member? MemberToEdit { get; set; }
-		private readonly MemberService _memberService;
-		private LibraryContextForEFcore _context; //Disposed in desighner file
-		private readonly ControlsController controlsController = new();
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        internal Member? MemberToEdit { get; set; }
+        private readonly MemberService _memberService;
+        private LibraryContext _context; //Disposed in desighner file
+        private readonly ControlsHelper controlsController = new();
 
-		public FaddEdit_prop()
-		{
-			InitializeComponent();
-			pbPhoto.Image = Properties.Resources.NoImage;
+        public FaddEdit_prop()
+        {
+            InitializeComponent();
+            pbPhoto.Image = Properties.Resources.NoImage;
 
-			var _logger = LoggerService.CreateLogger<FaddEdit_prop>();
-			_context = new LibraryContextForEFcore();
-			_memberService = new(_logger, new GenericRepository<Member>(), _context);
-		}
+            var _logger = LoggerService.CreateLogger<FaddEdit_prop>();
+            _context = new LibraryContext();
+            _memberService = new(_logger, new Repository<Member>(), _context);
+        }
 
-		private void BSelectPhoto_Click(object sender, EventArgs e)
-		{
-			var photo = PictureController.GetImageFromFile();
-			// Set photo on member's photo in picture box relying on photo or default photo if error
-			if (photo == null || photo is not Image)
-			{
-				pbPhoto.Image = Resources.NoImage;
-				PhotoAsBytes = PictureController.ImageToByteConvert(Resources.NoImage);
-			}
-			else
-			{
-				pbPhoto.Image = (Image)photo;
-				PhotoAsBytes = PictureController.ImageToByteConvert((Image)photo);
-			}
-		}
+        private void BSelectPhoto_Click(object sender, EventArgs e)
+        {
+            var photo = PictureHelper.GetImageFromFile();
+            // Set photo on member's photo in picture box relying on photo or default photo if error
+            if (photo == null || photo is not Image)
+            {
+                pbPhoto.Image = Resources.NoImage;
+                PhotoAsBytes = PictureHelper.ImageToByteConvert(Resources.NoImage);
+            }
+            else
+            {
+                pbPhoto.Image = (Image)photo;
+                PhotoAsBytes = PictureHelper.ImageToByteConvert((Image)photo);
+            }
+        }
 
-		private async void BAddMember_Click(object sender, EventArgs e)
-		{
-			if (CheckFieldsBeforeAction())
-			{
-				await ActionWithMember("CREATE");
-			}
-		}
+        private async void BAddMember_Click(object sender, EventArgs e)
+        {
+            if (CheckFieldsBeforeAction())
+            {
+                await ActionWithMember("CREATE");
+            }
+        }
 
-		internal async void ActionRequested()
-		{
-			switch (ActionMode.ToUpper())
-			{
-				case "UPDATE":
-					BUpdateMember.Visible = true;
-					BAddMember.Visible = false;
-					MTBIIN.Enabled = false;
-					try
-					{
-						MemberToEdit = await _memberService.GetMemberByIINForUpdateAsync(_context, MemberIIN);
-						if (MemberToEdit != null)
-						{
-							FillMemberData(MemberToEdit);
-						}
-						else
-						{
-							MessageBoxController.ShowWarning("Cannot load data, probably member was deleted by another employee while you edit, try again please");
-						}
-					}
-					catch (Exception ex)
-					{
-						MessageBoxController.ShowError($"An error occurred while loading member data: {ex.Message}");
-					}
-					break;
-				case "CREATE":
-					MTBIIN.Enabled = true;
-					BUpdateMember.Visible = false;
-					BAddMember.Visible = true;
-					ResetForm();
-					break;
-				default:
-					break;
-			}
-		}
+        internal async void ActionRequested()
+        {
+            switch (ActionMode.ToUpper())
+            {
+                case "UPDATE":
+                    BUpdateMember.Visible = true;
+                    BAddMember.Visible = false;
+                    MTBIIN.Enabled = false;
+                    try
+                    {
+                        MemberToEdit = await _memberService.GetMemberByIINForUpdateAsync(_context, MemberIIN);
+                        if (MemberToEdit != null)
+                        {
+                            FillMemberData(MemberToEdit);
+                        }
+                        else
+                        {
+                            MessageBoxHelper.ShowWarning("Cannot load data, probably member was deleted by another employee while you edit, try again please");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBoxHelper.ShowError($"An error occurred while loading member data: {ex.Message}");
+                    }
+                    break;
+                case "CREATE":
+                    MTBIIN.Enabled = true;
+                    BUpdateMember.Visible = false;
+                    BAddMember.Visible = true;
+                    ResetForm();
+                    break;
+                default:
+                    break;
+            }
+        }
 
-		private bool CheckFieldsBeforeAction()
-		{
-			bool allFieldsValid = this.Controls
-				.OfType<TextBoxBase>()
-				.All(textBox => TextBoxBaseController.CheckTextBoxBaseTextOnNull(textBox));
+        private bool CheckFieldsBeforeAction()
+        {
+            // 1. Пустые поля
+            bool allFieldsFilled = this.Controls
+                .OfType<TextBoxBase>()
+                .All(TextBoxHelper.CheckTextBoxBaseTextOnNull);
 
-			if (!allFieldsValid) return false;
+            if (!allFieldsFilled) return false;
 
-			bool areRegexValid = new[]
-			{
-				RegexController.Check(TBName.Text, TBName),
-				RegexController.Check(TBSurname.Text, TBSurname),
-				RegexController.Check(MTBBirthday.Text, MTBBirthday),
-				RegexController.Check(MTBAdress.Text, MTBAdress),
-				RegexController.Check(MTBPhoneNumber.Text, MTBPhoneNumber)
-			}.All(valid => valid);
+            // 2. Обязательные поля по паттернам
+            var checks = new (FieldKind Kind, string Value)[]
+            {
+                (FieldKind.Name,        TBName.Text),
+                (FieldKind.Surname,     TBSurname.Text),
+                (FieldKind.Birthday,    MTBBirthday.Text),
+                (FieldKind.Address,     MTBAdress.Text),
+                (FieldKind.PhoneNumber, MTBPhoneNumber.Text),
+            };
 
-			if (!areRegexValid) return false;
+            foreach (var (kind, value) in checks)
+            {
+                var result = InputValidator.Validate(kind, value);
+                if (!result.IsValid)
+                {
+                    MessageBoxHelper.ShowWarning(result.Error!);
+                    return false;
+                }
+            }
 
-			return string.IsNullOrEmpty(TBPatronymic.Text) || TBPatronymic.Text == "None" || RegexController.Check(TBPatronymic.Text, TBPatronymic);
-		}
+            // 3. Отчество — необязательное
+            bool patronymicOmitted =
+                string.IsNullOrEmpty(TBPatronymic.Text) || TBPatronymic.Text == "None";
 
-		private static string CheckIfHasPatronymic(string patronymic)
-		{
-			if (patronymic != "")
-			{
-				return patronymic;
-			}
-			else
-			{
-				return "None";
-			}
-		}
+            if (!patronymicOmitted)
+            {
+                var result = InputValidator.Validate(FieldKind.Patronymic, TBPatronymic.Text);
+                if (!result.IsValid)
+                {
+                    MessageBoxHelper.ShowWarning(result.Error!);
+                    return false;
+                }
+            }
 
-		private async Task ActionWithMember(string operation)
-		{
-			switch (operation)
-			{
-				case "CREATE":
-					//if(_memberService.IsIINExistsAsync()) //TODO check if IIN exists via MemberService
-					Member createdMember = new
-						(
-							TBName.Text,
-							TBSurname.Text,
-							DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture),
-							MTBAdress.Text,
-							Convert.ToInt64(MTBIIN.Text),
-							MTBPhoneNumber.Text,
-							PhotoAsBytes!,
-							CheckIfHasPatronymic(TBPatronymic.Text)
-						);
-					try
-					{
-						if (await _memberService.CreateMemberAsync(_context, createdMember))
-						{
-							var result = MessageBoxController.ShowConfirmation("Do you want to add another one?",
-									$"{createdMember.Name} {createdMember.Surname} added successfully");
+            return true;
+        }
 
-							if (result)
-							{
-								ResetForm();
-							}
-							else
-							{
-								this.Close();
-							}
-						}
-						else MessageBoxController.ShowWarning($"Cannot add {createdMember.Name} {createdMember.Surname} try again later.");
-					}
-					catch (DbUpdateException ex)
-					{
-						ErrorController.HandleException(ex, $"Error updating database: {ex.Message}.");
-					}
-					catch (Exception ex)
-					{
-						ErrorController.HandleException(ex, $"An unexpected error occurred: {ex.Message}.");
-					}
-					break;
+        private static string CheckIfHasPatronymic(string patronymic)
+        {
+            if (patronymic != "")
+            {
+                return patronymic;
+            }
+            else
+            {
+                return "None";
+            }
+        }
 
-				case "UPDATE":
-					// Directly update the object's properties
-					MemberToEdit!.Name = TBName.Text;
-					MemberToEdit.Surname = TBSurname.Text;
-					MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
-					MemberToEdit.BirthDay = DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture);
-					MemberToEdit.Age = byte.Parse(TBAge.Text);
-					MemberToEdit.Adress = MTBAdress.Text;
-					MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
-					MemberToEdit.Photo = PictureController.ImageToByteConvert(pbPhoto.Image);
+        private async Task ActionWithMember(string operation)
+        {
+            switch (operation)
+            {
+                case "CREATE":
+                    //if(_memberService.IsIINExistsAsync()) //TODO check if IIN exists via MemberService
+                    Member createdMember = new
+                        (
+                            TBName.Text,
+                            TBSurname.Text,
+                            DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture),
+                            MTBAdress.Text,
+                            Convert.ToInt64(MTBIIN.Text),
+                            MTBPhoneNumber.Text,
+                            PhotoAsBytes!,
+                            CheckIfHasPatronymic(TBPatronymic.Text)
+                        );
+                    try
+                    {
+                        if (await _memberService.CreateMemberAsync(_context, createdMember))
+                        {
+                            var result = MessageBoxHelper.ShowConfirmation("Do you want to add another one?",
+                                    $"{createdMember.Name} {createdMember.Surname} added successfully");
 
-					// Save the changes to the database
-					bool isUpdated = await _memberService.UpdateMemberChangedFieldsAsync(_context, MemberToEdit);
+                            if (result)
+                            {
+                                ResetForm();
+                            }
+                            else
+                            {
+                                this.Close();
+                            }
+                        }
+                        else MessageBoxHelper.ShowWarning($"Cannot add {createdMember.Name} {createdMember.Surname} try again later.");
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        ErrorHandler.HandleException(ex, $"Error updating database: {ex.Message}.");
+                    }
+                    catch (Exception ex)
+                    {
+                        ErrorHandler.HandleException(ex, $"An unexpected error occurred: {ex.Message}.");
+                    }
+                    break;
 
-					if (!isUpdated)
-					{
-						MessageBoxController.ShowWarning("You didn't change member's fields");
-						return;
-					}
-					else
-					{
-						MessageBoxController.ShowSuccess("Member's fields updated successfully");
-					}
+                case "UPDATE":
+                    // Directly update the object's properties
+                    MemberToEdit!.Name = TBName.Text;
+                    MemberToEdit.Surname = TBSurname.Text;
+                    MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
+                    MemberToEdit.BirthDay = DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture);
+                    MemberToEdit.Age = byte.Parse(TBAge.Text);
+                    MemberToEdit.Adress = MTBAdress.Text;
+                    MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
+                    MemberToEdit.Photo = PictureHelper.ImageToByteConvert(pbPhoto.Image);
 
-					var closeDialog = MessageBoxController.ShowConfirmation($"{MemberToEdit.Name} {MemberToEdit.Surname} updated successfully. Close the form?", "Update Successful");
-					if (closeDialog)
-					{
-						Close();
-					}
-					else
-					{
+                    // Save the changes to the database
+                    bool isUpdated = await _memberService.UpdateMemberChangedFieldsAsync(_context, MemberToEdit);
 
-						FillMemberData(MemberToEdit);
-						if (MemberToEdit.Photo == null) return;
-						pbPhoto.Image = PictureController.ConvertByteToImage(MemberToEdit.Photo);
-						// Focus on the first field
-						TBName.Focus();
-					}
-					break;
-			}
-		}
+                    if (!isUpdated)
+                    {
+                        MessageBoxHelper.ShowWarning("You didn't change member's fields");
+                        return;
+                    }
+                    else
+                    {
+                        MessageBoxHelper.ShowSuccess("Member's fields updated successfully");
+                    }
 
-		private async void BUpdateMember_Click(object sender, EventArgs e)
-		{
-			if (CheckFieldsBeforeAction())
-			{
-				await ActionWithMember("UPDATE");
-			}
-		}
+                    var closeDialog = MessageBoxHelper.ShowConfirmation($"{MemberToEdit.Name} {MemberToEdit.Surname} updated successfully. Close the form?", "Update Successful");
+                    if (closeDialog)
+                    {
+                        Close();
+                    }
+                    else
+                    {
 
-		private void FillMemberData(Member member)
-		{
-			MTBIIN.Text = member.IIN.ToString();
-			TBName.Text = member.Name;
-			TBSurname.Text = member.Surname;
-			TBPatronymic.Text = member.Patronymic;
-			MTBBirthday.Text = member.BirthDay.ToString("dd/MM/yyyy");
-			TBAge.Text = member.Age.ToString();
-			MTBAdress.Text = member.Adress;
-			MTBPhoneNumber.Text = member.PhoneNumber;
+                        FillMemberData(MemberToEdit);
+                        if (MemberToEdit.Photo == null) return;
+                        pbPhoto.Image = PictureHelper.ConvertByteToImage(MemberToEdit.Photo);
+                        // Focus on the first field
+                        TBName.Focus();
+                    }
+                    break;
+            }
+        }
 
-			byte[]? imageByte = member.Photo;
-			pbPhoto.Image = imageByte != null ? PictureController.ConvertByteToImage(imageByte) : Resources.NoImage;
-		}
+        private async void BUpdateMember_Click(object sender, EventArgs e)
+        {
+            if (CheckFieldsBeforeAction())
+            {
+                await ActionWithMember("UPDATE");
+            }
+        }
 
-		private void ResetForm()
-		{
-			TextBoxBaseController.AllTextBoxBaseOnFormClear(this);
-			pictureBoxController.pictureBoxImageSetDefault(pbPhoto);
-			TBName.Focus();
-		}
+        private void FillMemberData(Member member)
+        {
+            MTBIIN.Text = member.IIN.ToString();
+            TBName.Text = member.Name;
+            TBSurname.Text = member.Surname;
+            TBPatronymic.Text = member.Patronymic;
+            MTBBirthday.Text = member.BirthDay.ToString("dd/MM/yyyy");
+            TBAge.Text = member.Age.ToString();
+            MTBAdress.Text = member.Adress;
+            MTBPhoneNumber.Text = member.PhoneNumber;
 
-		private void FaddEdit_prop_FormClosing(object sender, FormClosingEventArgs e)
-		{
-			this.Dispose();
-		}
+            byte[]? imageByte = member.Photo;
+            pbPhoto.Image = imageByte != null ? PictureHelper.ConvertByteToImage(imageByte) : Resources.NoImage;
+        }
 
-		private void FaddEdit_prop_Load(object sender, EventArgs e)
-		{
-			ActionRequested();
-		}
-	}
+        private void ResetForm()
+        {
+            TextBoxHelper.AllTextBoxBaseOnFormClear(this);
+            PictureBoxHelper.PictureBoxImageSetDefault(pbPhoto);
+            TBName.Focus();
+        }
+
+        private void FaddEdit_prop_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            this.Dispose();
+        }
+
+        private void FaddEdit_prop_Load(object sender, EventArgs e)
+        {
+            ActionRequested();
+        }
+    }
 }

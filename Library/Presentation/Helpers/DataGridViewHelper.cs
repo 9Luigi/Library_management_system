@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace Library.Presentation.Controllers
 {
-    internal static class DataGridViewController
+    internal static class DataGridViewHelper
     {
         /// <summary>
         /// Applies custom styles to a DataGridView.

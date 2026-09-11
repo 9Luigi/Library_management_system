@@ -12,15 +12,15 @@ namespace Library
 	public partial class FormMembers : Form //TODO context per form, not per method
 	{//TODO Handle zero members in db via service 
 		#region FieldsAndProperties
-		readonly GenericRepository<Member> _memberRepository;
+		readonly Repository<Member> _memberRepository;
 		readonly ILogger _logger;
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		internal CancellationTokenSource CancellationTokenSource { get; set; }
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		internal CancellationToken CancellationToken { get; set; }
-		readonly ControlsController controlsController = new();
+		readonly ControlsHelper controlsController = new();
 
-		readonly LibraryContextForEFcore _context = new(); //Disposed in desighner file
+		readonly LibraryContext _context = new(); //Disposed in desighner file
 
 		public FormMembers()
 		{
@@ -50,7 +50,7 @@ namespace Library
 			{
 				this.Cursor = Cursors.Default;
 				_logger.LogError(ex, "An error occurred while handling AddMemberToolStripMenuItem_Click");
-				MessageBoxController.ShowError($"An unexpected error occurred: {ex.Message}\nPlease contact support if the problem persists.");
+				MessageBoxHelper.ShowError($"An unexpected error occurred: {ex.Message}\nPlease contact support if the problem persists.");
 			}
 		}
 
@@ -62,7 +62,7 @@ namespace Library
 		private async void EditToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			_logger.LogInformation("EditToolStripMenuItem_Click: Started processing the event.");
-			(bool isValid, long IIN) = LibraryService.TryGetValueFromRow<long>(dataGridViewForMembers);
+			(bool isValid, long IIN) = CirculationService.TryGetValueFromRow<long>(dataGridViewForMembers);
 
 			if (isValid)
 			{
@@ -78,17 +78,17 @@ namespace Library
 		{
 			_logger.LogInformation("DeleteToolStripMenuItem_Click: Started processing the event.");
 
-			(bool IsValid, long IIN) = LibraryService.TryGetValueFromRow<long>(dataGridViewForMembers);
+			(bool IsValid, long IIN) = CirculationService.TryGetValueFromRow<long>(dataGridViewForMembers);
 
 			if (IsValid)
 			{
-				bool ifConfirmed = MessageBoxController.ShowConfirmation("Are you sure to remove?", "Removing member");
+				bool ifConfirmed = MessageBoxHelper.ShowConfirmation("Are you sure to remove?", "Removing member");
 
 				if (ifConfirmed)
 				{
-					if (await _memberRepository.DeleteAsync(new LibraryContextForEFcore(), m => m.IIN, IIN) == true)
+					if (await _memberRepository.DeleteAsync(new LibraryContext(), m => m.IIN, IIN) == true)
 					{
-						MessageBoxController.ShowSuccess("Member successfully removed");
+						MessageBoxHelper.ShowSuccess("Member successfully removed");
 
 						await RefreshDataGridForMembers();
 					}
@@ -96,7 +96,7 @@ namespace Library
 			}
 			else
 			{
-				MessageBoxController.ShowWarning("Cannot delete this member, try later or contact your system administrator");
+				MessageBoxHelper.ShowWarning("Cannot delete this member, try later or contact your system administrator");
 			}
 		}
 
@@ -115,7 +115,7 @@ namespace Library
 		private async void TbIINSearch_TextChanged(object sender, EventArgs e)
 		{
 			_logger.LogInformation("Entered TbIINSearch_TextChanged method. Text length: {TextLength}", TbIINSearch.Text.Length);
-			var memberService = new MemberService(_logger, _memberRepository, new LibraryContextForEFcore());
+			var memberService = new MemberService(_logger, _memberRepository, new LibraryContext());
 
 			if (TbIINSearch.Text.Length <= 3 && previousTextLength > 3)
 			{
@@ -152,7 +152,7 @@ namespace Library
 				{
 					try
 					{
-						var memberService = new MemberService(_logger, _memberRepository, new LibraryContextForEFcore());
+						var memberService = new MemberService(_logger, _memberRepository, new LibraryContext());
 						int totalMembersCount = await GetTotalMembersCountAsync();
 
 						if (CancellationToken.IsCancellationRequested) return;
@@ -180,14 +180,14 @@ namespace Library
 					}
 					catch (Exception ex)
 					{
-						ErrorController.HandleException(ex, "An error occurred while loading members");
+						ErrorHandler.HandleException(ex, "An error occurred while loading members");
 					}
 				}, CancellationToken);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occurred in RefreshDataGridForMembers method.");
-				MessageBoxController.ShowError($"An error with message:{ex.Message}, occurred while preparing data for display. Please try again later.");
+				MessageBoxHelper.ShowError($"An error with message:{ex.Message}, occurred while preparing data for display. Please try again later.");
 			}
 		}
 
@@ -200,13 +200,13 @@ namespace Library
 		{
 			try
 			{
-				int totalMembersCount = await Task.Run(() => new LibraryContextForEFcore().Members.Count());
+				int totalMembersCount = await Task.Run(() => new LibraryContext().Members.Count());
 				return totalMembersCount;
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occurred while retrieving the total members count.");
-				MessageBoxController.ShowError("An error occurred while retrieving the total members count. Please try again.");
+				MessageBoxHelper.ShowError("An error occurred while retrieving the total members count. Please try again.");
 				return 0;
 			}
 		}
@@ -215,17 +215,17 @@ namespace Library
 		{
 			try
 			{
-				await ProgressBarController.UpdateProgressAsync(this, pbMembers, minValue, maxValue);
+				await ProgressBarHelper.UpdateProgressAsync(this, pbMembers, minValue, maxValue);
 			}
 			catch (ArgumentOutOfRangeException ex)
 			{
 				_logger.LogError(ex, "Invalid progress bar range: minValue = {MinValue}, maxValue = {MaxValue}.", minValue, maxValue);
-				MessageBoxController.ShowError("Error: Invalid range for the progress bar.");
+				MessageBoxHelper.ShowError("Error: Invalid range for the progress bar.");
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occurred while updating the progress bar.");
-				MessageBoxController.ShowError("An unexpected error occurred while updating the progress bar.");
+				MessageBoxHelper.ShowError("An unexpected error occurred while updating the progress bar.");
 			}
 		}
 
@@ -241,13 +241,13 @@ namespace Library
 					}
 
 					dataGridViewForMembers.DataSource = users;
-					DataGridViewController.CustomizeDataGridView(dataGridViewForMembers);
+					DataGridViewHelper.CustomizeDataGridView(dataGridViewForMembers);
 				}));
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occurred while updating the DataGridView.");
-				MessageBoxController.ShowError("An error occurred while updating the data. Please try again later.");
+				MessageBoxHelper.ShowError("An error occurred while updating the data. Please try again later.");
 			}
 		}
 
@@ -265,14 +265,14 @@ namespace Library
 					this.CreateControl();
 					this.BeginInvoke(async () =>
 					{
-						await ProgressBarController.ResetProgressAsync(pbMembers);
+						await ProgressBarHelper.ResetProgressAsync(pbMembers);
 					});
 				});
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occurred while resetting the progress bar.");
-				MessageBoxController.ShowError("An error occurred while resetting the progress bar. Please try again later.");
+				MessageBoxHelper.ShowError("An error occurred while resetting the progress bar. Please try again later.");
 			}
 		}
 
@@ -285,7 +285,7 @@ namespace Library
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occurred while trying to close the form.");
-				MessageBoxController.ShowError("An error occurred while closing the application. Please try again later.");
+				MessageBoxHelper.ShowError("An error occurred while closing the application. Please try again later.");
 			}
 		}
 
@@ -295,7 +295,7 @@ namespace Library
 			{
 				if (e.CloseReason == CloseReason.UserClosing)
 				{
-					var result = MessageBoxController.ShowConfirmation("Are you sure you want to exit?", "Confirm Exit");
+					var result = MessageBoxHelper.ShowConfirmation("Are you sure you want to exit?", "Confirm Exit");
 					if (!result)
 					{
 						e.Cancel = true;
@@ -325,7 +325,7 @@ namespace Library
 		{
 			try
 			{
-				(bool isValid, long IIN) = LibraryService.TryGetValueFromRow<long>(dataGridViewForMembers);
+				(bool isValid, long IIN) = CirculationService.TryGetValueFromRow<long>(dataGridViewForMembers);
 
 				if (isValid)
 				{
@@ -337,32 +337,32 @@ namespace Library
 				}
 				else
 				{
-					MessageBoxController.ShowWarning("Please select a member to proceed.");
+					MessageBoxHelper.ShowWarning("Please select a member to proceed.");
 				}
 			}
 			catch (Exception ex)
 			{
-				ErrorController.HandleException(ex, "An error occurred while processing the borrowing action.");
+				ErrorHandler.HandleException(ex, "An error occurred while processing the borrowing action.");
 			}
 		}
 
 		private async void ReturnBookToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			(bool isValid, long IIN) = LibraryService.TryGetValueFromRow<long>(dataGridViewForMembers);
+			(bool isValid, long IIN) = CirculationService.TryGetValueFromRow<long>(dataGridViewForMembers);
 			if (!isValid)
 			{
-				MessageBoxController.ShowWarning("Please select a valid member to proceed.");
+				MessageBoxHelper.ShowWarning("Please select a valid member to proceed.");
 				return;
 			}
 
 			try
 			{
-				var memberService = new MemberService(_logger, _memberRepository, new LibraryContextForEFcore());
+				var memberService = new MemberService(_logger, _memberRepository, new LibraryContext());
 
 				int borrowedBooksCount = await memberService.GetBorrowedBooksCountAsync(_context, IIN);
 				if (borrowedBooksCount == 0)
 				{
-					MessageBoxController.ShowWarning($"Member with IIN: {IIN} has not borrowed any books yet.");
+					MessageBoxHelper.ShowWarning($"Member with IIN: {IIN} has not borrowed any books yet.");
 					return;
 				}
 				using FormBorrowOrReturnBook FlendOrRecieveBook = new();
@@ -375,7 +375,7 @@ namespace Library
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occurred while checking borrowed books for member with IIN: {IIN}.", IIN);
-				MessageBoxController.ShowError($"An error occurred: {ex.Message}");
+				MessageBoxHelper.ShowError($"An error occurred: {ex.Message}");
 			}
 		}
 
@@ -388,7 +388,7 @@ namespace Library
 
 			dataGridViewForMembers.CurrentCell = dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
 
-			var (isValid, IIN) = LibraryService.TryGetValueFromRow<long>(dataGridViewForMembers);
+			var (isValid, IIN) = CirculationService.TryGetValueFromRow<long>(dataGridViewForMembers);
 			if (!isValid)
 			{
 				return;
@@ -413,29 +413,29 @@ namespace Library
 
 			try
 			{
-				var (isValid, IIN) = LibraryService.TryGetValueFromRow<long>(dataGridViewForMembers);
+				var (isValid, IIN) = CirculationService.TryGetValueFromRow<long>(dataGridViewForMembers);
 
 				if (isValid)
 				{
-					var memberService = new MemberService(_logger, _memberRepository, new LibraryContextForEFcore());
+					var memberService = new MemberService(_logger, _memberRepository, new LibraryContext());
 					var findedPhoto = await memberService.GetMemberPhotoByIINAsync(_context, IIN);
 					if (findedPhoto != null)
 					{
-						pictureBoxMember.Image = PictureController.ConvertByteToImage(findedPhoto);
+						pictureBoxMember.Image = PictureHelper.ConvertByteToImage(findedPhoto);
 					}
 					else
 					{
-						MessageBoxController.ShowWarning($"Member with IIN {IIN} was not found.");
+						MessageBoxHelper.ShowWarning($"Member with IIN {IIN} was not found.");
 					}
 				}
 				else
 				{
-					MessageBoxController.ShowWarning("Invalid or missing IIN in the selected row");
+					MessageBoxHelper.ShowWarning("Invalid or missing IIN in the selected row");
 				}
 			}
 			catch (Exception ex)
 			{
-				ErrorController.HandleException(ex, "An error occurred while fetching the member's data or displaying the photo.");
+				ErrorHandler.HandleException(ex, "An error occurred while fetching the member's data or displaying the photo.");
 			}
 		}
 	}

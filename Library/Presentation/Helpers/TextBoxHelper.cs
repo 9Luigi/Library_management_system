@@ -1,7 +1,7 @@
 ﻿
 namespace Library.Presentation.Controllers
 {
-    internal static class TextBoxBaseController
+    internal static class TextBoxHelper
     {
         static internal void AllTextBoxBaseOnFormClear(Form form)
         {
@@ -18,12 +18,12 @@ namespace Library.Presentation.Controllers
 
             if (string.IsNullOrWhiteSpace(textBoxBase.Text))
             {
-                MessageBoxController.ShowWarning(textBoxBase.Name + " is empty, fill in the empty requiered(*) fields");
+                MessageBoxHelper.ShowWarning(textBoxBase.Name + " is empty, fill in the empty requiered(*) fields");
                 return false;
             }
             if (textBoxBase.Text.Length > 75)
             {
-                MessageBoxController.ShowWarning($"{textBoxBase.Name} cannot be more than 75 symbols");
+                MessageBoxHelper.ShowWarning($"{textBoxBase.Name} cannot be more than 75 symbols");
                 return false;
             }
             else return true;
