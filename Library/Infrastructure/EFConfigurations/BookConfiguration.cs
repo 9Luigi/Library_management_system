@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Library.Infrastructure.EFConfigurations
 {
-    internal class EntityConfigurationForBook : IEntityTypeConfiguration<Book>
+    internal class BookConfiguration : IEntityTypeConfiguration<Book>
     {
         public void Configure(EntityTypeBuilder<Book> builder)
         {
@@ -15,8 +15,7 @@ namespace Library.Infrastructure.EFConfigurations
             builder.Property(b => b.Sort).HasColumnName("Sort").HasMaxLength(25);
             builder.Property(b => b.Description).HasColumnName("Description").HasMaxLength(500);
             builder.Property(b => b.Genre).HasColumnName("Genre").IsRequired().HasMaxLength(25);
-            builder.Property(b => b.CoverImage).HasColumnName("CoverImage").HasColumnType("VARBINARY(MAX)").HasDefaultValue(null).IsRequired(false); ;
-            builder.Property(b => b.BookVersion).HasColumnName("Version").IsRowVersion().IsRequired();
+            builder.Property(b => b.CoverImage).HasColumnName("CoverImage").IsRequired(false);
         }
     }
 }

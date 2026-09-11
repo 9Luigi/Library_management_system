@@ -15,13 +15,13 @@ namespace Library.Migrations
                 name: "Authors",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Surname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Biography = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Photo = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
-                    Version = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Surname = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Biography = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    Photo = table.Column<byte[]>(type: "BLOB", nullable: true),
+                    AuthorVersion = table.Column<byte[]>(type: "BLOB", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,16 +32,16 @@ namespace Library.Migrations
                 name: "Books",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Genre = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: false),
-                    Sort = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: true),
-                    publicationYear = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CoverImage = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
-                    Amount = table.Column<int>(type: "int", nullable: false),
-                    Version = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Title = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    Genre = table.Column<string>(type: "TEXT", maxLength: 25, nullable: false),
+                    Sort = table.Column<string>(type: "TEXT", maxLength: 25, nullable: true),
+                    publicationYear = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CoverImage = table.Column<byte[]>(type: "BLOB", nullable: true),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
+                    BookVersion = table.Column<byte[]>(type: "BLOB", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -52,19 +52,19 @@ namespace Library.Migrations
                 name: "Members",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(75)", maxLength: 75, nullable: false),
-                    Surname = table.Column<string>(type: "nvarchar(75)", maxLength: 75, nullable: false),
-                    Patronymic = table.Column<string>(type: "nvarchar(75)", maxLength: 75, nullable: false),
-                    Age = table.Column<int>(type: "int", nullable: false),
-                    BirthDay = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Adress = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(75)", maxLength: 75, nullable: false),
-                    IIN = table.Column<long>(type: "BIGINT", nullable: false),
-                    RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Photo = table.Column<byte[]>(type: "varbinary(max)", nullable: false, defaultValue: new byte[] { 0 }),
-                    Version = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 75, nullable: false),
+                    Surname = table.Column<string>(type: "TEXT", maxLength: 75, nullable: false),
+                    Patronymic = table.Column<string>(type: "TEXT", maxLength: 75, nullable: false),
+                    Age = table.Column<int>(type: "INTEGER", nullable: false),
+                    BirthDay = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Adress = table.Column<string>(type: "TEXT", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "TEXT", maxLength: 75, nullable: false),
+                    IIN = table.Column<long>(type: "INTEGER", nullable: false),
+                    RegistrationDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Photo = table.Column<byte[]>(type: "BLOB", nullable: true),
+                    MemberVersion = table.Column<byte[]>(type: "BLOB", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -75,8 +75,8 @@ namespace Library.Migrations
                 name: "AuthorBook",
                 columns: table => new
                 {
-                    AuthorsId = table.Column<int>(type: "int", nullable: false),
-                    BooksId = table.Column<int>(type: "int", nullable: false)
+                    AuthorsId = table.Column<int>(type: "INTEGER", nullable: false),
+                    BooksId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -99,8 +99,8 @@ namespace Library.Migrations
                 name: "BookMember",
                 columns: table => new
                 {
-                    BooksId = table.Column<int>(type: "int", nullable: false),
-                    MembersId = table.Column<int>(type: "int", nullable: false)
+                    BooksId = table.Column<int>(type: "INTEGER", nullable: false),
+                    MembersId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -128,12 +128,6 @@ namespace Library.Migrations
                 name: "IX_BookMember_MembersId",
                 table: "BookMember",
                 column: "MembersId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Members_Id",
-                table: "Members",
-                column: "Id",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Members_IIN",

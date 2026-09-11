@@ -3,32 +3,27 @@ using System;
 using Library;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
 namespace Library.Migrations
 {
-    [DbContext(typeof(LibraryContextForEFcore))]
+    [DbContext(typeof(LibraryContext))]
     partial class LibraryContextForEFcoreModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
-
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
 
             modelBuilder.Entity("AuthorBook", b =>
                 {
                     b.Property<int>("AuthorsId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("BooksId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("AuthorsId", "BooksId");
 
@@ -40,10 +35,10 @@ namespace Library.Migrations
             modelBuilder.Entity("BookMember", b =>
                 {
                     b.Property<int>("BooksId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("MembersId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("BooksId", "MembersId");
 
@@ -56,36 +51,31 @@ namespace Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("AuthorVersion")
-                        .IsConcurrencyToken()
                         .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion")
-                        .HasColumnName("Version");
+                        .HasColumnType("BLOB");
 
                     b.Property<string>("Biography")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("Biography");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("Name");
 
                     b.Property<byte[]>("Photo")
-                        .HasColumnType("VARBINARY(MAX)")
+                        .HasColumnType("BLOB")
                         .HasColumnName("Photo");
 
                     b.Property<string>("Surname")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("Surname");
 
                     b.HasKey("Id");
@@ -97,48 +87,42 @@ namespace Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Amount")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("BookVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion")
-                        .HasColumnName("Version");
+                        .HasColumnType("BLOB");
 
                     b.Property<byte[]>("CoverImage")
-                        .HasColumnType("VARBINARY(MAX)")
+                        .HasColumnType("BLOB")
                         .HasColumnName("CoverImage");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("Description");
 
                     b.Property<string>("Genre")
                         .IsRequired()
                         .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("Genre");
 
                     b.Property<DateTime>("PublicationDate")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("TEXT")
                         .HasColumnName("publicationYear");
 
                     b.Property<string>("Sort")
                         .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("Sort");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("Title");
 
                     b.HasKey("Id");
@@ -150,72 +134,64 @@ namespace Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Adress")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("Adress");
 
                     b.Property<int>("Age")
-                        .HasColumnType("int")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("Age");
 
                     b.Property<DateTime>("BirthDay")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("TEXT")
                         .HasColumnName("BirthDay");
 
                     b.Property<long>("IIN")
-                        .HasColumnType("BIGINT")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("IIN");
 
                     b.Property<byte[]>("MemberVersion")
-                        .IsConcurrencyToken()
                         .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion")
-                        .HasColumnName("Version");
+                        .HasColumnType("BLOB");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(75)
-                        .HasColumnType("nvarchar(75)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("Name");
 
                     b.Property<string>("Patronymic")
                         .IsRequired()
                         .HasMaxLength(75)
-                        .HasColumnType("nvarchar(75)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("Patronymic");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasMaxLength(75)
-                        .HasColumnType("nvarchar(75)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<byte[]>("Photo")
-                        .HasColumnType("VARBINARY(MAX)")
+                        .HasColumnType("BLOB")
                         .HasColumnName("Photo");
 
                     b.Property<DateTime>("RegistrationDate")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("TEXT")
                         .HasColumnName("RegistrationDate");
 
                     b.Property<string>("Surname")
                         .IsRequired()
                         .HasMaxLength(75)
-                        .HasColumnType("nvarchar(75)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("Surname");
 
                     b.HasKey("Id");
 
                     b.HasIndex("IIN")
-                        .IsUnique();
-
-                    b.HasIndex("Id")
                         .IsUnique();
 
                     b.ToTable("Members");
