@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-namespace Library.Infrastructure.Repositories;
+namespace Library.Data.Repositories;
 
 public class Repository<T> where T : class //TODO repositoty only for basic CRUD operations
 {

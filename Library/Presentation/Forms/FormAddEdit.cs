@@ -1,6 +1,7 @@
-﻿using Library.Application.Services.CRUD;
-using Library.Domain.Models;
-using Library.Infrastructure.Repositories;
+﻿using Library.Data;
+using Library.Services;
+using Library.Models;
+using Library.Data.Repositories;
 using Library.Presentation.Controllers;
 using Library.Presentation.Controllers.PictureController;
 using Library.Presentation.Validation;

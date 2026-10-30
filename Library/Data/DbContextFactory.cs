@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Library.Infrastructure
+namespace Library.Data
 {
     public static class DbContextFactory
     {

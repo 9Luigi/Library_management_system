@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Library.Infrastructure;
-using Library.Infrastructure.EFConfigurations;
-using Library.Domain.Models;
+using Library.Data.Configurations;
+using Library.Models;
 
-namespace Library
+namespace Library.Data
 {
     internal class LibraryContext : DbContext
     {

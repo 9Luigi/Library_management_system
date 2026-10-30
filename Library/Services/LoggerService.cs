@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Serilog;
 
+namespace Library.Services;
+
 public static class LoggerService
 {
 	/// <summary>

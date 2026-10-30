@@ -1,8 +1,8 @@
-﻿using Library.Domain.Models;
+﻿using Library.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Library.Infrastructure.EFConfigurations
+namespace Library.Data.Configurations
 {
     internal class MemberConfiguration : IEntityTypeConfiguration<Member>
     {

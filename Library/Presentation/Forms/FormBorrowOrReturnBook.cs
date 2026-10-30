@@ -1,6 +1,7 @@
-﻿using Library.Application.Services.CRUD;
-using Library.Domain.Models;
-using Library.Infrastructure.Repositories;
+﻿using Library.Data;
+using Library.Services;
+using Library.Models;
+using Library.Data.Repositories;
 using Library.Presentation.Controllers;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
@@ -71,7 +72,16 @@ namespace Library
 				case GridCriterion.BooksByMember:
 					returnBookToolStripMenuItem.Visible = true;
 					lendABookToolStripMenuItem.Visible = false;
-					await _memberService.GetMemberWithHisBooksToDataGridViewAsync(_context, MemberIIN, DataGridViewForLendBook);
+					var memberBooks = await _memberService.GetMemberBooksAsync(_context, MemberIIN);
+					if (memberBooks.Count == 0)
+					{
+						DataGridViewForLendBook.DataSource = null;
+						MessageBoxHelper.ShowWarning($"No books found for member with IIN: {MemberIIN}.");
+					}
+					else
+					{
+						DataGridViewForLendBook.DataSource = memberBooks;
+					}
 					break;
 			}
 		}
@@ -90,7 +100,7 @@ namespace Library
 		{
 			try
 			{
-				(bool isValid, int bookID) = CirculationService.TryGetValueFromRow<int>(DataGridViewForLendBook);
+				(bool isValid, int bookID) = DataGridViewHelper.TryGetValueFromRow<int>(DataGridViewForLendBook);
 				if (isValid)
 				{
 					var result = await _libraryService.BorrowBook(bookID, MemberIIN);
@@ -112,16 +122,17 @@ namespace Library
 		{
 			try
 			{
-				(bool isValid, int bookID) = CirculationService.TryGetValueFromRow<int>(DataGridViewForLendBook, 1);
+				(bool isValid, int bookID) = DataGridViewHelper.TryGetValueFromRow<int>(DataGridViewForLendBook, 1);
 				if (isValid)
 				{
-					await _libraryService.ReturnBook(bookID, MemberIIN);
+					var result = await _libraryService.ReturnBook(bookID, MemberIIN);
+					if (result) MessageBoxHelper.ShowSuccess($"Book with ID {bookID} successfully returned.");
 					FillGridWith(GridCriterion.BooksByMember);
 				}
 			}
 			catch (InvalidOperationException ex)
 			{
-				ErrorHandler.HandleException(ex, "Check if member has this book");
+				ErrorHandler.HandleException(ex, ex.Message);
 			}
 			catch (Exception ex)
 			{

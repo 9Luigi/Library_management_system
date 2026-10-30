@@ -1,11 +1,11 @@
-﻿using Library.Domain.Models;
+﻿using Library.Data;
+using Library.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Library.Infrastructure.Repositories;
-using Library.Presentation.Controllers;
+using Library.Data.Repositories;
 using System;
 
-namespace Library.Application.Services.CRUD
+namespace Library.Services
 {
 
 	internal class MemberService
@@ -171,43 +171,20 @@ namespace Library.Application.Services.CRUD
 			}
 		}
 
-		internal async Task<bool> GetMemberWithHisBooksToDataGridViewAsync
-			(LibraryContext dbContext, long memberIIN, DataGridView dataGridView)
+		/// <summary>
+		/// Returns the books currently borrowed by the member. Empty list if the member is missing or has no books.
+		/// </summary>
+		internal async Task<List<MemberBookRow>> GetMemberBooksAsync(LibraryContext dbContext, long memberIIN)
 		{
 			_logger.LogInformation("Start fetching books for member with IIN: {MemberIIN}", memberIIN);
 
-			var memberWithBooks = await dbContext.Members
-				.Include(m => m.Books)
+			var rows = await dbContext.Members
 				.Where(m => m.IIN == memberIIN)
-				.FirstOrDefaultAsync();
+				.SelectMany(m => m.Books.Select(b => new MemberBookRow(m.IIN, b.Id, b.Title)))
+				.ToListAsync();
 
-			if (memberWithBooks == null || memberWithBooks.Books == null || memberWithBooks.Books.Count < 0)
-			{
-				_logger.LogWarning("No books found for member with IIN: {MemberIIN}", memberIIN);
-
-				// Display warning message using MessageBox instead of throwing an error
-				MessageBoxHelper.ShowWarning($"No books found for member with IIN: {memberIIN}.");
-
-				// Optionally clear the DataGridView as well
-				dataGridView.DataSource = null;
-
-				return false;
-			}
-
-			_logger.LogInformation("Successfully retrieved {BookCount} books for member with IIN: {MemberIIN}", memberWithBooks.Books.Count, memberIIN);
-
-			// Populate DataGridView with the member's books
-			dataGridView.DataSource = memberWithBooks.Books
-				.Select(book => new
-				{
-					memberWithBooks.IIN,
-					BookID = book.Id,
-					BookTitle = book.Title,
-					// BookAuthor = book.Author // Include additional fields if available
-				})
-				.ToList();
-
-			return true;
+			_logger.LogInformation("Retrieved {BookCount} books for member with IIN: {MemberIIN}", rows.Count, memberIIN);
+			return rows;
 		}
 		internal async Task<bool> UpdateMemberChangedFieldsAsync(LibraryContext dbContext, Member memberToUpdate)
 		{
@@ -219,15 +196,12 @@ namespace Library.Application.Services.CRUD
 		}
 		#endregion
 		#region Validation
+		/// <summary>
+		/// Returns true if a member with this IIN already exists.
+		/// </summary>
 		internal async Task<bool> IsIINExistsAsync(LibraryContext dbContext, long IIN)
 		{
-			bool isIINExists = await _memberRepository.AnyAsync(dbContext, m => m.IIN == IIN);
-			if (isIINExists)
-			{
-				MessageBoxHelper.ShowWarning($"A member with IIN {IIN} already exists.");
-				return false;
-			}
-			return true;
+			return await _memberRepository.AnyAsync(dbContext, m => m.IIN == IIN);
 		}
 		#endregion
 	}

@@ -1,10 +1,10 @@
-﻿using Library.Infrastructure.Repositories;
-using Library.Domain.Models;
+﻿using Library.Data;
+using Library.Data.Repositories;
+using Library.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
-using Library.Presentation.Controllers;
 
-namespace Library.Application.Services.CRUD
+namespace Library.Services
 {
 	internal class CirculationService
 	{
@@ -19,79 +19,15 @@ namespace Library.Application.Services.CRUD
 			_logger = LoggerService.CreateLogger<CirculationService>();
 		}
 
-		#region Helper
-		/// <summary>
-		/// Tries to retrieve a value from the selected row of the DataGridView.
-		/// </summary>
-		/// <typeparam name="T">The type of the value to retrieve.</typeparam>
-		/// <param name="view">The DataGridView instance.</param>
-		/// <param name="columnIndexToCheck">The index of the column to check (default is 0).</param>
-		/// <returns>A tuple indicating whether the value was found and the value itself.</returns>
-		internal static (bool, T) TryGetValueFromRow<T>(DataGridView view, int columnIndexToCheck = 0) where T : struct
-		{
-			// Check if any cell is selected
-			if (view.CurrentCell == null)
-				return (false, default);
-
-			// Get the row index of the selected cell and ensure it is valid
-			int rowIndex = view.CurrentCell.RowIndex;
-			if (rowIndex < 0 || rowIndex >= view.Rows.Count)
-				return (false, default);
-
-			// Ensure the specified column index is valid
-			if (columnIndexToCheck < 0 || columnIndexToCheck >= view.ColumnCount)
-				return (false, default);
-
-			// Check the value in the specified column of the selected row
-			var cellValue = view.Rows[rowIndex].Cells[columnIndexToCheck]?.Value;
-			if (cellValue != null && TryParseValue(cellValue.ToString()!, out T value))
-			{
-				return (true, value);
-			}
-
-			return (false, default);
-		}
-
-		/// <summary>
-		/// Tries to parse a string value into a specified type.
-		/// </summary>
-		/// <typeparam name="T">The type to parse into.</typeparam>
-		/// <param name="value">The string value to parse.</param>
-		/// <param name="result">The parsed result.</param>
-		/// <returns>True if parsing succeeded, otherwise false.</returns>
-		private static bool TryParseValue<T>(string value, out T result) where T : struct
-		{
-			if (typeof(T) == typeof(long))
-			{
-				if (long.TryParse(value, out var longResult))
-				{
-					result = (T)(object)longResult;
-					return true;
-				}
-			}
-			else if (typeof(T) == typeof(int))
-			{
-				if (int.TryParse(value, out var intResult))
-				{
-					result = (T)(object)intResult;
-					return true;
-				}
-			}
-
-			result = default;
-			return false;
-		}
-
-		#endregion
-
 		#region CRUD
 
 		/// <summary>
-		/// Attempts to borrow a book for a member.
+		/// Borrows a book for a member.
 		/// </summary>
 		/// <param name="bookID">The ID of the book to borrow.</param>
 		/// <param name="IIN">The IIN of the member borrowing the book.</param>
-		/// <returns>True if the book is successfully borrowed, otherwise false.</returns>
+		/// <returns>True if the book is successfully borrowed.</returns>
+		/// <exception cref="InvalidOperationException">Book/member not found, no copies left, already borrowed or nothing saved.</exception>
 		internal async Task<bool> BorrowBook(int bookID, long IIN)
 		{
 			try
@@ -99,8 +35,8 @@ namespace Library.Application.Services.CRUD
 				using var _dbContext = new LibraryContext();
 				_logger.LogInformation("Attempting to borrow book with ID: {BookID} for member with IIN: {IIN}", bookID, IIN);
 
-				// Retrieve the book directly from the DbContext
-				var selectedBook = await _dbContext.Books.FirstOrDefaultAsync(b => b.Id == bookID);
+				// Tracking is required here: the context is configured with NoTracking by default
+				var selectedBook = await _dbContext.Books.AsTracking().FirstOrDefaultAsync(b => b.Id == bookID);
 
 				// Validate book existence
 				if (selectedBook == null)
@@ -116,8 +52,9 @@ namespace Library.Application.Services.CRUD
 					throw new InvalidOperationException($"Book '{selectedBook.Title}' has zero amount in store.");
 				}
 
-				// Retrieve the member directly from the DbContext, loading only the IIN and IDs of borrowed books
+				// Retrieve the member together with the IDs of borrowed books
 				var memberWithBookIds = await _dbContext.Members
+					.AsTracking()
 					.Where(m => m.IIN == IIN)
 					.Select(m => new
 					{
@@ -163,11 +100,12 @@ namespace Library.Application.Services.CRUD
 
 
 		/// <summary>
-		/// Attempts to return a borrowed book.
+		/// Returns a borrowed book.
 		/// </summary>
 		/// <param name="bookID">The ID of the book to return.</param>
 		/// <param name="IIN">The IIN of the member returning the book.</param>
-		/// <returns>True if the book is successfully returned, otherwise false.</returns>
+		/// <returns>True if the book is successfully returned.</returns>
+		/// <exception cref="InvalidOperationException">Book/member not found, book not borrowed by this member or nothing saved.</exception>
 		internal async Task<bool> ReturnBook(int bookID, long IIN)
 		{
 			try
@@ -176,59 +114,48 @@ namespace Library.Application.Services.CRUD
 
 				using LibraryContext context = new();
 
-				// Retrieve the book to return
-				var bookToReturn = await context.Books.FindAsync(bookID);
+				// Tracking is required here: the context is configured with NoTracking by default
+				var bookToReturn = await context.Books.AsTracking().FirstOrDefaultAsync(b => b.Id == bookID);
 				if (bookToReturn == null)
 				{
 					_logger.LogWarning("Book with ID {BookID} not found", bookID);
-					MessageBoxHelper.ShowWarning($"Book with ID {bookID} not found.");
-					return false;
+					throw new InvalidOperationException($"Book with ID {bookID} not found.");
 				}
 
-				// Retrieve the member
 				var memberWithBook = await context.Members
+					.AsTracking()
 					.Include(m => m.Books) // Include borrowed books
 					.SingleOrDefaultAsync(m => m.IIN == IIN);
 				if (memberWithBook == null)
 				{
 					_logger.LogWarning("Member with IIN {IIN} not found", IIN);
-					MessageBoxHelper.ShowWarning($"Member with IIN {IIN} not found.");
-					return false;
+					throw new InvalidOperationException($"Member with IIN {IIN} not found.");
 				}
 
 				// Ensure the member has borrowed the book
-				bool hasBorrowedBook = memberWithBook.Books.Any(b => b.Id == bookID);
-				if (!hasBorrowedBook)
+				var borrowedBook = memberWithBook.Books.FirstOrDefault(b => b.Id == bookID);
+				if (borrowedBook == null)
 				{
 					_logger.LogWarning("Member with IIN {IIN} has not borrowed book with ID {BookID}", IIN, bookID);
-					MessageBoxHelper.ShowWarning($"Member with IIN {IIN} has not borrowed book with ID {bookID}.");
-					return false;
+					throw new InvalidOperationException($"Member with IIN {IIN} has not borrowed book with ID {bookID}.");
 				}
 
-				// Proceed with returning the book
-				memberWithBook.Books.Remove(bookToReturn);
+				memberWithBook.Books.Remove(borrowedBook);
 				bookToReturn.Amount += 1;
 
-				// Save changes and log the result
-				bool success = await context.SaveChangesAsync() > 0;
-				if (success)
+				if (await context.SaveChangesAsync() > 0)
 				{
 					_logger.LogInformation("Book with ID {BookID} successfully returned by member with IIN {IIN}", bookID, IIN);
-					MessageBoxHelper.ShowSuccess($"Book with ID {bookID} successfully returned.");
-				}
-				else
-				{
-					_logger.LogError("Failed to save changes for returning book with ID {BookID}", bookID);
-					MessageBoxHelper.ShowError($"Failed to save changes for returning book with ID {bookID}. Please try again.");
+					return true;
 				}
 
-				return success;
+				_logger.LogError("Failed to save changes for returning book with ID {BookID}", bookID);
+				throw new InvalidOperationException("Failed to save changes.");
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occurred while returning book with ID {BookID} for member with IIN {IIN}", bookID, IIN);
-				MessageBoxHelper.ShowError($"An error occurred while returning the book: {ex.Message}");
-				return false;
+				throw;
 			}
 		}
 

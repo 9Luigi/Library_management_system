@@ -1,6 +1,7 @@
-﻿using Library.Application.Services.CRUD;
-using Library.Domain.Models;
-using Library.Infrastructure.Repositories;
+﻿using Library.Data;
+using Library.Services;
+using Library.Models;
+using Library.Data.Repositories;
 using Library.Presentation.Controllers;
 using Library.Presentation.Controllers.PictureController;
 using Microsoft.Extensions.Logging;
@@ -61,7 +62,7 @@ namespace Library
 		private async void EditToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			_logger.LogInformation("EditToolStripMenuItem_Click: Started processing the event.");
-			(bool isValid, long IIN) = CirculationService.TryGetValueFromRow<long>(dataGridViewForMembers);
+			(bool isValid, long IIN) = DataGridViewHelper.TryGetValueFromRow<long>(dataGridViewForMembers);
 
 			if (isValid)
 			{
@@ -77,7 +78,7 @@ namespace Library
 		{
 			_logger.LogInformation("DeleteToolStripMenuItem_Click: Started processing the event.");
 
-			(bool IsValid, long IIN) = CirculationService.TryGetValueFromRow<long>(dataGridViewForMembers);
+			(bool IsValid, long IIN) = DataGridViewHelper.TryGetValueFromRow<long>(dataGridViewForMembers);
 
 			if (IsValid)
 			{
@@ -324,7 +325,7 @@ namespace Library
 		{
 			try
 			{
-				(bool isValid, long IIN) = CirculationService.TryGetValueFromRow<long>(dataGridViewForMembers);
+				(bool isValid, long IIN) = DataGridViewHelper.TryGetValueFromRow<long>(dataGridViewForMembers);
 
 				if (isValid)
 				{
@@ -347,7 +348,7 @@ namespace Library
 
 		private async void ReturnBookToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			(bool isValid, long IIN) = CirculationService.TryGetValueFromRow<long>(dataGridViewForMembers);
+			(bool isValid, long IIN) = DataGridViewHelper.TryGetValueFromRow<long>(dataGridViewForMembers);
 			if (!isValid)
 			{
 				MessageBoxHelper.ShowWarning("Please select a valid member to proceed.");
@@ -387,7 +388,7 @@ namespace Library
 
 			dataGridViewForMembers.CurrentCell = dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
 
-			var (isValid, IIN) = CirculationService.TryGetValueFromRow<long>(dataGridViewForMembers);
+			var (isValid, IIN) = DataGridViewHelper.TryGetValueFromRow<long>(dataGridViewForMembers);
 			if (!isValid)
 			{
 				return;
@@ -412,7 +413,7 @@ namespace Library
 
 			try
 			{
-				var (isValid, IIN) = CirculationService.TryGetValueFromRow<long>(dataGridViewForMembers);
+				var (isValid, IIN) = DataGridViewHelper.TryGetValueFromRow<long>(dataGridViewForMembers);
 
 				if (isValid)
 				{

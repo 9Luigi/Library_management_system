@@ -1,8 +1,9 @@
-﻿using Library.Infrastructure.Repositories;
+﻿using Library.Data;
+using Library.Data.Repositories;
 using Microsoft.Extensions.Logging;
-using Library.Domain.Models;
+using Library.Models;
 using Microsoft.EntityFrameworkCore;
-namespace Library.Application.Services.CRUD
+namespace Library.Services
 {
 	/// <summary>
 	/// Service class responsible for operations related to books.
