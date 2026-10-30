@@ -20,8 +20,7 @@ namespace Library.Migrations
                     Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     Surname = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     Biography = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
-                    Photo = table.Column<byte[]>(type: "BLOB", nullable: true),
-                    AuthorVersion = table.Column<byte[]>(type: "BLOB", nullable: false)
+                    Photo = table.Column<byte[]>(type: "BLOB", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -40,8 +39,7 @@ namespace Library.Migrations
                     Sort = table.Column<string>(type: "TEXT", maxLength: 25, nullable: true),
                     publicationYear = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CoverImage = table.Column<byte[]>(type: "BLOB", nullable: true),
-                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
-                    BookVersion = table.Column<byte[]>(type: "BLOB", nullable: true)
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -63,8 +61,7 @@ namespace Library.Migrations
                     PhoneNumber = table.Column<string>(type: "TEXT", maxLength: 75, nullable: false),
                     IIN = table.Column<long>(type: "INTEGER", nullable: false),
                     RegistrationDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Photo = table.Column<byte[]>(type: "BLOB", nullable: true),
-                    MemberVersion = table.Column<byte[]>(type: "BLOB", nullable: false)
+                    Photo = table.Column<byte[]>(type: "BLOB", nullable: true)
                 },
                 constraints: table =>
                 {

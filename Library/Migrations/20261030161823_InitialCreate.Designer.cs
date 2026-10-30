@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Migrations
 {
     [DbContext(typeof(LibraryContext))]
-    [Migration("20260910104917_InitialCreate")]
+    [Migration("20261030161823_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -56,10 +56,6 @@ namespace Library.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<byte[]>("AuthorVersion")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
                     b.Property<string>("Biography")
                         .HasMaxLength(500)
                         .HasColumnType("TEXT")
@@ -94,9 +90,6 @@ namespace Library.Migrations
 
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
-
-                    b.Property<byte[]>("BookVersion")
-                        .HasColumnType("BLOB");
 
                     b.Property<byte[]>("CoverImage")
                         .HasColumnType("BLOB")
@@ -155,10 +148,6 @@ namespace Library.Migrations
                     b.Property<long>("IIN")
                         .HasColumnType("INTEGER")
                         .HasColumnName("IIN");
-
-                    b.Property<byte[]>("MemberVersion")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -11,7 +11,7 @@ namespace Library
 	public partial class FormMembers : Form //TODO context per form, not per method
 	{//TODO Handle zero members in db via service 
 		#region FieldsAndProperties
-		readonly GenericRepository<Member> _memberRepository; //TODO factory for services,repositories? and forms
+		readonly Repository<Member> _memberRepository; //TODO factory for services,repositories? and forms
 		readonly ILogger _logger;
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		internal CancellationTokenSource CancellationTokenSource { get; set; }
