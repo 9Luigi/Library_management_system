@@ -3,3 +3,5 @@ obj/
 .vs/
 *.user
 library.db
+
+Library.Server/App_Data/
