@@ -43,7 +43,6 @@
 			pictureBoxMember = new PictureBox();
 			TbIINSearch = new TextBox();
 			pbMembers = new ProgressBar();
-			buttonLoadPhoto = new Button();
 			menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)dataGridViewForMembers).BeginInit();
 			cmMember.SuspendLayout();
@@ -102,6 +101,7 @@
 			dataGridViewForMembers.TabIndex = 2;
 			dataGridViewForMembers.CellMouseClick += View_CellMouseClick;
 			dataGridViewForMembers.CellMouseDoubleClick += DataGridViewForMembers_CellMouseDoubleClick;
+			dataGridViewForMembers.SelectionChanged += DataGridViewForMembers_SelectionChanged;
 			// 
 			// cmMember
 			// 
@@ -171,23 +171,11 @@
 			pbMembers.Step = 1;
 			pbMembers.TabIndex = 6;
 			// 
-			// buttonLoadPhoto
-			// 
-			buttonLoadPhoto.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-			buttonLoadPhoto.Location = new Point(798, 444);
-			buttonLoadPhoto.Name = "buttonLoadPhoto";
-			buttonLoadPhoto.Size = new Size(267, 38);
-			buttonLoadPhoto.TabIndex = 7;
-			buttonLoadPhoto.Text = "Show photo";
-			buttonLoadPhoto.UseVisualStyleBackColor = true;
-			buttonLoadPhoto.Click += buttonLoadPhoto_Click;
-			// 
 			// FormMembers
 			// 
 			AutoScaleDimensions = new SizeF(8F, 20F);
 			AutoScaleMode = AutoScaleMode.Font;
 			ClientSize = new Size(1079, 668);
-			Controls.Add(buttonLoadPhoto);
 			Controls.Add(pbMembers);
 			Controls.Add(TbIINSearch);
 			Controls.Add(pictureBoxMember);
@@ -222,6 +210,5 @@
         private ToolStripMenuItem deleteToolStripMenuItem;
         private ToolStripMenuItem BorrowBookToolStripMenuItem;
         private ToolStripMenuItem ReturnBookToolStripMenuItem;
-		private Button buttonLoadPhoto;
 	}
 }

@@ -82,19 +82,31 @@ namespace Library.Services
 				throw;
 			}
 		}
-		internal async Task<byte[]> GetMemberPhotoByIINAsync(LibraryContext _dbContext, long IIN)
+		/// <summary>
+		/// Returns the member's photo bytes, or null if the member has no photo.
+		/// </summary>
+		internal async Task<byte[]?> GetMemberPhotoAsync(LibraryContext dbContext, long IIN)
 		{
-			var photoBytes = await _dbContext.Members
+			var photoPath = await dbContext.Members
 				.AsNoTracking()
 				.Where(m => m.IIN == IIN)
-				.Select(m => m.Photo)
+				.Select(m => m.PhotoPath)
 				.FirstOrDefaultAsync();
-			if (photoBytes == null || photoBytes.Length == 0)
+
+			return LoadPhoto(photoPath);
+		}
+
+		/// <summary>
+		/// Reads a photo file by the file name stored in Member.PhotoPath. Null if there is none.
+		/// </summary>
+		internal byte[]? LoadPhoto(string? photoPath)
+		{
+			var photo = ImageStorage.Load(ImageKind.Member, photoPath);
+			if (photoPath != null && photo == null)
 			{
-				_logger.LogWarning("No photo found for member with IIN: {IIN}", IIN);
-				throw new KeyNotFoundException($"No photo found for member with IIN: {IIN}");
+				_logger.LogWarning("Photo file {PhotoPath} is missing in {Folder}", photoPath, ImageStorage.Folder(ImageKind.Member));
 			}
-			return photoBytes;
+			return photo;
 		}
 		public async Task<int> GetBorrowedBooksCountAsync(LibraryContext dbContext, long IIN)
 		{
@@ -151,7 +163,10 @@ namespace Library.Services
 			}
 		}
 
-		internal async Task<bool> CreateMemberAsync(LibraryContext dbContext ,Member memberToCreate)
+		/// <summary>
+		/// Creates the member, then saves the photo file named by the new Id and stores its file name.
+		/// </summary>
+		internal async Task<bool> CreateMemberAsync(LibraryContext dbContext, Member memberToCreate, byte[]? photo)
 		{
 			try
 			{
@@ -160,6 +175,13 @@ namespace Library.Services
 				if (isCreated)
 				{
 					_logger.LogInformation("New member created successfully.");
+
+					// The file is named by Id, which exists only after the first save
+					if (photo is { Length: > 0 })
+					{
+						memberToCreate.PhotoPath = ImageStorage.Save(ImageKind.Member, memberToCreate.Id, photo);
+						await dbContext.SaveChangesAsync();
+					}
 				}
 
 				return isCreated;
@@ -186,9 +208,41 @@ namespace Library.Services
 			_logger.LogInformation("Retrieved {BookCount} books for member with IIN: {MemberIIN}", rows.Count, memberIIN);
 			return rows;
 		}
-		internal async Task<bool> UpdateMemberChangedFieldsAsync(LibraryContext dbContext, Member memberToUpdate)
+		/// <summary>
+		/// Saves changed fields and, if a new photo was chosen, replaces the photo file.
+		/// </summary>
+		/// <returns>True if anything changed (fields or photo).</returns>
+		internal async Task<bool> UpdateMemberChangedFieldsAsync(LibraryContext dbContext, Member memberToUpdate, byte[]? newPhoto)
 		{
-			return await _memberRepository.UpdateAttachedFieldsAsync(dbContext!, memberToUpdate);
+			bool photoChanged = false;
+			if (newPhoto is { Length: > 0 })
+			{
+				// Usually the same file name ("15.png"), so the database may not change while the file does
+				memberToUpdate.PhotoPath = ImageStorage.Save(ImageKind.Member, memberToUpdate.Id, newPhoto);
+				photoChanged = true;
+			}
+
+			bool fieldsChanged = await _memberRepository.UpdateAttachedFieldsAsync(dbContext!, memberToUpdate);
+			return fieldsChanged || photoChanged;
+		}
+
+		/// <summary>
+		/// Deletes the member and the member's photo file.
+		/// </summary>
+		internal async Task<bool> DeleteMemberAsync(LibraryContext dbContext, long IIN)
+		{
+			int memberId = await dbContext.Members
+				.Where(m => m.IIN == IIN)
+				.Select(m => m.Id)
+				.FirstOrDefaultAsync();
+
+			bool isDeleted = await _memberRepository.DeleteAsync(dbContext, m => m.IIN, IIN);
+			if (isDeleted)
+			{
+				ImageStorage.Delete(ImageKind.Member, memberId);
+				_logger.LogInformation("Member with IIN {IIN} and the photo were deleted.", IIN);
+			}
+			return isDeleted;
 		}
 		internal async Task<Member> GetMemberByIINForUpdateAsync(LibraryContext dbContext, long IIN)
 		{

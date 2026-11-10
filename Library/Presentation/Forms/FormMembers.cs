@@ -26,7 +26,6 @@ namespace Library
 		public FormMembers()
 		{
 			InitializeComponent();
-			buttonLoadPhoto.Tag = ButtonRole.Secondary;
 			AppTheme.Apply(this);
 			CancellationTokenSource = new CancellationTokenSource();
 			_logger = LoggerService.CreateLogger<FormMembers>();
@@ -92,7 +91,9 @@ namespace Library
 
 				if (ifConfirmed)
 				{
-					if (await _memberRepository.DeleteAsync(new LibraryContext(), m => m.IIN, IIN) == true)
+					using var deleteContext = new LibraryContext();
+					var memberService = new MemberService(_logger, _memberRepository, deleteContext);
+					if (await memberService.DeleteMemberAsync(deleteContext, IIN))
 					{
 						MessageBoxHelper.ShowSuccess("Member successfully removed");
 
@@ -401,36 +402,46 @@ namespace Library
 			}
 		}
 
-		private async void buttonLoadPhoto_Click(object sender, EventArgs e)
-		{
-			if (dataGridViewForMembers.CurrentCell == null) return;
+		private int _photoRequestId;
 
+		/// <summary>
+		/// Shows the photo of the selected member as soon as the selection changes.
+		/// </summary>
+		private async void DataGridViewForMembers_SelectionChanged(object sender, EventArgs e)
+		{
+			var (isValid, IIN) = DataGridViewHelper.TryGetValueFromRow<long>(dataGridViewForMembers);
+			if (!isValid)
+			{
+				SetMemberPhoto(null);
+				return;
+			}
+
+			// The selection can change faster than photos load: only the latest request may update the picture
+			int requestId = ++_photoRequestId;
 			try
 			{
-				var (isValid, IIN) = DataGridViewHelper.TryGetValueFromRow<long>(dataGridViewForMembers);
+				// Own context: the form's _context may be busy with a grid refresh at the same moment
+				using var photoContext = new LibraryContext();
+				var memberService = new MemberService(_logger, _memberRepository, photoContext);
+				var photo = await memberService.GetMemberPhotoAsync(photoContext, IIN);
 
-				if (isValid)
-				{
-					var memberService = new MemberService(_logger, _memberRepository, new LibraryContext());
-					var findedPhoto = await memberService.GetMemberPhotoByIINAsync(_context, IIN);
-					if (findedPhoto != null)
-					{
-						pictureBoxMember.Image = PictureHelper.ConvertByteToImage(findedPhoto);
-					}
-					else
-					{
-						MessageBoxHelper.ShowWarning($"Member with IIN {IIN} was not found.");
-					}
-				}
-				else
-				{
-					MessageBoxHelper.ShowWarning("Invalid or missing IIN in the selected row");
-				}
+				if (requestId == _photoRequestId) SetMemberPhoto(photo);
 			}
 			catch (Exception ex)
 			{
-				ErrorHandler.HandleException(ex, "An error occurred while fetching the member's data or displaying the photo.");
+				_logger.LogError(ex, "Failed to load photo for member with IIN {IIN}", IIN);
+				if (requestId == _photoRequestId) SetMemberPhoto(null);
 			}
+		}
+
+		/// <summary>
+		/// Replaces the shown photo (null shows the "No image" placeholder) and frees the previous image.
+		/// </summary>
+		private void SetMemberPhoto(byte[]? photo)
+		{
+			var previous = pictureBoxMember.Image;
+			pictureBoxMember.Image = PictureHelper.ConvertByteToImage(photo);
+			previous?.Dispose();
 		}
 	}
 }

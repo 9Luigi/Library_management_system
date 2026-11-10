@@ -15,7 +15,7 @@ namespace Library.Data.Configurations
             builder.Property(b => b.Sort).HasColumnName("Sort").HasMaxLength(25);
             builder.Property(b => b.Description).HasColumnName("Description").HasMaxLength(500);
             builder.Property(b => b.Genre).HasColumnName("Genre").IsRequired().HasMaxLength(25);
-            builder.Property(b => b.CoverImage).HasColumnName("CoverImage").IsRequired(false);
+            builder.Property(b => b.CoverImagePath).HasColumnName("CoverImagePath").HasMaxLength(260).IsRequired(false);
         }
     }
 }

@@ -64,9 +64,10 @@ namespace Library.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("Name");
 
-                    b.Property<byte[]>("Photo")
-                        .HasColumnType("BLOB")
-                        .HasColumnName("Photo");
+                    b.Property<string>("PhotoPath")
+                        .HasMaxLength(260)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("PhotoPath");
 
                     b.Property<string>("Surname")
                         .IsRequired()
@@ -88,9 +89,10 @@ namespace Library.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<byte[]>("CoverImage")
-                        .HasColumnType("BLOB")
-                        .HasColumnName("CoverImage");
+                    b.Property<string>("CoverImagePath")
+                        .HasMaxLength(260)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("CoverImagePath");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -164,9 +166,10 @@ namespace Library.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("PhoneNumber");
 
-                    b.Property<byte[]>("Photo")
-                        .HasColumnType("BLOB")
-                        .HasColumnName("Photo");
+                    b.Property<string>("PhotoPath")
+                        .HasMaxLength(260)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("PhotoPath");
 
                     b.Property<DateTime>("RegistrationDate")
                         .HasColumnType("TEXT")

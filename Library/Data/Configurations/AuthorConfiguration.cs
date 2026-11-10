@@ -12,7 +12,7 @@ namespace Library.Data.Configurations
             builder.Property(a => a.Name).HasColumnName("Name").IsRequired().HasMaxLength(50);
             builder.Property(a => a.Surname).HasColumnName("Surname").IsRequired().HasMaxLength(50);
             builder.Property(a => a.Biography).HasColumnName("Biography").HasMaxLength(500);
-            builder.Property(a => a.Photo).HasColumnName("Photo").IsRequired(false);
+            builder.Property(a => a.PhotoPath).HasColumnName("PhotoPath").HasMaxLength(260).IsRequired(false);
         }
     }
 }

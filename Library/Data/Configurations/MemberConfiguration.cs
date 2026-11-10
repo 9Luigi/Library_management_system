@@ -19,7 +19,7 @@ namespace Library.Data.Configurations
             builder.Property(m => m.Age).HasColumnName("Age").IsRequired();
             builder.Property(m => m.BirthDay).HasColumnName("BirthDay").IsRequired();
             builder.Property(m => m.IIN).HasColumnName("IIN").IsRequired();
-            builder.Property(m => m.Photo).HasColumnName("Photo").IsRequired(false);
+            builder.Property(m => m.PhotoPath).HasColumnName("PhotoPath").HasMaxLength(260).IsRequired(false);
             builder.Property(m => m.RegistrationDate).HasColumnName("RegistrationDate").IsRequired();
             builder.Property(m => m.Adress).HasColumnName("Adress").IsRequired();
             builder.Property(m => m.PhoneNumber).HasColumnName("PhoneNumber").IsRequired().HasMaxLength(75);

@@ -14,7 +14,8 @@ namespace Library.Models
         public string? Genre { get; set; }
         public string? Sort { get; set; } //new,classic,bestseller
         public DateTime? PublicationDate { get; set; }
-        public byte[]? CoverImage { get; set; }
+        /// <summary>Cover file name inside the books images folder (e.g. "7.jpg"), null if there is no cover.</summary>
+        public string? CoverImagePath { get; set; }
         public int Amount { get; set; }
         public List<Member> Members { get; set; } = new();
         public List<Author> Authors { get; set; } = new();

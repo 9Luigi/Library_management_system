@@ -42,17 +42,11 @@ namespace Library
         private void BSelectPhoto_Click(object sender, EventArgs e)
         {
             var photo = PictureHelper.GetImageFromFile();
-            // Set photo on member's photo in picture box relying on photo or default photo if error
-            if (photo == null || photo is not Image)
-            {
-                pbPhoto.Image = Resources.NoImage;
-                PhotoAsBytes = PictureHelper.ImageToByteConvert(Resources.NoImage);
-            }
-            else
-            {
-                pbPhoto.Image = (Image)photo;
-                PhotoAsBytes = PictureHelper.ImageToByteConvert((Image)photo);
-            }
+            // Dialog cancelled or the image was rejected: keep the current photo
+            if (photo == null) return;
+
+            pbPhoto.Image = photo;
+            PhotoAsBytes = PictureHelper.ImageToByteConvert(photo);
         }
 
         private async void BAddMember_Click(object sender, EventArgs e)
@@ -173,12 +167,11 @@ namespace Library
                             MTBAdress.Text,
                             Convert.ToInt64(MTBIIN.Text),
                             MTBPhoneNumber.Text,
-                            PhotoAsBytes!,
                             CheckIfHasPatronymic(TBPatronymic.Text)
                         );
                     try
                     {
-                        if (await _memberService.CreateMemberAsync(_context, createdMember))
+                        if (await _memberService.CreateMemberAsync(_context, createdMember, PhotoAsBytes))
                         {
                             var result = MessageBoxHelper.ShowConfirmation("Do you want to add another one?",
                                     $"{createdMember.Name} {createdMember.Surname} added successfully");
@@ -213,10 +206,9 @@ namespace Library
                     MemberToEdit.Age = byte.Parse(TBAge.Text);
                     MemberToEdit.Adress = MTBAdress.Text;
                     MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
-                    MemberToEdit.Photo = PictureHelper.ImageToByteConvert(pbPhoto.Image);
 
-                    // Save the changes to the database
-                    bool isUpdated = await _memberService.UpdateMemberChangedFieldsAsync(_context, MemberToEdit);
+                    // Save the changes to the database (and the photo file, if a new one was selected)
+                    bool isUpdated = await _memberService.UpdateMemberChangedFieldsAsync(_context, MemberToEdit, PhotoAsBytes);
 
                     if (!isUpdated)
                     {
@@ -225,6 +217,7 @@ namespace Library
                     }
                     else
                     {
+                        PhotoAsBytes = null;
                         MessageBoxHelper.ShowSuccess("Member's fields updated successfully");
                     }
 
@@ -237,8 +230,6 @@ namespace Library
                     {
 
                         FillMemberData(MemberToEdit);
-                        if (MemberToEdit.Photo == null) return;
-                        pbPhoto.Image = PictureHelper.ConvertByteToImage(MemberToEdit.Photo);
                         // Focus on the first field
                         TBName.Focus();
                     }
@@ -265,12 +256,13 @@ namespace Library
             MTBAdress.Text = member.Adress;
             MTBPhoneNumber.Text = member.PhoneNumber;
 
-            byte[]? imageByte = member.Photo;
-            pbPhoto.Image = imageByte != null ? PictureHelper.ConvertByteToImage(imageByte) : Resources.NoImage;
+            // ConvertByteToImage returns the "No image" placeholder for null
+            pbPhoto.Image = PictureHelper.ConvertByteToImage(_memberService.LoadPhoto(member.PhotoPath));
         }
 
         private void ResetForm()
         {
+            PhotoAsBytes = null;
             TextBoxHelper.AllTextBoxBaseOnFormClear(this);
             PictureBoxHelper.PictureBoxImageSetDefault(pbPhoto);
             TBName.Focus();

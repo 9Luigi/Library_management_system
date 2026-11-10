@@ -19,11 +19,12 @@ namespace Library.Models
         public string PhoneNumber { get; set; }
         public long IIN { get; set; }
         public DateTime RegistrationDate { get; set; }
-        public byte[]? Photo { get; set; }
+        /// <summary>Photo file name inside ImageStorage.Folder(ImageKind.Member) (e.g. "15.png"), null if there is no photo.</summary>
+        public string? PhotoPath { get; set; }
         public List<Book> Books { get; set; } = new();
         public Member() { }
 
-        public Member(string name, string surname, DateTime birthday, string adress, long iin, string Phonenumber, byte[] photo, string patronymic = "None")
+        public Member(string name, string surname, DateTime birthday, string adress, long iin, string Phonenumber, string patronymic = "None")
         {
             Name = name;
             Surname = surname;
@@ -33,7 +34,6 @@ namespace Library.Models
             Adress = adress;
             PhoneNumber = Phonenumber;
             IIN = iin;
-            Photo = photo ?? Array.Empty<byte>(); ;
             Age = RegistrationDate.Year - BirthDay.Year;
             if (BirthDay > RegistrationDate.AddYears(-Age)) Age--;
             if (Patronymic == null)
