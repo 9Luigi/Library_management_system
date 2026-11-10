@@ -3,6 +3,7 @@ using Library.Services;
 using Library.Models;
 using Library.Data.Repositories;
 using Library.Presentation.Controllers;
+using Library.Presentation.Theme;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 
@@ -37,6 +38,7 @@ namespace Library
 			_memberService = new(_logger, _memberRepository, new LibraryContext());
 			_libraryService = new();
 			InitializeComponent();
+			AppTheme.Apply(this);
 		}
 
 		private void FormBorrowOrReturnBook_Load(object sender, EventArgs e)
@@ -51,9 +53,11 @@ namespace Library
 			switch (ActionMode.ToUpper())
 			{
 				case "BORROW":
+					Text = "Borrow a book — right-click a book to lend it";
 					FillGridWith(GridCriterion.AllBooks);
 					break;
 				case "RETURN":
+					Text = "Return a book — right-click a book to return it";
 					FillGridWith(GridCriterion.BooksByMember);
 					break;
 			}

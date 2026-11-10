@@ -1,5 +1,6 @@
 ﻿using Library.Services;
 using Library.Presentation.Controllers;
+using Library.Presentation.Theme;
 using Serilog;
 
 namespace Library
@@ -22,6 +23,7 @@ namespace Library
 			// To customize application configuration such as set high DPI settings or default font,
 			// see https://aka.ms/applicationconfiguration.
 			ApplicationConfiguration.Initialize();
+			AppTheme.Load();
 			System.Windows.Forms.Application.Run(new FormMain());
 		}
     }

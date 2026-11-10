@@ -41,12 +41,18 @@
 			// 
 			// DataGridViewForLendBook
 			// 
+			DataGridViewForLendBook.AllowUserToAddRows = false;
+			DataGridViewForLendBook.AllowUserToDeleteRows = false;
+			DataGridViewForLendBook.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 			DataGridViewForLendBook.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			DataGridViewForLendBook.Location = new Point(15, 27);
+			DataGridViewForLendBook.Location = new Point(16, 16);
 			DataGridViewForLendBook.Margin = new Padding(3, 4, 3, 4);
+			DataGridViewForLendBook.MultiSelect = false;
 			DataGridViewForLendBook.Name = "DataGridViewForLendBook";
+			DataGridViewForLendBook.ReadOnly = true;
 			DataGridViewForLendBook.RowHeadersWidth = 51;
-			DataGridViewForLendBook.Size = new Size(887, 491);
+			DataGridViewForLendBook.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+			DataGridViewForLendBook.Size = new Size(882, 528);
 			DataGridViewForLendBook.TabIndex = 0;
 			DataGridViewForLendBook.CellMouseClick += DataGridViewForLendBook_CellMouseClick;
 			// 
@@ -70,15 +76,16 @@
 			returnBookToolStripMenuItem.Size = new Size(176, 24);
 			returnBookToolStripMenuItem.Text = "Return book";
 			returnBookToolStripMenuItem.Click += ReturnBookToolStripMenuItem_Click;
-			// 
+			//
 			// PBBorrowOrReturn
-			// 
-			PBBorrowOrReturn.Location = new Point(14, 515);
+			//
+			PBBorrowOrReturn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+			PBBorrowOrReturn.Location = new Point(16, 568);
 			PBBorrowOrReturn.Margin = new Padding(3, 4, 3, 4);
 			PBBorrowOrReturn.Name = "PBBorrowOrReturn";
-			PBBorrowOrReturn.Size = new Size(887, 31);
+			PBBorrowOrReturn.Size = new Size(882, 6);
 			PBBorrowOrReturn.TabIndex = 1;
-			// 
+			//
 			// unlendABookToolStripMenuItem
 			// 
 			unlendABookToolStripMenuItem.Name = "unlendABookToolStripMenuItem";

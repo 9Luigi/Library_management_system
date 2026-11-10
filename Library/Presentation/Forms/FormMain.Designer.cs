@@ -28,84 +28,116 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
-			bCatalog = new Button();
-			bMembers = new Button();
-			pbCatalog = new PictureBox();
-			pbMembers = new PictureBox();
-			((System.ComponentModel.ISupportInitialize)pbCatalog).BeginInit();
-			((System.ComponentModel.ISupportInitialize)pbMembers).BeginInit();
+			sidebar = new Panel();
+			bTheme = new Button();
+			bNavCatalog = new Button();
+			bNavMembers = new Button();
+			lblAppSubtitle = new Label();
+			lblAppTitle = new Label();
+			contentHost = new Panel();
+			sidebar.SuspendLayout();
 			SuspendLayout();
-			// 
-			// bCatalog
-			// 
-			bCatalog.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-			bCatalog.Enabled = false;
-			bCatalog.Location = new Point(12, 394);
-			bCatalog.Name = "bCatalog";
-			bCatalog.Size = new Size(280, 35);
-			bCatalog.TabIndex = 3;
-			bCatalog.Text = "Catalog";
-			bCatalog.UseVisualStyleBackColor = true;
-			bCatalog.Click += bCatalog_Click;
-			// 
-			// bMembers
-			// 
-			bMembers.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-			bMembers.Location = new Point(332, 394);
-			bMembers.Name = "bMembers";
-			bMembers.Size = new Size(280, 35);
-			bMembers.TabIndex = 4;
-			bMembers.Text = "Members";
-			bMembers.UseVisualStyleBackColor = true;
-			bMembers.Click += bMembers_Click;
-			// 
-			// pbCatalog
-			// 
-			pbCatalog.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-			pbCatalog.Image = (Image)resources.GetObject("pbCatalog.Image");
-			pbCatalog.Location = new Point(12, 12);
-			pbCatalog.Name = "pbCatalog";
-			pbCatalog.Size = new Size(280, 376);
-			pbCatalog.SizeMode = PictureBoxSizeMode.StretchImage;
-			pbCatalog.TabIndex = 5;
-			pbCatalog.TabStop = false;
-			// 
-			// pbMembers
-			// 
-			pbMembers.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
-			pbMembers.Image = Properties.Resources.Member;
-			pbMembers.Location = new Point(332, 12);
-			pbMembers.Name = "pbMembers";
-			pbMembers.Size = new Size(280, 376);
-			pbMembers.SizeMode = PictureBoxSizeMode.StretchImage;
-			pbMembers.TabIndex = 6;
-			pbMembers.TabStop = false;
-			// 
+			//
+			// sidebar
+			//
+			sidebar.Controls.Add(bTheme);
+			sidebar.Controls.Add(bNavCatalog);
+			sidebar.Controls.Add(bNavMembers);
+			sidebar.Controls.Add(lblAppSubtitle);
+			sidebar.Controls.Add(lblAppTitle);
+			sidebar.Dock = DockStyle.Left;
+			sidebar.Location = new Point(0, 0);
+			sidebar.Name = "sidebar";
+			sidebar.Size = new Size(220, 720);
+			sidebar.TabIndex = 0;
+			sidebar.Tag = "theme:skip";
+			//
+			// bTheme
+			//
+			bTheme.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			bTheme.Location = new Point(12, 664);
+			bTheme.Name = "bTheme";
+			bTheme.Padding = new Padding(12, 0, 0, 0);
+			bTheme.Size = new Size(196, 44);
+			bTheme.TabIndex = 3;
+			bTheme.Text = "Dark theme";
+			bTheme.TextAlign = ContentAlignment.MiddleLeft;
+			bTheme.Click += BTheme_Click;
+			//
+			// bNavCatalog
+			//
+			bNavCatalog.Location = new Point(12, 152);
+			bNavCatalog.Name = "bNavCatalog";
+			bNavCatalog.Padding = new Padding(12, 0, 0, 0);
+			bNavCatalog.Size = new Size(196, 44);
+			bNavCatalog.TabIndex = 2;
+			bNavCatalog.TabStop = false;
+			bNavCatalog.Text = "Catalog  (soon)";
+			bNavCatalog.TextAlign = ContentAlignment.MiddleLeft;
+			//
+			// bNavMembers
+			//
+			bNavMembers.Location = new Point(12, 100);
+			bNavMembers.Name = "bNavMembers";
+			bNavMembers.Padding = new Padding(12, 0, 0, 0);
+			bNavMembers.Size = new Size(196, 44);
+			bNavMembers.TabIndex = 1;
+			bNavMembers.Text = "Members";
+			bNavMembers.TextAlign = ContentAlignment.MiddleLeft;
+			bNavMembers.Click += BNavMembers_Click;
+			//
+			// lblAppSubtitle
+			//
+			lblAppSubtitle.AutoSize = true;
+			lblAppSubtitle.Location = new Point(22, 58);
+			lblAppSubtitle.Name = "lblAppSubtitle";
+			lblAppSubtitle.Size = new Size(147, 20);
+			lblAppSubtitle.TabIndex = 4;
+			lblAppSubtitle.Text = "Management system";
+			//
+			// lblAppTitle
+			//
+			lblAppTitle.AutoSize = true;
+			lblAppTitle.Location = new Point(20, 20);
+			lblAppTitle.Name = "lblAppTitle";
+			lblAppTitle.Size = new Size(84, 37);
+			lblAppTitle.TabIndex = 5;
+			lblAppTitle.Text = "Library";
+			//
+			// contentHost
+			//
+			contentHost.Dock = DockStyle.Fill;
+			contentHost.Location = new Point(220, 0);
+			contentHost.Name = "contentHost";
+			contentHost.Size = new Size(1080, 720);
+			contentHost.TabIndex = 1;
+			//
 			// FormMain
-			// 
-			AutoScaleDimensions = new SizeF(9F, 19F);
+			//
+			AutoScaleDimensions = new SizeF(8F, 20F);
 			AutoScaleMode = AutoScaleMode.Font;
-			ClientSize = new Size(624, 441);
-			Controls.Add(pbMembers);
-			Controls.Add(pbCatalog);
-			Controls.Add(bMembers);
-			Controls.Add(bCatalog);
-			Font = new Font("Times New Roman", 12F, FontStyle.Regular, GraphicsUnit.Point);
-			Margin = new Padding(4);
+			ClientSize = new Size(1300, 720);
+			Controls.Add(contentHost);
+			Controls.Add(sidebar);
+			MinimumSize = new Size(1100, 680);
 			Name = "FormMain";
+			StartPosition = FormStartPosition.CenterScreen;
 			Text = "Library";
+			FormClosing += FormMain_FormClosing;
 			Load += FMain_Load;
-			((System.ComponentModel.ISupportInitialize)pbCatalog).EndInit();
-			((System.ComponentModel.ISupportInitialize)pbMembers).EndInit();
+			sidebar.ResumeLayout(false);
+			sidebar.PerformLayout();
 			ResumeLayout(false);
 		}
 
 		#endregion
 
-		private Button bCatalog;
-        private Button bMembers;
-        private PictureBox pbCatalog;
-        private PictureBox pbMembers;
+		private Panel sidebar;
+		private Label lblAppTitle;
+		private Label lblAppSubtitle;
+		private Button bNavMembers;
+		private Button bNavCatalog;
+		private Button bTheme;
+		private Panel contentHost;
     }
 }

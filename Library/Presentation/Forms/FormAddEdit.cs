@@ -4,6 +4,7 @@ using Library.Models;
 using Library.Data.Repositories;
 using Library.Presentation.Controllers;
 using Library.Presentation.Controllers.PictureController;
+using Library.Presentation.Theme;
 using Library.Presentation.Validation;
 using Library.Properties;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,8 @@ namespace Library
         public FaddEdit_prop()
         {
             InitializeComponent();
+            BSelectPhoto.Tag = ButtonRole.Secondary;
+            AppTheme.Apply(this);
             pbPhoto.Image = Properties.Resources.NoImage;
 
             var _logger = LoggerService.CreateLogger<FaddEdit_prop>();
@@ -65,6 +68,7 @@ namespace Library
             switch (ActionMode.ToUpper())
             {
                 case "UPDATE":
+                    Text = "Edit member";
                     BUpdateMember.Visible = true;
                     BAddMember.Visible = false;
                     MTBIIN.Enabled = false;
@@ -86,6 +90,7 @@ namespace Library
                     }
                     break;
                 case "CREATE":
+                    Text = "New member";
                     MTBIIN.Enabled = true;
                     BUpdateMember.Visible = false;
                     BAddMember.Visible = true;

@@ -4,6 +4,7 @@ using Library.Models;
 using Library.Data.Repositories;
 using Library.Presentation.Controllers;
 using Library.Presentation.Controllers.PictureController;
+using Library.Presentation.Theme;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 namespace Library
@@ -25,6 +26,8 @@ namespace Library
 		public FormMembers()
 		{
 			InitializeComponent();
+			buttonLoadPhoto.Tag = ButtonRole.Secondary;
+			AppTheme.Apply(this);
 			CancellationTokenSource = new CancellationTokenSource();
 			_logger = LoggerService.CreateLogger<FormMembers>();
 			_memberRepository = new();
@@ -56,6 +59,9 @@ namespace Library
 
 		private async void FMembers_Load(object sender, EventArgs e)
 		{
+			// Embedded into the main window: closing is handled there
+			exitToolStripMenuItem.Visible = TopLevel;
+
 			await RefreshDataGridForMembers();
 		}
 
@@ -306,18 +312,6 @@ namespace Library
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occurred during the form closing process.");
-			}
-		}
-
-		private void TbIINSearch_Click(object sender, EventArgs e)
-		{
-			try
-			{
-				TbIINSearch.Text = "";
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An error occurred while clearing the IIN Search TextBox.");
 			}
 		}
 

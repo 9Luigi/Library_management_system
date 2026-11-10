@@ -91,14 +91,14 @@
 			dataGridViewForMembers.AllowUserToResizeRows = false;
 			dataGridViewForMembers.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 			dataGridViewForMembers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			dataGridViewForMembers.Location = new Point(14, 32);
+			dataGridViewForMembers.Location = new Point(14, 80);
 			dataGridViewForMembers.Margin = new Padding(3, 4, 3, 4);
 			dataGridViewForMembers.MultiSelect = false;
 			dataGridViewForMembers.Name = "dataGridViewForMembers";
 			dataGridViewForMembers.ReadOnly = true;
 			dataGridViewForMembers.RowHeadersWidth = 51;
 			dataGridViewForMembers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-			dataGridViewForMembers.Size = new Size(770, 480);
+			dataGridViewForMembers.Size = new Size(770, 556);
 			dataGridViewForMembers.TabIndex = 2;
 			dataGridViewForMembers.CellMouseClick += View_CellMouseClick;
 			dataGridViewForMembers.CellMouseDoubleClick += DataGridViewForMembers_CellMouseDoubleClick;
@@ -142,45 +142,43 @@
 			// 
 			pictureBoxMember.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 			pictureBoxMember.Image = Properties.Resources.NoImage;
-			pictureBoxMember.Location = new Point(791, 32);
+			pictureBoxMember.Location = new Point(798, 80);
 			pictureBoxMember.Margin = new Padding(3, 4, 3, 4);
 			pictureBoxMember.Name = "pictureBoxMember";
-			pictureBoxMember.Size = new Size(274, 452);
+			pictureBoxMember.Size = new Size(267, 356);
 			pictureBoxMember.SizeMode = PictureBoxSizeMode.StretchImage;
 			pictureBoxMember.TabIndex = 3;
 			pictureBoxMember.TabStop = false;
 			// 
 			// TbIINSearch
 			// 
-			TbIINSearch.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-			TbIINSearch.Location = new Point(373, 583);
+			TbIINSearch.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+			TbIINSearch.Location = new Point(14, 42);
 			TbIINSearch.Margin = new Padding(3, 4, 3, 4);
 			TbIINSearch.Name = "TbIINSearch";
-			TbIINSearch.Size = new Size(333, 27);
+			TbIINSearch.PlaceholderText = "Search by IIN (at least 4 digits)";
+			TbIINSearch.Size = new Size(770, 27);
 			TbIINSearch.TabIndex = 4;
-			TbIINSearch.Text = "Enter IIN";
-			TbIINSearch.TextAlign = HorizontalAlignment.Center;
-			TbIINSearch.Click += TbIINSearch_Click;
 			TbIINSearch.TextChanged += TbIINSearch_TextChanged;
 			// 
 			// pbMembers
 			// 
 			pbMembers.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-			pbMembers.Location = new Point(14, 520);
+			pbMembers.Location = new Point(14, 648);
 			pbMembers.Margin = new Padding(3, 4, 3, 4);
 			pbMembers.Name = "pbMembers";
-			pbMembers.Size = new Size(1051, 31);
+			pbMembers.Size = new Size(1051, 6);
 			pbMembers.Step = 1;
 			pbMembers.TabIndex = 6;
 			// 
 			// buttonLoadPhoto
 			// 
 			buttonLoadPhoto.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-			buttonLoadPhoto.Location = new Point(791, 487);
+			buttonLoadPhoto.Location = new Point(798, 444);
 			buttonLoadPhoto.Name = "buttonLoadPhoto";
-			buttonLoadPhoto.Size = new Size(274, 29);
+			buttonLoadPhoto.Size = new Size(267, 38);
 			buttonLoadPhoto.TabIndex = 7;
-			buttonLoadPhoto.Text = "Load selected member's photo";
+			buttonLoadPhoto.Text = "Show photo";
 			buttonLoadPhoto.UseVisualStyleBackColor = true;
 			buttonLoadPhoto.Click += buttonLoadPhoto_Click;
 			// 
