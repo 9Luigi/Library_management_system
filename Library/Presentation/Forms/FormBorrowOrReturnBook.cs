@@ -63,30 +63,41 @@ namespace Library
 			}
 		}
 
+		/// <summary>
+		/// async void: nobody awaits it, so an exception escaping from here would crash the app
+		/// (or stop it in the debugger). Every error is handled inside.
+		/// </summary>
 		private async void FillGridWith(GridCriterion criterion)
 		{
-			switch (criterion)
+			try
 			{
-				case GridCriterion.AllBooks:
-					returnBookToolStripMenuItem.Visible = false;
-					lendABookToolStripMenuItem.Visible = true;
-					DataGridViewForLendBook.DataSource = await _bookService.GetAllBooksAsync();
-					break;
+				switch (criterion)
+				{
+					case GridCriterion.AllBooks:
+						returnBookToolStripMenuItem.Visible = false;
+						lendABookToolStripMenuItem.Visible = true;
+						DataGridViewForLendBook.DataSource = await _bookService.GetAllBooksAsync();
+						break;
 
-				case GridCriterion.BooksByMember:
-					returnBookToolStripMenuItem.Visible = true;
-					lendABookToolStripMenuItem.Visible = false;
-					var memberBooks = await _memberService.GetMemberBooksAsync(_context, MemberIIN);
-					if (memberBooks.Count == 0)
-					{
-						DataGridViewForLendBook.DataSource = null;
-						MessageBoxHelper.ShowWarning($"No books found for member with IIN: {MemberIIN}.");
-					}
-					else
-					{
-						DataGridViewForLendBook.DataSource = memberBooks;
-					}
-					break;
+					case GridCriterion.BooksByMember:
+						returnBookToolStripMenuItem.Visible = true;
+						lendABookToolStripMenuItem.Visible = false;
+						var memberBooks = await _memberService.GetMemberBooksAsync(_context, MemberIIN);
+						if (memberBooks.Count == 0)
+						{
+							DataGridViewForLendBook.DataSource = null;
+							MessageBoxHelper.ShowWarning($"No books found for member with IIN: {MemberIIN}.");
+						}
+						else
+						{
+							DataGridViewForLendBook.DataSource = memberBooks;
+						}
+						break;
+				}
+			}
+			catch (Exception ex)
+			{
+				ErrorHandler.HandleException(ex, "An error occurred while loading books.");
 			}
 		}
 

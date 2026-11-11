@@ -210,9 +210,12 @@ namespace Library.Services
 		{
 			_logger.LogInformation("Start fetching books for member with IIN: {MemberIIN}", memberIIN);
 
+			// No reference to the outer member inside the books projection: that would need SQL APPLY,
+			// which SQLite doesn't support. The IIN is known anyway, so a plain JOIN is enough.
 			var rows = await dbContext.Members
 				.Where(m => m.IIN == memberIIN)
-				.SelectMany(m => m.Books.Select(b => new MemberBookRow(m.IIN, b.Id, b.Title)))
+				.SelectMany(m => m.Books)
+				.Select(b => new MemberBookRow(memberIIN, b.Id, b.Title))
 				.ToListAsync();
 
 			_logger.LogInformation("Retrieved {BookCount} books for member with IIN: {MemberIIN}", rows.Count, memberIIN);
