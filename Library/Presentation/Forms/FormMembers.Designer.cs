@@ -15,7 +15,6 @@
         {
             if (disposing && (components != null))
             {
-				CancellationTokenSource.Cancel();
 				components.Dispose();
             }
             base.Dispose(disposing);
@@ -42,7 +41,14 @@
 			ReturnBookToolStripMenuItem = new ToolStripMenuItem();
 			pictureBoxMember = new PictureBox();
 			TbIINSearch = new TextBox();
-			pbMembers = new ProgressBar();
+			bSearch = new Button();
+			bClearSearch = new Button();
+			lblRowsPerPage = new Label();
+			cbPageSize = new ComboBox();
+			lblRange = new Label();
+			bPrevPage = new Button();
+			lblPageInfo = new Label();
+			bNextPage = new Button();
 			menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)dataGridViewForMembers).BeginInit();
 			cmMember.SuspendLayout();
@@ -97,7 +103,7 @@
 			dataGridViewForMembers.ReadOnly = true;
 			dataGridViewForMembers.RowHeadersWidth = 51;
 			dataGridViewForMembers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-			dataGridViewForMembers.Size = new Size(770, 556);
+			dataGridViewForMembers.Size = new Size(770, 540);
 			dataGridViewForMembers.TabIndex = 2;
 			dataGridViewForMembers.CellMouseClick += View_CellMouseClick;
 			dataGridViewForMembers.CellMouseDoubleClick += DataGridViewForMembers_CellMouseDoubleClick;
@@ -155,28 +161,107 @@
 			TbIINSearch.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 			TbIINSearch.Location = new Point(14, 42);
 			TbIINSearch.Margin = new Padding(3, 4, 3, 4);
+			TbIINSearch.MaxLength = 12;
 			TbIINSearch.Name = "TbIINSearch";
-			TbIINSearch.PlaceholderText = "Search by IIN (at least 4 digits)";
-			TbIINSearch.Size = new Size(770, 27);
+			TbIINSearch.PlaceholderText = "Enter full IIN (12 digits)";
+			TbIINSearch.Size = new Size(550, 27);
 			TbIINSearch.TabIndex = 4;
 			TbIINSearch.TextChanged += TbIINSearch_TextChanged;
-			// 
-			// pbMembers
-			// 
-			pbMembers.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-			pbMembers.Location = new Point(14, 648);
-			pbMembers.Margin = new Padding(3, 4, 3, 4);
-			pbMembers.Name = "pbMembers";
-			pbMembers.Size = new Size(1051, 6);
-			pbMembers.Step = 1;
-			pbMembers.TabIndex = 6;
-			// 
+			TbIINSearch.KeyDown += TbIINSearch_KeyDown;
+			TbIINSearch.KeyPress += TbIINSearch_KeyPress;
+			//
+			// bSearch
+			//
+			bSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+			bSearch.Location = new Point(572, 38);
+			bSearch.Name = "bSearch";
+			bSearch.Size = new Size(102, 34);
+			bSearch.TabIndex = 11;
+			bSearch.Text = "Search";
+			bSearch.Click += BSearch_Click;
+			//
+			// bClearSearch
+			//
+			bClearSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+			bClearSearch.Location = new Point(682, 38);
+			bClearSearch.Name = "bClearSearch";
+			bClearSearch.Size = new Size(102, 34);
+			bClearSearch.TabIndex = 12;
+			bClearSearch.Text = "Clear";
+			bClearSearch.Click += BClearSearch_Click;
+			//
+			// lblRowsPerPage
+			//
+			lblRowsPerPage.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			lblRowsPerPage.AutoSize = true;
+			lblRowsPerPage.Location = new Point(14, 637);
+			lblRowsPerPage.Name = "lblRowsPerPage";
+			lblRowsPerPage.Size = new Size(99, 20);
+			lblRowsPerPage.TabIndex = 5;
+			lblRowsPerPage.Text = "Rows per page";
+			//
+			// cbPageSize
+			//
+			cbPageSize.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			cbPageSize.DropDownStyle = ComboBoxStyle.DropDownList;
+			cbPageSize.Location = new Point(122, 633);
+			cbPageSize.Name = "cbPageSize";
+			cbPageSize.Size = new Size(70, 28);
+			cbPageSize.TabIndex = 6;
+			cbPageSize.SelectedIndexChanged += CbPageSize_SelectedIndexChanged;
+			//
+			// lblRange
+			//
+			lblRange.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			lblRange.AutoSize = true;
+			lblRange.Location = new Point(206, 637);
+			lblRange.Name = "lblRange";
+			lblRange.Size = new Size(0, 20);
+			lblRange.TabIndex = 7;
+			//
+			// bPrevPage
+			//
+			bPrevPage.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+			bPrevPage.Location = new Point(444, 630);
+			bPrevPage.Name = "bPrevPage";
+			bPrevPage.Size = new Size(100, 34);
+			bPrevPage.TabIndex = 8;
+			bPrevPage.Text = "‹ Prev";
+			bPrevPage.Click += BPrevPage_Click;
+			//
+			// lblPageInfo
+			//
+			lblPageInfo.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+			lblPageInfo.Location = new Point(548, 630);
+			lblPageInfo.Name = "lblPageInfo";
+			lblPageInfo.Size = new Size(132, 34);
+			lblPageInfo.TabIndex = 9;
+			lblPageInfo.Text = "Page 1 of 1";
+			lblPageInfo.TextAlign = ContentAlignment.MiddleCenter;
+			//
+			// bNextPage
+			//
+			bNextPage.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+			bNextPage.Location = new Point(684, 630);
+			bNextPage.Name = "bNextPage";
+			bNextPage.Size = new Size(100, 34);
+			bNextPage.TabIndex = 10;
+			bNextPage.Text = "Next ›";
+			bNextPage.Click += BNextPage_Click;
+			//
 			// FormMembers
-			// 
+			//
 			AutoScaleDimensions = new SizeF(8F, 20F);
 			AutoScaleMode = AutoScaleMode.Font;
 			ClientSize = new Size(1079, 668);
-			Controls.Add(pbMembers);
+			Controls.Add(bNextPage);
+			Controls.Add(lblPageInfo);
+			Controls.Add(bPrevPage);
+			Controls.Add(lblRange);
+			Controls.Add(cbPageSize);
+			Controls.Add(lblRowsPerPage);
+			Controls.Add(bClearSearch);
+			Controls.Add(bSearch);
 			Controls.Add(TbIINSearch);
 			Controls.Add(pictureBoxMember);
 			Controls.Add(dataGridViewForMembers);
@@ -204,7 +289,14 @@
         private PictureBox pictureBoxMember;
         private ToolStripMenuItem addMemberToolStripMenuItem;
         private TextBox TbIINSearch;
-        private ProgressBar pbMembers;
+		private Button bSearch;
+		private Button bClearSearch;
+		private Label lblRowsPerPage;
+		private ComboBox cbPageSize;
+		private Label lblRange;
+		private Button bPrevPage;
+		private Label lblPageInfo;
+		private Button bNextPage;
         private ContextMenuStrip cmMember;
         private ToolStripMenuItem editToolStripMenuItem;
         private ToolStripMenuItem deleteToolStripMenuItem;

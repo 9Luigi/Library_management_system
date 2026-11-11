@@ -55,15 +55,25 @@ namespace Library.Services
 			}
 		}
 
-		internal async Task<List<dynamic>> GetMembersAsync(LibraryContext dbContext)
+		/// <summary>
+		/// Returns one page of members ordered by registration date, plus the total number of members.
+		/// </summary>
+		/// <param name="page">1-based page number.</param>
+		internal async Task<(List<dynamic> Members, int TotalCount)> GetMembersPageAsync(LibraryContext dbContext, int page, int pageSize)
 		{
 			try
 			{
-				_logger.LogInformation("GetMembersAsync started.");
+				_logger.LogInformation("GetMembersPageAsync started. Page: {Page}, PageSize: {PageSize}", page, pageSize);
 
-				// Retrieve members with their borrowed books
-				var members = await dbContext.Set<Member>().Select(
-					m => new
+				int totalCount = await dbContext.Members.CountAsync();
+
+				// Stable order is required for paging: registration date, Id as a tie-breaker
+				var members = await dbContext.Members
+					.OrderBy(m => m.RegistrationDate)
+					.ThenBy(m => m.Id)
+					.Skip((page - 1) * pageSize)
+					.Take(pageSize)
+					.Select(m => new
 					{
 						m.IIN,
 						m.Name,
@@ -74,7 +84,7 @@ namespace Library.Services
 					}).ToListAsync();
 
 				// Return the members as dynamic objects
-				return members.Select(m => (dynamic)m).ToList();
+				return (members.Select(m => (dynamic)m).ToList(), totalCount);
 			}
 			catch (Exception ex)
 			{

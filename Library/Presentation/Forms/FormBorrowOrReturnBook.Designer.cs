@@ -33,7 +33,6 @@
 			CMSLendBook = new ContextMenuStrip(components);
 			lendABookToolStripMenuItem = new ToolStripMenuItem();
 			returnBookToolStripMenuItem = new ToolStripMenuItem();
-			PBBorrowOrReturn = new ProgressBar();
 			unlendABookToolStripMenuItem = new ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)DataGridViewForLendBook).BeginInit();
 			CMSLendBook.SuspendLayout();
@@ -52,7 +51,7 @@
 			DataGridViewForLendBook.ReadOnly = true;
 			DataGridViewForLendBook.RowHeadersWidth = 51;
 			DataGridViewForLendBook.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-			DataGridViewForLendBook.Size = new Size(882, 528);
+			DataGridViewForLendBook.Size = new Size(882, 568);
 			DataGridViewForLendBook.TabIndex = 0;
 			DataGridViewForLendBook.CellMouseClick += DataGridViewForLendBook_CellMouseClick;
 			// 
@@ -76,16 +75,7 @@
 			returnBookToolStripMenuItem.Size = new Size(176, 24);
 			returnBookToolStripMenuItem.Text = "Return book";
 			returnBookToolStripMenuItem.Click += ReturnBookToolStripMenuItem_Click;
-			//
-			// PBBorrowOrReturn
-			//
-			PBBorrowOrReturn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-			PBBorrowOrReturn.Location = new Point(16, 568);
-			PBBorrowOrReturn.Margin = new Padding(3, 4, 3, 4);
-			PBBorrowOrReturn.Name = "PBBorrowOrReturn";
-			PBBorrowOrReturn.Size = new Size(882, 6);
-			PBBorrowOrReturn.TabIndex = 1;
-			//
+			// 
 			// unlendABookToolStripMenuItem
 			// 
 			unlendABookToolStripMenuItem.Name = "unlendABookToolStripMenuItem";
@@ -96,7 +86,6 @@
 			AutoScaleDimensions = new SizeF(8F, 20F);
 			AutoScaleMode = AutoScaleMode.Font;
 			ClientSize = new Size(914, 600);
-			Controls.Add(PBBorrowOrReturn);
 			Controls.Add(DataGridViewForLendBook);
 			Margin = new Padding(3, 4, 3, 4);
 			Name = "FormBorrowOrReturnBook";
@@ -112,7 +101,6 @@
 		private DataGridView DataGridViewForLendBook;
         private ContextMenuStrip CMSLendBook;
         private ToolStripMenuItem lendABookToolStripMenuItem;
-        private ProgressBar PBBorrowOrReturn;
 		private ToolStripMenuItem unlendABookToolStripMenuItem;
 		private ToolStripMenuItem returnBookToolStripMenuItem;
 	}

@@ -4,9 +4,9 @@ using Library.Models;
 using Library.Data.Repositories;
 using Library.Presentation.Controllers;
 using Library.Presentation.Controllers.PictureController;
+using Library.Presentation.Settings;
 using Library.Presentation.Theme;
 using Microsoft.Extensions.Logging;
-using System.ComponentModel;
 namespace Library
 {
 	//TODO datagrid not updating after add/edit member
@@ -15,21 +15,19 @@ namespace Library
 		#region FieldsAndProperties
 		readonly Repository<Member> _memberRepository; //TODO factory for services,repositories? and forms
 		readonly ILogger _logger;
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		internal CancellationTokenSource CancellationTokenSource { get; set; }
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		internal CancellationToken CancellationToken { get; set; }
-		readonly ControlsHelper controlsController = new();
 
 		readonly LibraryContext _context = new(); //Disposed in desighner file
 
 		public FormMembers()
 		{
 			InitializeComponent();
+			bPrevPage.Tag = ButtonRole.Secondary;
+			bNextPage.Tag = ButtonRole.Secondary;
+			bClearSearch.Tag = ButtonRole.Secondary;
 			AppTheme.Apply(this);
-			CancellationTokenSource = new CancellationTokenSource();
 			_logger = LoggerService.CreateLogger<FormMembers>();
 			_memberRepository = new();
+			InitializePager();
 		}
 		#endregion
 
@@ -117,171 +115,192 @@ namespace Library
 				cmMember.Show(dataGridViewForMembers, relativeCursorPosition);
 			}
 		}
-		private int previousTextLength = 0;
+		#region Search
+
+		private const int IinLength = 12;
+		private long _searchIin;
+
+		private async void BSearch_Click(object sender, EventArgs e) => await SearchAsync();
+
+		private async void TbIINSearch_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.KeyCode != Keys.Enter) return;
+
+			e.SuppressKeyPress = true; // no system "ding"
+			await SearchAsync();
+		}
+
+		private void TbIINSearch_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			// Digits and control keys (Backspace, Ctrl+V, ...) only
+			if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar)) e.Handled = true;
+		}
 
 		private async void TbIINSearch_TextChanged(object sender, EventArgs e)
 		{
-			_logger.LogInformation("Entered TbIINSearch_TextChanged method. Text length: {TextLength}", TbIINSearch.Text.Length);
-			var memberService = new MemberService(_logger, _memberRepository, new LibraryContext());
-
-			if (TbIINSearch.Text.Length <= 3 && previousTextLength > 3)
-			{
-				dataGridViewForMembers.DataSource = await memberService.GetMembersAsync(_context);
-			}
-			else if (TbIINSearch.Text.Length > 3)
-			{
-				string input = TbIINSearch.Text.Trim();
-
-				if (long.TryParse(input, out long IIN) && IIN != 0)
-				{
-					dataGridViewForMembers.DataSource = await memberService.GetFilteredMembersAsync(_context, IIN);
-				}
-				else
-				{
-					dataGridViewForMembers.DataSource = null;
-				}
-			}
-
-			previousTextLength = TbIINSearch.Text.Length;
+			// Field emptied (by hand or by Clear): back to the list
+			if (TbIINSearch.Text.Length == 0 && _isSearchMode) await ExitSearchAsync();
 		}
 
+		private void BClearSearch_Click(object sender, EventArgs e)
+		{
+			TbIINSearch.Clear(); // TextChanged returns to the list
+			TbIINSearch.Focus();
+		}
+
+		private async Task SearchAsync()
+		{
+			string input = TbIINSearch.Text.Trim();
+			if (input.Length == 0)
+			{
+				if (_isSearchMode) await ExitSearchAsync();
+				return;
+			}
+
+			// The field blocks letters on typing, but pasted text still has to be checked
+			if (input.Length != IinLength || !input.All(char.IsDigit))
+			{
+				MessageBoxHelper.ShowWarning($"IIN must be {IinLength} digits.");
+				return;
+			}
+
+			_searchIin = long.Parse(input);
+			_isSearchMode = true;
+			await ShowSearchResultsAsync();
+		}
+
+		private async Task ExitSearchAsync()
+		{
+			// Back to the page that was shown before the search
+			_isSearchMode = false;
+			await RefreshDataGridForMembers();
+		}
+
+		#endregion
+
+		private async Task ShowSearchResultsAsync()
+		{
+			try
+			{
+				using var searchContext = new LibraryContext();
+				var memberService = new MemberService(_logger, _memberRepository, searchContext);
+				var found = await memberService.GetFilteredMembersAsync(searchContext, _searchIin);
+
+				dataGridViewForMembers.DataSource = found;
+				DataGridViewHelper.CustomizeDataGridView(dataGridViewForMembers);
+				lblRange.Text = $"Found: {found.Count}";
+			}
+			catch (Exception ex)
+			{
+				ErrorHandler.HandleException(ex, "An error occurred while searching members");
+			}
+			finally
+			{
+				UpdatePagerState();
+			}
+		}
+
+		/// <summary>
+		/// Reloads what the grid shows: search results while searching, otherwise the current page.
+		/// </summary>
 		private async Task RefreshDataGridForMembers()
 		{
 			_logger.LogInformation("Entered RefreshDataGridForMembers method.");
 
+			if (_isSearchMode)
+			{
+				await ShowSearchResultsAsync();
+				return;
+			}
+
 			try
 			{
-				await SetControlsEnabledAsync(false);
+				// Only the pager is locked (against double clicks); the load itself takes milliseconds
+				bPrevPage.Enabled = bNextPage.Enabled = cbPageSize.Enabled = false;
 
-				CancellationToken = CancellationTokenSource.Token;
+				using var context = new LibraryContext();
+				var memberService = new MemberService(_logger, _memberRepository, context);
+				var (members, totalCount) = await memberService.GetMembersPageAsync(context, _currentPage, PageSize);
 
-				await Task.Run(async () =>
+				_totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
+				if (_currentPage > _totalPages)
 				{
-					try
-					{
-						var memberService = new MemberService(_logger, _memberRepository, new LibraryContext());
-						int totalMembersCount = await GetTotalMembersCountAsync();
-
-						if (CancellationToken.IsCancellationRequested) return;
-
-						await UpdateProgressBarAsync(0, 25);
-
-						var users = await memberService.GetMembersAsync(_context);
-
-						if (CancellationToken.IsCancellationRequested) return;
-
-						await UpdateProgressBarAsync(25, 50);
-
-						UpdateDataGridViewAsync(users);
-
-						if (CancellationToken.IsCancellationRequested) return;
-
-						await UpdateProgressBarAsync(50, 100);
-
-						if (CancellationToken.IsCancellationRequested) return;
-
-						if (pbMembers.IsDisposed) return;
-
-						await ResetProgressBarAsync();
-						await SetControlsEnabledAsync(true);
-					}
-					catch (Exception ex)
-					{
-						ErrorHandler.HandleException(ex, "An error occurred while loading members");
-					}
-				}, CancellationToken);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An error occurred in RefreshDataGridForMembers method.");
-				MessageBoxHelper.ShowError($"An error with message:{ex.Message}, occurred while preparing data for display. Please try again later.");
-			}
-		}
-
-		private async Task SetControlsEnabledAsync(bool isEnabled)
-		{
-			await controlsController.SetControlsEnableFlag(this, this.Controls, isEnabled);
-		}
-
-		private async Task<int> GetTotalMembersCountAsync()
-		{
-			try
-			{
-				int totalMembersCount = await Task.Run(() => new LibraryContext().Members.Count());
-				return totalMembersCount;
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An error occurred while retrieving the total members count.");
-				MessageBoxHelper.ShowError("An error occurred while retrieving the total members count. Please try again.");
-				return 0;
-			}
-		}
-
-		private async Task UpdateProgressBarAsync(int minValue, int maxValue)
-		{
-			try
-			{
-				await ProgressBarHelper.UpdateProgressAsync(this, pbMembers, minValue, maxValue);
-			}
-			catch (ArgumentOutOfRangeException ex)
-			{
-				_logger.LogError(ex, "Invalid progress bar range: minValue = {MinValue}, maxValue = {MaxValue}.", minValue, maxValue);
-				MessageBoxHelper.ShowError("Error: Invalid range for the progress bar.");
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An error occurred while updating the progress bar.");
-				MessageBoxHelper.ShowError("An unexpected error occurred while updating the progress bar.");
-			}
-		}
-
-		private void UpdateDataGridViewAsync(List<dynamic> users)
-		{
-			try
-			{
-				this.Invoke(new Action(() =>
-				{
-					if (users == null || users.Count == 0)
-					{
-						return;
-					}
-
-					dataGridViewForMembers.DataSource = users;
-					DataGridViewHelper.CustomizeDataGridView(dataGridViewForMembers);
-				}));
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An error occurred while updating the DataGridView.");
-				MessageBoxHelper.ShowError("An error occurred while updating the data. Please try again later.");
-			}
-		}
-
-		private async Task ResetProgressBarAsync()
-		{
-			try
-			{
-				if (pbMembers.IsDisposed)
-				{
-					return;
+					// e.g. the only member on the last page was deleted
+					_currentPage = _totalPages;
+					(members, totalCount) = await memberService.GetMembersPageAsync(context, _currentPage, PageSize);
 				}
 
-				await Task.Run(() =>
-				{
-					this.CreateControl();
-					this.BeginInvoke(async () =>
-					{
-						await ProgressBarHelper.ResetProgressAsync(pbMembers);
-					});
-				});
+				dataGridViewForMembers.DataSource = members;
+				DataGridViewHelper.CustomizeDataGridView(dataGridViewForMembers);
+
+				int first = totalCount == 0 ? 0 : (_currentPage - 1) * PageSize + 1;
+				int last = (_currentPage - 1) * PageSize + members.Count;
+				lblRange.Text = $"{first}–{last} of {totalCount} members";
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occurred while resetting the progress bar.");
-				MessageBoxHelper.ShowError("An error occurred while resetting the progress bar. Please try again later.");
+				ErrorHandler.HandleException(ex, "An error occurred while loading members");
+			}
+			finally
+			{
+				// Runs after errors too, so the pager never stays locked
+				UpdatePagerState();
 			}
 		}
+
+		#region Paging
+
+		private int _currentPage = 1;
+		private int _totalPages = 1;
+		private bool _isSearchMode;
+		private bool _pagerInitializing;
+
+		private static int PageSize => UserSettings.Current.MembersPageSize;
+
+		private void InitializePager()
+		{
+			_pagerInitializing = true;
+			cbPageSize.Items.AddRange(UserSettings.PageSizes.Cast<object>().ToArray());
+			cbPageSize.SelectedItem = PageSize;
+			_pagerInitializing = false;
+		}
+
+		private async void CbPageSize_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (_pagerInitializing || cbPageSize.SelectedItem is not int pageSize) return;
+
+			UserSettings.Current.MembersPageSize = pageSize;
+			UserSettings.Current.Save();
+			_currentPage = 1;
+			await RefreshDataGridForMembers();
+		}
+
+		private async void BPrevPage_Click(object sender, EventArgs e)
+		{
+			if (_currentPage <= 1) return;
+			_currentPage--;
+			await RefreshDataGridForMembers();
+		}
+
+		private async void BNextPage_Click(object sender, EventArgs e)
+		{
+			if (_currentPage >= _totalPages) return;
+			_currentPage++;
+			await RefreshDataGridForMembers();
+		}
+
+		/// <summary>
+		/// Paging is switched off while search results are shown.
+		/// </summary>
+		private void UpdatePagerState()
+		{
+			bPrevPage.Enabled = !_isSearchMode && _currentPage > 1;
+			bNextPage.Enabled = !_isSearchMode && _currentPage < _totalPages;
+			cbPageSize.Enabled = !_isSearchMode;
+			lblPageInfo.Text = _isSearchMode ? "" : $"Page {_currentPage} of {_totalPages}";
+		}
+
+		#endregion
 
 		private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
 		{

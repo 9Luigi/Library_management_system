@@ -1,3 +1,4 @@
+using Library.Presentation.Settings;
 using System.Runtime.InteropServices;
 
 namespace Library.Presentation.Theme
@@ -21,9 +22,6 @@ namespace Library.Presentation.Theme
 		internal static readonly Font TitleFont = new("Segoe UI Semibold", 16F);
 		internal static readonly Font NavFont = new("Segoe UI", 10.5F);
 
-		private static readonly string SettingsPath = Path.Combine(
-			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Library", "theme.txt");
-
 		internal static bool IsDark { get; private set; }
 		internal static ThemePalette Palette => IsDark ? ThemePalette.Dark : ThemePalette.Light;
 
@@ -33,29 +31,15 @@ namespace Library.Presentation.Theme
 		/// <summary>Reads the saved theme. Call once at startup before the first form is created.</summary>
 		internal static void Load()
 		{
-			try
-			{
-				IsDark = File.Exists(SettingsPath) && File.ReadAllText(SettingsPath).Trim() == "dark";
-			}
-			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-			{
-				IsDark = false;
-			}
+			IsDark = UserSettings.Current.Theme == "dark";
 			ToolStripManager.Renderer = new ThemedMenuRenderer();
 		}
 
 		internal static void Toggle()
 		{
 			IsDark = !IsDark;
-			try
-			{
-				Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath)!);
-				File.WriteAllText(SettingsPath, IsDark ? "dark" : "light");
-			}
-			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-			{
-				// The theme still switches, it just won't be remembered
-			}
+			UserSettings.Current.Theme = IsDark ? "dark" : "light";
+			UserSettings.Current.Save();
 
 			ToolStripManager.Renderer = new ThemedMenuRenderer();
 			foreach (var form in System.Windows.Forms.Application.OpenForms.Cast<Form>().ToList())
@@ -108,6 +92,11 @@ namespace Library.Presentation.Theme
 					break;
 				case DataGridView g:
 					StyleGrid(g);
+					break;
+				case ComboBox cb:
+					cb.FlatStyle = FlatStyle.Flat;
+					cb.BackColor = p.Surface;
+					cb.ForeColor = p.Text;
 					break;
 				case ToolStrip ts:
 					ts.BackColor = p.Surface;
