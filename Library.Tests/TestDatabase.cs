@@ -1,32 +1,32 @@
 using Library.Server.Data;
 using Library.Server.Models;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Library.Tests;
 
 /// <summary>
-/// Temporary SQLite database in memory: one per test, gone after Dispose.
-/// The in-memory database lives as long as its connection is open, so the connection is kept here
-/// and every context created by this class shares it (and therefore sees the same data).
+/// A separate PostgreSQL database for one test: created by the real migrations, dropped after Dispose.
+/// Tests don't see each other's data and don't depend on the order they run in.
 /// </summary>
 internal sealed class TestDatabase : IDisposable
 {
-	private readonly SqliteConnection _connection;
 	private readonly DbContextOptions<LibraryContext> _options;
 
-	public TestDatabase()
+	public TestDatabase(PostgresFixture postgres)
 	{
-		_connection = new SqliteConnection("DataSource=:memory:");
-		_connection.Open();
+		var connectionString = new NpgsqlConnectionStringBuilder(postgres.ConnectionString)
+		{
+			Database = $"test_{Guid.NewGuid():N}"
+		}.ConnectionString;
 
 		_options = new DbContextOptionsBuilder<LibraryContext>()
-			.UseSqlite(_connection)
+			.UseNpgsql(connectionString)
 			.Options;
 
-		// Builds the tables from the model (no migrations needed for tests)
+		// Creates the database and applies the migrations, the same way the server does at startup
 		using var context = CreateContext();
-		context.Database.EnsureCreated();
+		context.Database.Migrate();
 	}
 
 	public LibraryContext CreateContext() => new(_options);
@@ -40,5 +40,9 @@ internal sealed class TestDatabase : IDisposable
 		return member;
 	}
 
-	public void Dispose() => _connection.Dispose();
+	public void Dispose()
+	{
+		using var context = CreateContext();
+		context.Database.EnsureDeleted();
+	}
 }

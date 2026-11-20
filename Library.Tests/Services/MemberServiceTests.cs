@@ -4,9 +4,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Library.Tests.Services;
 
-public class MemberServiceTests : IDisposable
+[Collection("Postgres")]
+public class MemberServiceTests(PostgresFixture postgres) : IDisposable
 {
-	private readonly TestDatabase _db = new();
+	private readonly TestDatabase _db = new(postgres);
 
 	public void Dispose() => _db.Dispose();
 
