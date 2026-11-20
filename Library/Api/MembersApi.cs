@@ -8,14 +8,17 @@ namespace Library.Api
 {
 	/// <summary>
 	/// Calls api/members on Library.Server. Every method throws <see cref="ApiException"/> if the server
-	/// answers with an error and <see cref="HttpRequestException"/> if the server can't be reached.
+	/// answers with an error, <see cref="HttpRequestException"/> if the server can't be reached
+	/// and <see cref="TaskCanceledException"/> if it doesn't answer in time.
 	/// </summary>
 	internal static class MembersApi
 	{
 		// One HttpClient for the whole app: creating one per request exhausts sockets
 		private static readonly HttpClient Http = new()
 		{
-			BaseAddress = new Uri(UserSettings.Current.ServerUrl.TrimEnd('/') + "/api/members/")
+			BaseAddress = new Uri(UserSettings.Current.ServerUrl.TrimEnd('/') + "/api/members/"),
+			// The default is 100 seconds: too long to keep the user waiting
+			Timeout = TimeSpan.FromSeconds(10)
 		};
 
 		internal static async Task<List<MemberDto>> GetAllAsync()

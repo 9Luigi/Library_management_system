@@ -18,8 +18,13 @@ namespace Library
         public FaddEdit_prop()
         {
             InitializeComponent();
+            BCancel.Tag = ButtonRole.Secondary;
             AppTheme.Apply(this);
+            lblPersonal.Font = AppTheme.HeaderFont;
+            lblContacts.Font = AppTheme.HeaderFont;
         }
+
+        private void BCancel_Click(object sender, EventArgs e) => Close();
 
         private async void BAddMember_Click(object sender, EventArgs e)
         {
@@ -40,11 +45,11 @@ namespace Library
                     MTBIIN.Enabled = false;
                     try
                     {
-                        FillMemberData(await MembersApi.GetAsync(MemberIIN));
+                        FillMemberData(await ServerConnection.CallAsync(() => MembersApi.GetAsync(MemberIIN)));
                     }
-                    catch (Exception ex) when (ex is ApiException or HttpRequestException)
+                    catch (ApiException ex)
                     {
-                        ErrorHandler.HandleException(ex, FormMembers.ErrorText(ex));
+                        ErrorHandler.HandleException(ex, ex.Message);
                         Close();
                     }
                     break;
@@ -137,7 +142,7 @@ namespace Library
                             MTBAdress.Text,
                             MTBPhoneNumber.Text);
 
-                        var created = await MembersApi.CreateAsync(createRequest);
+                        var created = await ServerConnection.CallAsync(() => MembersApi.CreateAsync(createRequest));
 
                         if (MessageBoxHelper.ShowConfirmation("Do you want to add another one?",
                                 $"{created.Name} {created.Surname} added successfully"))
@@ -159,7 +164,7 @@ namespace Library
                             MTBAdress.Text,
                             MTBPhoneNumber.Text);
 
-                        var updated = await MembersApi.UpdateAsync(MemberIIN, updateRequest);
+                        var updated = await ServerConnection.CallAsync(() => MembersApi.UpdateAsync(MemberIIN, updateRequest));
 
                         if (MessageBoxHelper.ShowConfirmation($"{updated.Name} {updated.Surname} updated successfully. Close the form?", "Update Successful"))
                         {
@@ -169,14 +174,14 @@ namespace Library
                         {
                             // The server recalculates the age, show what it saved
                             FillMemberData(updated);
-                            TBName.Focus();
+                            TBSurname.Focus();
                         }
                         break;
                 }
             }
-            catch (Exception ex) when (ex is ApiException or HttpRequestException)
+            catch (ApiException ex)
             {
-                ErrorHandler.HandleException(ex, FormMembers.ErrorText(ex));
+                ErrorHandler.HandleException(ex, ex.Message);
             }
         }
 
@@ -203,7 +208,7 @@ namespace Library
         private void ResetForm()
         {
             TextBoxHelper.AllTextBoxBaseOnFormClear(this);
-            TBName.Focus();
+            TBSurname.Focus();
         }
 
         private void FaddEdit_prop_FormClosing(object sender, FormClosingEventArgs e)

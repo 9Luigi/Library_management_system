@@ -75,12 +75,12 @@ namespace Library
 
 			try
 			{
-				await MembersApi.DeleteAsync(IIN);
+				await ServerConnection.CallAsync(() => MembersApi.DeleteAsync(IIN));
 				MessageBoxHelper.ShowSuccess("Member successfully removed");
 			}
-			catch (Exception ex) when (ex is ApiException or HttpRequestException)
+			catch (ApiException ex)
 			{
-				ErrorHandler.HandleException(ex, ErrorText(ex));
+				ErrorHandler.HandleException(ex, ex.Message);
 			}
 
 			await RefreshDataGridForMembers();
@@ -101,21 +101,14 @@ namespace Library
 		{
 			try
 			{
-				dataGridViewForMembers.DataSource = await MembersApi.GetAllAsync();
+				dataGridViewForMembers.DataSource = await ServerConnection.CallAsync(MembersApi.GetAllAsync);
 				DataGridViewHelper.CustomizeDataGridView(dataGridViewForMembers);
 			}
-			catch (Exception ex) when (ex is ApiException or HttpRequestException)
+			catch (ApiException ex)
 			{
-				ErrorHandler.HandleException(ex, ErrorText(ex));
+				ErrorHandler.HandleException(ex, ex.Message);
 			}
 		}
-
-		/// <summary>
-		/// ApiException already has a message for the user; HttpRequestException means there is no connection.
-		/// </summary>
-		internal static string ErrorText(Exception ex) => ex is ApiException
-			? ex.Message
-			: "Cannot connect to the server. Make sure Library.Server is running.";
 
 		private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
 		{
