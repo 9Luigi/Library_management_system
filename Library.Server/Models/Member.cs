@@ -10,12 +10,12 @@ public class Member
 	public DateTime BirthDay { get; set; }
 	public string Address { get; set; } = "";
 	public string PhoneNumber { get; set; } = "";
-	public long IIN { get; set; }
+	public string IIN { get; set; } = "";
 	public DateTime RegistrationDate { get; set; }
 
 	public Member() { }
 
-	public Member(string name, string surname, DateTime birthday, string address, long iin, string phoneNumber, string? patronymic = null)
+	public Member(string name, string surname, DateTime birthday, string address, string iin, string phoneNumber, string? patronymic = null)
 	{
 		Name = name;
 		Surname = surname;

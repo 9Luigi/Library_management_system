@@ -13,7 +13,7 @@ namespace Library
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string ActionMode { get; set; } = "CREATE"; // Default action mode is CREATE
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public long MemberIIN { get; set; }
+        public string MemberIIN { get; set; } = "";
 
         public FaddEdit_prop()
         {
@@ -68,10 +68,10 @@ namespace Library
         private bool CheckFieldsBeforeAction()
         {
             // 1. Пустые поля
-            // Age is calculated by the server, it is not typed in
+            // Age is calculated by the server, it is not typed in; patronymic is optional (checked below)
             bool allFieldsFilled = this.Controls
                 .OfType<TextBoxBase>()
-                .Where(tb => tb != TBAge)
+                .Where(tb => tb != TBAge && tb != TBPatronymic)
                 .All(TextBoxHelper.CheckTextBoxBaseTextOnNull);
 
             if (!allFieldsFilled) return false;
@@ -134,7 +134,7 @@ namespace Library
                 {
                     case "CREATE":
                         var createRequest = new CreateMemberRequest(
-                            Convert.ToInt64(MTBIIN.Text),
+                            MTBIIN.Text,
                             TBName.Text,
                             TBSurname.Text,
                             CheckIfHasPatronymic(TBPatronymic.Text),
@@ -195,7 +195,7 @@ namespace Library
 
         private void FillMemberData(MemberDto member)
         {
-            MTBIIN.Text = member.IIN.ToString();
+            MTBIIN.Text = member.IIN;
             TBName.Text = member.Name;
             TBSurname.Text = member.Surname;
             TBPatronymic.Text = member.Patronymic;

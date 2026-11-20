@@ -10,6 +10,7 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
 	{
 		builder.HasKey(m => m.Id);
 		builder.HasIndex(m => m.IIN).IsUnique();
+		builder.Property(m => m.IIN).IsRequired().HasMaxLength(12);
 
 		builder.Property(m => m.Name).IsRequired().HasMaxLength(75);
 		builder.Property(m => m.Surname).IsRequired().HasMaxLength(75);

@@ -27,7 +27,7 @@ public class MemberTests
 	[Fact]
 	public void Patronymic_NotGiven_IsNone()
 	{
-		var member = new Member("Ivan", "Ivanov", new DateTime(1990, 1, 1), "Almaty, Abay 1", 900101300123, "+7(777) 123-4567");
+		var member = new Member("Ivan", "Ivanov", new DateTime(1990, 1, 1), "Almaty, Abay 1", "900101300123", "+7(777) 123-4567");
 
 		Assert.Equal("None", member.Patronymic);
 	}

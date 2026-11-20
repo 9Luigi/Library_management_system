@@ -38,7 +38,7 @@ namespace Library
 
 		private async void EditToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			(bool isValid, long IIN) = DataGridViewHelper.TryGetValueFromRow<long>(dataGridViewForMembers);
+			(bool isValid, string IIN) = DataGridViewHelper.TryGetValueFromRow(dataGridViewForMembers);
 			if (isValid) await EditMemberAsync(IIN);
 		}
 
@@ -48,11 +48,11 @@ namespace Library
 
 			dataGridViewForMembers.CurrentCell = dataGridViewForMembers.Rows[e.RowIndex].Cells[e.ColumnIndex];
 
-			var (isValid, IIN) = DataGridViewHelper.TryGetValueFromRow<long>(dataGridViewForMembers);
+			var (isValid, IIN) = DataGridViewHelper.TryGetValueFromRow(dataGridViewForMembers);
 			if (isValid) await EditMemberAsync(IIN);
 		}
 
-		private async Task EditMemberAsync(long IIN)
+		private async Task EditMemberAsync(string IIN)
 		{
 			using FaddEdit_prop _FaddEdit_prop = new();
 			_FaddEdit_prop.ActionMode = "UPDATE";
@@ -64,7 +64,7 @@ namespace Library
 
 		private async void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			(bool isValid, long IIN) = DataGridViewHelper.TryGetValueFromRow<long>(dataGridViewForMembers);
+			(bool isValid, string IIN) = DataGridViewHelper.TryGetValueFromRow(dataGridViewForMembers);
 			if (!isValid)
 			{
 				MessageBoxHelper.ShowWarning("Please select a member to proceed.");

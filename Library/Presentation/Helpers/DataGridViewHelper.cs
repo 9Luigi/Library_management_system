@@ -31,53 +31,28 @@ namespace Library.Presentation.Controllers
         }
 
         /// <summary>
-        /// Tries to retrieve a value from the selected row of the DataGridView.
+        /// Tries to retrieve the text of a cell in the selected row of the DataGridView.
         /// </summary>
-        /// <typeparam name="T">The type of the value to retrieve (int or long).</typeparam>
         /// <param name="view">The DataGridView instance.</param>
         /// <param name="columnIndexToCheck">The index of the column to check (default is 0).</param>
-        /// <returns>A tuple indicating whether the value was found and the value itself.</returns>
-        internal static (bool, T) TryGetValueFromRow<T>(DataGridView view, int columnIndexToCheck = 0) where T : struct
+        /// <returns>A tuple indicating whether a non-empty value was found and the value itself.</returns>
+        internal static (bool, string) TryGetValueFromRow(DataGridView view, int columnIndexToCheck = 0)
         {
             // Check if any cell is selected
             if (view.CurrentCell == null)
-                return (false, default);
+                return (false, "");
 
             // Get the row index of the selected cell and ensure it is valid
             int rowIndex = view.CurrentCell.RowIndex;
             if (rowIndex < 0 || rowIndex >= view.Rows.Count)
-                return (false, default);
+                return (false, "");
 
             // Ensure the specified column index is valid
             if (columnIndexToCheck < 0 || columnIndexToCheck >= view.ColumnCount)
-                return (false, default);
+                return (false, "");
 
-            // Check the value in the specified column of the selected row
-            var cellValue = view.Rows[rowIndex].Cells[columnIndexToCheck]?.Value;
-            if (cellValue != null && TryParseValue(cellValue.ToString()!, out T value))
-            {
-                return (true, value);
-            }
-
-            return (false, default);
-        }
-
-        private static bool TryParseValue<T>(string value, out T result) where T : struct
-        {
-            if (typeof(T) == typeof(long) && long.TryParse(value, out var longResult))
-            {
-                result = (T)(object)longResult;
-                return true;
-            }
-
-            if (typeof(T) == typeof(int) && int.TryParse(value, out var intResult))
-            {
-                result = (T)(object)intResult;
-                return true;
-            }
-
-            result = default;
-            return false;
+            string? value = view.Rows[rowIndex].Cells[columnIndexToCheck]?.Value?.ToString();
+            return string.IsNullOrEmpty(value) ? (false, "") : (true, value);
         }
     }
 }

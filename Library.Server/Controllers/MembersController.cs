@@ -1,4 +1,5 @@
 using Library.Contracts.Members;
+using Library.Server.Models;
 using Library.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,8 +17,8 @@ public class MembersController(MemberService memberService) : ControllerBase
 	public async Task<List<MemberDto>> GetAll() => await memberService.GetAllAsync();
 
 	// GET api/members/{iin}
-	[HttpGet("{iin:long}")]
-	public async Task<ActionResult<MemberDto>> Get(long iin)
+	[HttpGet("{iin}")]
+	public async Task<ActionResult<MemberDto>> Get(string iin)
 	{
 		var member = await memberService.GetByIinAsync(iin);
 		return member == null ? NotFound() : member;
@@ -27,6 +28,13 @@ public class MembersController(MemberService memberService) : ControllerBase
 	[HttpPost]
 	public async Task<ActionResult<MemberDto>> Create(CreateMemberRequest request)
 	{
+		// 12 digits are checked by the attribute on the request; here the check digit
+		if (!Iin.IsValid(request.IIN))
+		{
+			ModelState.AddModelError(nameof(request.IIN), "IIN is not valid: wrong check digit.");
+			return ValidationProblem(ModelState);
+		}
+
 		if (await memberService.ExistsAsync(request.IIN))
 			return Conflict($"Member with IIN {request.IIN} already exists.");
 
@@ -36,16 +44,16 @@ public class MembersController(MemberService memberService) : ControllerBase
 	}
 
 	// PUT api/members/{iin}
-	[HttpPut("{iin:long}")]
-	public async Task<ActionResult<MemberDto>> Update(long iin, UpdateMemberRequest request)
+	[HttpPut("{iin}")]
+	public async Task<ActionResult<MemberDto>> Update(string iin, UpdateMemberRequest request)
 	{
 		var updated = await memberService.UpdateAsync(iin, request);
 		return updated == null ? NotFound() : updated;
 	}
 
 	// DELETE api/members/{iin}
-	[HttpDelete("{iin:long}")]
-	public async Task<IActionResult> Delete(long iin)
+	[HttpDelete("{iin}")]
+	public async Task<IActionResult> Delete(string iin)
 	{
 		return await memberService.DeleteAsync(iin) ? NoContent() : NotFound();
 	}

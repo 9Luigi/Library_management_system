@@ -20,13 +20,13 @@ public class MemberService(LibraryContext context, ILogger<MemberService> logger
 			.ToListAsync();
 	}
 
-	public async Task<MemberDto?> GetByIinAsync(long iin)
+	public async Task<MemberDto?> GetByIinAsync(string iin)
 	{
 		var member = await context.Members.AsNoTracking().FirstOrDefaultAsync(m => m.IIN == iin);
 		return member == null ? null : ToDto(member);
 	}
 
-	public Task<bool> ExistsAsync(long iin) => context.Members.AnyAsync(m => m.IIN == iin);
+	public Task<bool> ExistsAsync(string iin) => context.Members.AnyAsync(m => m.IIN == iin);
 
 	public async Task<MemberDto> CreateAsync(CreateMemberRequest request)
 	{
@@ -41,7 +41,7 @@ public class MemberService(LibraryContext context, ILogger<MemberService> logger
 	}
 
 	/// <returns>The updated member, or null if there is no member with this IIN.</returns>
-	public async Task<MemberDto?> UpdateAsync(long iin, UpdateMemberRequest request)
+	public async Task<MemberDto?> UpdateAsync(string iin, UpdateMemberRequest request)
 	{
 		var member = await context.Members.FirstOrDefaultAsync(m => m.IIN == iin);
 		if (member == null) return null;
@@ -62,7 +62,7 @@ public class MemberService(LibraryContext context, ILogger<MemberService> logger
 	}
 
 	/// <returns>False if there is no member with this IIN.</returns>
-	public async Task<bool> DeleteAsync(long iin)
+	public async Task<bool> DeleteAsync(string iin)
 	{
 		int deleted = await context.Members.Where(m => m.IIN == iin).ExecuteDeleteAsync();
 

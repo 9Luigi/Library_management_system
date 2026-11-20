@@ -17,7 +17,7 @@ namespace Library.Server.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.1")
+                .HasAnnotation("ProductVersion", "10.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -40,8 +40,10 @@ namespace Library.Server.Migrations
                     b.Property<DateTime>("BirthDay")
                         .HasColumnType("date");
 
-                    b.Property<long>("IIN")
-                        .HasColumnType("bigint");
+                    b.Property<string>("IIN")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)");
 
                     b.Property<string>("Name")
                         .IsRequired()

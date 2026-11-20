@@ -31,7 +31,7 @@ internal sealed class TestDatabase : IDisposable
 
 	public LibraryContext CreateContext() => new(_options);
 
-	public Member AddMember(long iin = 900101300123)
+	public Member AddMember(string iin = "900101300123")
 	{
 		var member = new Member("Ivan", "Ivanov", new DateTime(1990, 1, 1), "Almaty, Abay 1", iin, "+7(777) 123-4567");
 		using var context = CreateContext();

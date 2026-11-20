@@ -27,7 +27,7 @@ namespace Library.Api
 			return await ReadAsync<List<MemberDto>>(response);
 		}
 
-		internal static async Task<MemberDto> GetAsync(long iin)
+		internal static async Task<MemberDto> GetAsync(string iin)
 		{
 			using var response = await Http.GetAsync($"{iin}");
 			return await ReadAsync<MemberDto>(response);
@@ -39,13 +39,13 @@ namespace Library.Api
 			return await ReadAsync<MemberDto>(response);
 		}
 
-		internal static async Task<MemberDto> UpdateAsync(long iin, UpdateMemberRequest request)
+		internal static async Task<MemberDto> UpdateAsync(string iin, UpdateMemberRequest request)
 		{
 			using var response = await Http.PutAsJsonAsync($"{iin}", request);
 			return await ReadAsync<MemberDto>(response);
 		}
 
-		internal static async Task DeleteAsync(long iin)
+		internal static async Task DeleteAsync(string iin)
 		{
 			using var response = await Http.DeleteAsync($"{iin}");
 			await EnsureSuccessAsync(response);

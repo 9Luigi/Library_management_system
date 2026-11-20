@@ -38,9 +38,10 @@ public static class DevDataSeeder
 		{
 			bool female = random.Next(2) == 0;
 
-			// 1950–1999: IINs of people born in 2000–2009 start with 0, and IIN is stored as a number,
-			// so the leading zero would be lost
-			var birthDay = new DateTime(random.Next(1950, 2000), 1, 1).AddDays(random.Next(365));
+			// From 1950 up to 14 years ago (the client doesn't accept younger members)
+			var oldest = new DateTime(1950, 1, 1);
+			var youngest = DateTime.Today.AddYears(-14);
+			var birthDay = oldest.AddDays(random.Next((youngest - oldest).Days + 1));
 
 			string? iin;
 			do iin = Iin.Create(birthDay, female, serial++);
@@ -52,7 +53,7 @@ public static class DevDataSeeder
 			string phone = $"+7({Pick(random, MobileCodes)}) {random.Next(100, 1000)}-{random.Next(0, 10000):D4}";
 
 			var member = new Member(Pick(random, female ? FemaleNames : MaleNames), surname, birthDay,
-				address, long.Parse(iin), phone, patronymic)
+				address, iin, phone, patronymic)
 			{
 				// Spread over the last three years, so sorting by registration date makes sense
 				RegistrationDate = DateTime.Now.AddDays(-random.Next(3 * 365)).AddMinutes(-random.Next(24 * 60))
