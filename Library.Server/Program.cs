@@ -19,7 +19,11 @@ var app = builder.Build();
 // Apply migrations that are not in the database yet (the database itself runs in Docker: docker compose up -d)
 using (var scope = app.Services.CreateScope())
 {
-	scope.ServiceProvider.GetRequiredService<LibraryContext>().Database.Migrate();
+	var context = scope.ServiceProvider.GetRequiredService<LibraryContext>();
+	context.Database.Migrate();
+
+	// 100 fictional members, only if the table is empty
+	if (app.Environment.IsDevelopment()) DevDataSeeder.Seed(context);
 }
 
 if (app.Environment.IsDevelopment())
