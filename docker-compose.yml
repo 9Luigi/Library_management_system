@@ -1,0 +1,24 @@
+# Database for local development: docker compose up -d
+# Stop: docker compose down (data stays in the "library-db-data" volume; add -v to delete it)
+services:
+  db:
+    image: postgres:17
+    container_name: library-db
+    environment:
+      # Local development only; the same values are in Library.Server/appsettings.json
+      POSTGRES_DB: library
+      POSTGRES_USER: library
+      POSTGRES_PASSWORD: library
+    ports:
+      - "5432:5432"
+    volumes:
+      - library-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U library -d library"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  library-db-data:

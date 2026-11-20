@@ -9,15 +9,14 @@ builder.Services.AddOpenApi();
 
 // One LibraryContext and one MemberService per HTTP request
 var connectionString = builder.Configuration.GetConnectionString("Library");
-builder.Services.AddDbContext<LibraryContext>(o => o.UseSqlite(connectionString));
+builder.Services.AddDbContext<LibraryContext>(o => o.UseNpgsql(connectionString));
 builder.Services.AddScoped<MemberService>();
 
 // TODO (later): AddAuthentication().AddJwtBearer(...) before UseAuthorization
 
 var app = builder.Build();
 
-// SQLite creates the file, but not the folder; then apply migrations that are not in the database yet
-Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "App_Data"));
+// Apply migrations that are not in the database yet (the database itself runs in Docker: docker compose up -d)
 using (var scope = app.Services.CreateScope())
 {
 	scope.ServiceProvider.GetRequiredService<LibraryContext>().Database.Migrate();
