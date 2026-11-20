@@ -1,0 +1,16 @@
+[
+  {
+    "Name": "Server + Client",
+    "Projects": [
+      {
+        "Path": "Library.Server\Library.Server.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      },
+      {
+        "Path": "Library\Library.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
