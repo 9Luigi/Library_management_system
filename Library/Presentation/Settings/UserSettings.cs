@@ -1,5 +1,4 @@
-using Library.Data;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace Library.Presentation.Settings
 {
@@ -8,14 +7,19 @@ namespace Library.Presentation.Settings
 	/// </summary>
 	internal sealed class UserSettings
 	{
-		internal static readonly int[] PageSizes = [10, 25, 50, 100];
-		private const int DefaultPageSize = 25;
+		/// <summary>
+		/// %LocalAppData%\Library: survives Clean/Rebuild (bin is wiped) and doesn't need admin rights.
+		/// </summary>
+		private static readonly string DataFolder = Path.Combine(
+			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Library");
 
 		public string Theme { get; set; } = "light";
-		public int MembersPageSize { get; set; } = DefaultPageSize;
 
-		private static readonly string FilePath = Path.Combine(DbProviderConfig.DataFolder, "settings.json");
-		private static readonly string LegacyThemeFile = Path.Combine(DbProviderConfig.DataFolder, "theme.txt");
+		/// <summary>Address of Library.Server (the "http" profile in its launchSettings.json).</summary>
+		public string ServerUrl { get; set; } = "http://localhost:5063";
+
+		private static readonly string FilePath = Path.Combine(DataFolder, "settings.json");
+		private static readonly string LegacyThemeFile = Path.Combine(DataFolder, "theme.txt");
 		private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
 		private static UserSettings? _current;
@@ -43,7 +47,6 @@ namespace Library.Presentation.Settings
 				// Broken or unreadable file: start with defaults
 			}
 
-			if (!PageSizes.Contains(settings.MembersPageSize)) settings.MembersPageSize = DefaultPageSize;
 			return settings;
 		}
 
@@ -51,7 +54,7 @@ namespace Library.Presentation.Settings
 		{
 			try
 			{
-				Directory.CreateDirectory(DbProviderConfig.DataFolder);
+				Directory.CreateDirectory(DataFolder);
 				File.WriteAllText(FilePath, JsonSerializer.Serialize(this, JsonOptions));
 			}
 			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

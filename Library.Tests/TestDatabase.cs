@@ -1,5 +1,5 @@
-using Library.Data;
-using Library.Models;
+using Library.Server.Data;
+using Library.Server.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,15 +30,6 @@ internal sealed class TestDatabase : IDisposable
 	}
 
 	public LibraryContext CreateContext() => new(_options);
-
-	public Book AddBook(string title = "Test book", int amount = 1)
-	{
-		var book = new Book(title, "Novel", new DateTime(2000, 1, 1), amount);
-		using var context = CreateContext();
-		context.Books.Add(book);
-		context.SaveChanges();
-		return book;
-	}
 
 	public Member AddMember(long iin = 900101300123)
 	{

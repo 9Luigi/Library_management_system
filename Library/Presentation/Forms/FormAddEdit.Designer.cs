@@ -16,7 +16,6 @@
             if (disposing && (components != null))
             {
 				components.Dispose();
-				_context.Dispose();
 			}
             base.Dispose(disposing);
         }
@@ -32,8 +31,6 @@
 			TBSurname = new TextBox();
 			TBPatronymic = new TextBox();
 			TBAge = new TextBox();
-			pbPhoto = new PictureBox();
-			BSelectPhoto = new Button();
 			BAddMember = new Button();
 			label1 = new Label();
 			label2 = new Label();
@@ -49,7 +46,6 @@
 			TBName = new TextBox();
 			MTBAdress = new MaskedTextBox();
 			BUpdateMember = new Button();
-			((System.ComponentModel.ISupportInitialize)pbPhoto).BeginInit();
 			SuspendLayout();
 			// 
 			// TBSurname
@@ -73,29 +69,10 @@
 			TBAge.Location = new Point(24, 274);
 			TBAge.Margin = new Padding(3, 4, 3, 4);
 			TBAge.Name = "TBAge";
+			TBAge.ReadOnly = true;
+			TBAge.TabStop = false;
 			TBAge.Size = new Size(220, 27);
 			TBAge.TabIndex = 4;
-			// 
-			// pbPhoto
-			// 
-			pbPhoto.Location = new Point(272, 42);
-			pbPhoto.Margin = new Padding(3, 4, 3, 4);
-			pbPhoto.Name = "pbPhoto";
-			pbPhoto.Size = new Size(270, 360);
-			pbPhoto.SizeMode = PictureBoxSizeMode.StretchImage;
-			pbPhoto.TabIndex = 9;
-			pbPhoto.TabStop = false;
-			// 
-			// BSelectPhoto
-			// 
-			BSelectPhoto.Location = new Point(272, 410);
-			BSelectPhoto.Margin = new Padding(3, 4, 3, 4);
-			BSelectPhoto.Name = "BSelectPhoto";
-			BSelectPhoto.Size = new Size(270, 38);
-			BSelectPhoto.TabIndex = 8;
-			BSelectPhoto.Text = "Select photo*";
-			BSelectPhoto.UseVisualStyleBackColor = true;
-			BSelectPhoto.Click += BSelectPhoto_Click;
 			// 
 			// BAddMember
 			// 
@@ -241,7 +218,7 @@
 			// 
 			AutoScaleDimensions = new SizeF(8F, 20F);
 			AutoScaleMode = AutoScaleMode.Font;
-			ClientSize = new Size(566, 568);
+			ClientSize = new Size(270, 568);
 			Controls.Add(BUpdateMember);
 			Controls.Add(MTBAdress);
 			Controls.Add(MTBIIN);
@@ -256,8 +233,6 @@
 			Controls.Add(label2);
 			Controls.Add(label1);
 			Controls.Add(BAddMember);
-			Controls.Add(BSelectPhoto);
-			Controls.Add(pbPhoto);
 			Controls.Add(TBAge);
 			Controls.Add(TBPatronymic);
 			Controls.Add(TBSurname);
@@ -266,7 +241,6 @@
 			Name = "FaddEdit_prop";
 			FormClosing += FaddEdit_prop_FormClosing;
 			Load += FaddEdit_prop_Load;
-			((System.ComponentModel.ISupportInitialize)pbPhoto).EndInit();
 			ResumeLayout(false);
 			PerformLayout();
 		}
@@ -275,8 +249,6 @@
 		private TextBox TBSurname;
         private TextBox TBPatronymic;
         private TextBox TBAge;
-        private PictureBox pbPhoto;
-        private Button BSelectPhoto;
         private Button BAddMember;
         private Label label1;
         private Label label2;

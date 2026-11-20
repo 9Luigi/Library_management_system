@@ -1,46 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+namespace Library.Server.Models;
 
-namespace Library.Server.Models
+public class Member
 {
-    internal class Member
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Surname { get; set; }
-        public string Patronymic { get; set; }
-        public int Age { get; set; }
-        public DateTime BirthDay { get; set; }
-        public string Adress { get; set; }
-        public string PhoneNumber { get; set; }
-        public long IIN { get; set; }
-        public DateTime RegistrationDate { get; set; }
-        /// <summary>Photo file name inside the photos folder (e.g. "15.png"), null if there is no photo.</summary>
-        public string? PhotoPath { get; set; }
-        public List<Book> Books { get; set; } = new();
-        public Member() { }
+	public int Id { get; set; }
+	public string Name { get; set; } = "";
+	public string Surname { get; set; } = "";
+	public string Patronymic { get; set; } = "None";
+	public int Age { get; set; }
+	public DateTime BirthDay { get; set; }
+	public string Address { get; set; } = "";
+	public string PhoneNumber { get; set; } = "";
+	public long IIN { get; set; }
+	public DateTime RegistrationDate { get; set; }
 
-        public Member(string name, string surname, DateTime birthday, string adress, long iin, string Phonenumber, string patronymic = "None")
-        {
-            Name = name;
-            Surname = surname;
-            Patronymic = patronymic;
-            RegistrationDate = DateTime.Now;
-            BirthDay = birthday;
-            Adress = adress;
-            PhoneNumber = Phonenumber;
-            IIN = iin;
-            Age = RegistrationDate.Year - BirthDay.Year;
-            if (BirthDay > RegistrationDate.AddYears(-Age)) Age--;
-            if (Patronymic == null)
-            {
-                Patronymic = "None";
-            }
-        }
-    }
+	public Member() { }
+
+	public Member(string name, string surname, DateTime birthday, string address, long iin, string phoneNumber, string? patronymic = null)
+	{
+		Name = name;
+		Surname = surname;
+		Patronymic = string.IsNullOrWhiteSpace(patronymic) ? "None" : patronymic;
+		RegistrationDate = DateTime.Now;
+		BirthDay = birthday;
+		Address = address;
+		PhoneNumber = phoneNumber;
+		IIN = iin;
+		Age = CalculateAge(BirthDay, RegistrationDate);
+	}
+
+	/// <summary>
+	/// Full years between the birthday and the given date (one less if the birthday hasn't come yet that year).
+	/// </summary>
+	public static int CalculateAge(DateTime birthDay, DateTime today)
+	{
+		int age = today.Year - birthDay.Year;
+		if (birthDay > today.AddYears(-age)) age--;
+		return age;
+	}
 }
-

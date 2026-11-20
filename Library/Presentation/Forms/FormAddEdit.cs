@@ -1,13 +1,8 @@
-﻿using Library.Data;
-using Library.Services;
-using Library.Models;
-using Library.Data.Repositories;
+﻿using Library.Api;
+using Library.Contracts.Members;
 using Library.Presentation.Controllers;
-using Library.Presentation.Controllers.PictureController;
 using Library.Presentation.Theme;
 using Library.Presentation.Validation;
-using Library.Properties;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.Globalization;
 
@@ -19,34 +14,11 @@ namespace Library
         public string ActionMode { get; set; } = "CREATE"; // Default action mode is CREATE
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public long MemberIIN { get; set; }
-        byte[]? PhotoAsBytes { get; set; }
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        internal Member? MemberToEdit { get; set; }
-        private readonly MemberService _memberService;
-        private LibraryContext _context; //Disposed in desighner file
-        private readonly ControlsHelper controlsController = new();
 
         public FaddEdit_prop()
         {
             InitializeComponent();
-            BSelectPhoto.Tag = ButtonRole.Secondary;
             AppTheme.Apply(this);
-            pbPhoto.Image = Properties.Resources.NoImage;
-
-            var _logger = LoggerService.CreateLogger<FaddEdit_prop>();
-            _context = new LibraryContext();
-            _memberService = new(_logger, new Repository<Member>(), _context);
-        }
-
-        private void BSelectPhoto_Click(object sender, EventArgs e)
-        {
-            var photo = PictureHelper.GetImageFromFile();
-            // Dialog cancelled or the image was rejected: keep the current photo
-            if (photo == null) return;
-
-            pbPhoto.Image = photo;
-            PhotoAsBytes = PictureHelper.ImageToByteConvert(photo);
         }
 
         private async void BAddMember_Click(object sender, EventArgs e)
@@ -68,19 +40,12 @@ namespace Library
                     MTBIIN.Enabled = false;
                     try
                     {
-                        MemberToEdit = await _memberService.GetMemberByIINForUpdateAsync(_context, MemberIIN);
-                        if (MemberToEdit != null)
-                        {
-                            FillMemberData(MemberToEdit);
-                        }
-                        else
-                        {
-                            MessageBoxHelper.ShowWarning("Cannot load data, probably member was deleted by another employee while you edit, try again please");
-                        }
+                        FillMemberData(await MembersApi.GetAsync(MemberIIN));
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (ex is ApiException or HttpRequestException)
                     {
-                        MessageBoxHelper.ShowError($"An error occurred while loading member data: {ex.Message}");
+                        ErrorHandler.HandleException(ex, FormMembers.ErrorText(ex));
+                        Close();
                     }
                     break;
                 case "CREATE":
@@ -98,8 +63,10 @@ namespace Library
         private bool CheckFieldsBeforeAction()
         {
             // 1. Пустые поля
+            // Age is calculated by the server, it is not typed in
             bool allFieldsFilled = this.Controls
                 .OfType<TextBoxBase>()
+                .Where(tb => tb != TBAge)
                 .All(TextBoxHelper.CheckTextBoxBaseTextOnNull);
 
             if (!allFieldsFilled) return false;
@@ -155,85 +122,61 @@ namespace Library
 
         private async Task ActionWithMember(string operation)
         {
-            switch (operation)
+            var birthDay = DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture);
+            try
             {
-                case "CREATE":
-                    //if(_memberService.IsIINExistsAsync()) //TODO check if IIN exists via MemberService
-                    Member createdMember = new
-                        (
+                switch (operation)
+                {
+                    case "CREATE":
+                        var createRequest = new CreateMemberRequest(
+                            Convert.ToInt64(MTBIIN.Text),
                             TBName.Text,
                             TBSurname.Text,
-                            DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture),
+                            CheckIfHasPatronymic(TBPatronymic.Text),
+                            birthDay,
                             MTBAdress.Text,
-                            Convert.ToInt64(MTBIIN.Text),
-                            MTBPhoneNumber.Text,
-                            CheckIfHasPatronymic(TBPatronymic.Text)
-                        );
-                    try
-                    {
-                        if (await _memberService.CreateMemberAsync(_context, createdMember, PhotoAsBytes))
+                            MTBPhoneNumber.Text);
+
+                        var created = await MembersApi.CreateAsync(createRequest);
+
+                        if (MessageBoxHelper.ShowConfirmation("Do you want to add another one?",
+                                $"{created.Name} {created.Surname} added successfully"))
                         {
-                            var result = MessageBoxHelper.ShowConfirmation("Do you want to add another one?",
-                                    $"{createdMember.Name} {createdMember.Surname} added successfully");
-
-                            if (result)
-                            {
-                                ResetForm();
-                            }
-                            else
-                            {
-                                this.Close();
-                            }
+                            ResetForm();
                         }
-                        else MessageBoxHelper.ShowWarning($"Cannot add {createdMember.Name} {createdMember.Surname} try again later.");
-                    }
-                    catch (DbUpdateException ex)
-                    {
-                        ErrorHandler.HandleException(ex, $"Error updating database: {ex.Message}.");
-                    }
-                    catch (Exception ex)
-                    {
-                        ErrorHandler.HandleException(ex, $"An unexpected error occurred: {ex.Message}.");
-                    }
-                    break;
+                        else
+                        {
+                            Close();
+                        }
+                        break;
 
-                case "UPDATE":
-                    // Directly update the object's properties
-                    MemberToEdit!.Name = TBName.Text;
-                    MemberToEdit.Surname = TBSurname.Text;
-                    MemberToEdit.Patronymic = CheckIfHasPatronymic(TBPatronymic.Text);
-                    MemberToEdit.BirthDay = DateTime.ParseExact(MTBBirthday.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture);
-                    MemberToEdit.Age = byte.Parse(TBAge.Text);
-                    MemberToEdit.Adress = MTBAdress.Text;
-                    MemberToEdit.PhoneNumber = MTBPhoneNumber.Text;
+                    case "UPDATE":
+                        var updateRequest = new UpdateMemberRequest(
+                            TBName.Text,
+                            TBSurname.Text,
+                            CheckIfHasPatronymic(TBPatronymic.Text),
+                            birthDay,
+                            MTBAdress.Text,
+                            MTBPhoneNumber.Text);
 
-                    // Save the changes to the database (and the photo file, if a new one was selected)
-                    bool isUpdated = await _memberService.UpdateMemberChangedFieldsAsync(_context, MemberToEdit, PhotoAsBytes);
+                        var updated = await MembersApi.UpdateAsync(MemberIIN, updateRequest);
 
-                    if (!isUpdated)
-                    {
-                        MessageBoxHelper.ShowWarning("You didn't change member's fields");
-                        return;
-                    }
-                    else
-                    {
-                        PhotoAsBytes = null;
-                        MessageBoxHelper.ShowSuccess("Member's fields updated successfully");
-                    }
-
-                    var closeDialog = MessageBoxHelper.ShowConfirmation($"{MemberToEdit.Name} {MemberToEdit.Surname} updated successfully. Close the form?", "Update Successful");
-                    if (closeDialog)
-                    {
-                        Close();
-                    }
-                    else
-                    {
-
-                        FillMemberData(MemberToEdit);
-                        // Focus on the first field
-                        TBName.Focus();
-                    }
-                    break;
+                        if (MessageBoxHelper.ShowConfirmation($"{updated.Name} {updated.Surname} updated successfully. Close the form?", "Update Successful"))
+                        {
+                            Close();
+                        }
+                        else
+                        {
+                            // The server recalculates the age, show what it saved
+                            FillMemberData(updated);
+                            TBName.Focus();
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex) when (ex is ApiException or HttpRequestException)
+            {
+                ErrorHandler.HandleException(ex, FormMembers.ErrorText(ex));
             }
         }
 
@@ -245,7 +188,7 @@ namespace Library
             }
         }
 
-        private void FillMemberData(Member member)
+        private void FillMemberData(MemberDto member)
         {
             MTBIIN.Text = member.IIN.ToString();
             TBName.Text = member.Name;
@@ -253,18 +196,13 @@ namespace Library
             TBPatronymic.Text = member.Patronymic;
             MTBBirthday.Text = member.BirthDay.ToString("dd/MM/yyyy");
             TBAge.Text = member.Age.ToString();
-            MTBAdress.Text = member.Adress;
+            MTBAdress.Text = member.Address;
             MTBPhoneNumber.Text = member.PhoneNumber;
-
-            // ConvertByteToImage returns the "No image" placeholder for null
-            pbPhoto.Image = PictureHelper.ConvertByteToImage(_memberService.LoadPhoto(member.PhotoPath));
         }
 
         private void ResetForm()
         {
-            PhotoAsBytes = null;
             TextBoxHelper.AllTextBoxBaseOnFormClear(this);
-            PictureBoxHelper.PictureBoxImageSetDefault(pbPhoto);
             TBName.Focus();
         }
 

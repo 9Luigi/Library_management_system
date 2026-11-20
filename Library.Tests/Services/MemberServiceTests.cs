@@ -1,6 +1,5 @@
-using Library.Data.Repositories;
-using Library.Models;
-using Library.Services;
+using Library.Contracts.Members;
+using Library.Server.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Library.Tests.Services;
@@ -8,66 +7,85 @@ namespace Library.Tests.Services;
 public class MemberServiceTests : IDisposable
 {
 	private readonly TestDatabase _db = new();
-	private readonly MemberService _service;
-
-	public MemberServiceTests()
-	{
-		// NullLogger: the tests don't need log files
-		_service = new MemberService(NullLogger.Instance, new Repository<Member>(), _db.CreateContext());
-	}
 
 	public void Dispose() => _db.Dispose();
 
+	// A new service with a new context, as on the server: one per HTTP request
+	private MemberService CreateService() => new(_db.CreateContext(), NullLogger<MemberService>.Instance);
+
 	[Fact]
-	public async Task IsIINExistsAsync_ReturnsTrueOnlyForExistingMember()
+	public async Task ExistsAsync_ReturnsTrueOnlyForExistingMember()
 	{
 		var member = _db.AddMember(iin: 900101300123);
-		using var context = _db.CreateContext();
 
-		Assert.True(await _service.IsIINExistsAsync(context, member.IIN));
-		Assert.False(await _service.IsIINExistsAsync(context, 111111111111));
+		Assert.True(await CreateService().ExistsAsync(member.IIN));
+		Assert.False(await CreateService().ExistsAsync(111111111111));
 	}
 
 	[Fact]
-	public async Task GetMemberBooksAsync_ReturnsBorrowedBooks()
+	public async Task GetAllAsync_ReturnsAllMembers()
+	{
+		_db.AddMember(iin: 900101300001);
+		_db.AddMember(iin: 900101300002);
+
+		var members = await CreateService().GetAllAsync();
+
+		Assert.Equal(2, members.Count);
+	}
+
+	[Fact]
+	public async Task GetByIinAsync_UnknownMember_ReturnsNull()
+	{
+		Assert.Null(await CreateService().GetByIinAsync(111111111111));
+	}
+
+	[Fact]
+	public async Task CreateAsync_SavesMemberAndCalculatesAge()
+	{
+		var birthDay = DateTime.Today.AddYears(-30);
+		var request = new CreateMemberRequest(900101300123, "Ivan", "Ivanov", null, birthDay, "Almaty", "+7(777) 123-4567");
+
+		await CreateService().CreateAsync(request);
+
+		var saved = await CreateService().GetByIinAsync(900101300123);
+		Assert.NotNull(saved);
+		Assert.Equal(30, saved.Age);
+		Assert.Equal("None", saved.Patronymic);
+	}
+
+	[Fact]
+	public async Task UpdateAsync_ChangesFields()
 	{
 		var member = _db.AddMember();
-		var book1 = _db.AddBook("First");
-		var book2 = _db.AddBook("Second");
-		var circulation = new CirculationService(_db.CreateContext);
-		await circulation.BorrowBook(book1.Id, member.IIN);
-		await circulation.BorrowBook(book2.Id, member.IIN);
+		var request = new UpdateMemberRequest("Petr", "Petrov", "Ivanovich", new DateTime(1990, 1, 1), "Astana", "+7(777) 000-0000");
 
-		using var context = _db.CreateContext();
-		var rows = await _service.GetMemberBooksAsync(context, member.IIN);
+		await CreateService().UpdateAsync(member.IIN, request);
 
-		Assert.Equal(2, rows.Count);
-		Assert.All(rows, r => Assert.Equal(member.IIN, r.IIN));
-		Assert.Equal(["First", "Second"], rows.Select(r => r.BookTitle).Order());
+		var saved = await CreateService().GetByIinAsync(member.IIN);
+		Assert.Equal("Petr", saved!.Name);
+		Assert.Equal("Astana", saved.Address);
 	}
 
 	[Fact]
-	public async Task GetMemberBooksAsync_UnknownMember_ReturnsEmptyList()
+	public async Task UpdateAsync_UnknownMember_ReturnsNull()
 	{
-		using var context = _db.CreateContext();
+		var request = new UpdateMemberRequest("Petr", "Petrov", null, new DateTime(1990, 1, 1), "Astana", "+7(777) 000-0000");
 
-		var rows = await _service.GetMemberBooksAsync(context, 111111111111);
-
-		Assert.Empty(rows);
+		Assert.Null(await CreateService().UpdateAsync(111111111111, request));
 	}
 
 	[Fact]
-	public async Task GetMembersPageAsync_ReturnsRequestedPageAndTotalCount()
+	public async Task DeleteAsync_RemovesMember()
 	{
-		for (int i = 0; i < 5; i++)
-		{
-			_db.AddMember(iin: 900101300000 + i);
-		}
-		using var context = _db.CreateContext();
+		var member = _db.AddMember();
 
-		var (members, totalCount) = await _service.GetMembersPageAsync(context, page: 2, pageSize: 2);
+		Assert.True(await CreateService().DeleteAsync(member.IIN));
+		Assert.False(await CreateService().ExistsAsync(member.IIN));
+	}
 
-		Assert.Equal(5, totalCount);
-		Assert.Equal(2, members.Count);
+	[Fact]
+	public async Task DeleteAsync_UnknownMember_ReturnsFalse()
+	{
+		Assert.False(await CreateService().DeleteAsync(111111111111));
 	}
 }
