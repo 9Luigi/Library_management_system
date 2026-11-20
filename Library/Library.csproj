@@ -36,4 +36,8 @@
   <ItemGroup>
     <Folder Include="Migrations\" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Services and models are internal; the test project needs access to them -->
+    <InternalsVisibleTo Include="Library.Tests" />
+  </ItemGroup>
 </Project>

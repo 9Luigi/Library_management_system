@@ -11,12 +11,20 @@ namespace Library.Services
 		private readonly Repository<Member> _memberRepository;
 		private readonly Repository<Book> _bookRepository;
 		private readonly ILogger _logger;
+		private readonly Func<LibraryContext> _createContext;
 
-		public CirculationService()
+		// Used by the forms: works with the real database
+		public CirculationService() : this(() => new LibraryContext())
+		{
+		}
+
+		// Used by the tests: they pass a context bound to a temporary in-memory database
+		internal CirculationService(Func<LibraryContext> createContext)
 		{
 			_bookRepository = new Repository<Book>();
 			_memberRepository = new Repository<Member>();
 			_logger = LoggerService.CreateLogger<CirculationService>();
+			_createContext = createContext;
 		}
 
 		#region CRUD
@@ -32,7 +40,7 @@ namespace Library.Services
 		{
 			try
 			{
-				using var _dbContext = new LibraryContext();
+				using var _dbContext = _createContext();
 				_logger.LogInformation("Attempting to borrow book with ID: {BookID} for member with IIN: {IIN}", bookID, IIN);
 
 				// Tracking is required here: the context is configured with NoTracking by default
@@ -112,7 +120,7 @@ namespace Library.Services
 			{
 				_logger.LogInformation("Attempting to return book with ID: {BookID} for member with IIN: {IIN}", bookID, IIN);
 
-				using LibraryContext context = new();
+				using LibraryContext context = _createContext();
 
 				// Tracking is required here: the context is configured with NoTracking by default
 				var bookToReturn = await context.Books.AsTracking().FirstOrDefaultAsync(b => b.Id == bookID);
